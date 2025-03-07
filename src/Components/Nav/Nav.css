@@ -1,0 +1,52 @@
+/* src/Navbar.css */
+.navbar {
+    padding: 1rem 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .navbar-brand {
+    font-family: "Playfair Display", serif;
+  }
+  
+  .nav-link {
+    font-weight: 500;
+    margin: 0 0.5rem;
+    position: relative;
+    color: white !important;
+    transition: color 0.3s ease;
+  }
+  
+  .nav-link:hover {
+    color: #ff6b6b !important;
+  }
+  
+  /* Underline Animation */
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: #ff6b6b;
+    transition: width 0.3s ease;
+  }
+  
+  .nav-link.active::after {
+    width: 100%;
+  }
+  
+  .nav-link.active {
+    color: #ff6b6b !important;
+  }
+  
+  /* Buttons */
+  .btn-outline-light:hover {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  .btn-light:hover {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
