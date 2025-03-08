@@ -6,10 +6,10 @@
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <nav className="navbar navbar-expand-lg navbar-dark bg-black fixed-top">
+        <nav className="navbar h-10 navbar-expand-lg fixed-top">
         <div className="container-fluid d-flex justify-content-between align-items-center">
             {/* Brand Logo */}
-            <a className="navbar-brand text-3xl fw-bold" href="#">
+            <a className="navbar-brand text-3xl text-white fw-bold" href="#">
             Restaurant
             </a>
 

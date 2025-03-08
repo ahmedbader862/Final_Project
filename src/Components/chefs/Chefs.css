@@ -1,0 +1,119 @@
+    /* General Styles */
+    .chefs {
+        padding: 60px 0;
+        background-color: #151518;;
+    }
+    
+    .container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .chef-topic {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .chef-head {
+        font-size: 2rem;
+        /* color: #333; */
+    }
+    
+    .chef-topic h3 {
+        font-size: 1.5rem;
+        /* color: #555; */
+    }
+    
+    .red {
+        color: #ff4c4c;
+    }
+    
+    /* Cards Layout */
+    .cards {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+    }
+    
+    .card {
+        background: #26262D;
+        /* border-radius: 10px; */
+        box-shadow: 0 10px 10px rgb(0, 0, 0);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Image Holder */
+    .img-holder {
+        position: relative;
+        margin-bottom: 20px;
+        width: 100%;
+    }
+    
+    .chef-img {
+        width: 100%;
+        /* border-radius: 10px; */
+        transition: transform 0.3s ease;
+    }
+    
+    .png-img {
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        opacity: 0.8;
+    }
+    
+    .card:hover .chef-img {
+        transform: scale(1.05);
+    }
+    
+    /* Chef Details */
+    .chef-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+        margin: 10px 0;
+    }
+    
+    .chef-rank {
+        font-size: 1.2rem;
+        color: #ff4c4c;
+        margin: 5px 0;
+    }
+    
+    .chef-disc {
+        font-size: 1rem;
+        color: white;
+        line-height: 1.5;
+        margin: 10px 0;
+    }
+    
+    /* Social Icons */
+    .social {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        padding: 0;
+        list-style: none;
+    }
+    
+    .social li {
+        font-size: 1.2rem;
+        color: white;
+        transition: color 0.3s ease;
+    }
+    
+    .social li:hover {
+        color: #ff4c4c;
+        cursor: pointer;
+    }

@@ -1,11 +1,13 @@
 /* src/Navbar.css */
 .navbar {
     padding: 1rem 0;
+    background: #151518;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
   
   .navbar-brand {
     font-family: "Playfair Display", serif;
+    
   }
   
   .nav-link {
