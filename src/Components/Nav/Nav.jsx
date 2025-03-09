@@ -1,5 +1,7 @@
     import React, { useState } from "react";
     import "./Nav.css";
+import { Link } from "react-router-dom";
+import Register from "../../Pages/Register/Register";
 
     function Nav() {
     const [activeTab, setActiveTab] = useState("Home");
@@ -28,9 +30,9 @@
             <div className={`collapse navbar-collapse ${isOpen ? "show" : ""}`} id="navbarNavDropdown">
             <ul className="navbar-nav mx-auto">
                 <li className="nav-item">
-                <a className={`nav-link ${activeTab === "Home" ? "active" : ""}`} href="#" onClick={() => setActiveTab("Home")}>
+                <Link to={"/"} className={`nav-link ${activeTab === "Home" ? "active" : ""}`} href="#" onClick={() => setActiveTab("Home")}>
                     Home
-                </a>
+                </Link>
                 </li>
                 <li className="nav-item">
                 <a className={`nav-link ${activeTab === "Menu" ? "active" : ""}`} href="#" onClick={() => setActiveTab("Menu")}>
@@ -57,7 +59,7 @@
             </div>
             <div className="buttons d-flex gap-2">
             <button className="btn btn-outline-light btn-md"><i className="fas fa-user me-2"></i>Sign In</button>
-            <button className="btn btn-light btn-md"><i className="fas fa-user-plus me-2"></i>Register</button>
+          <Link to={"/Register"}> <button className="btn btn-light btn-md"><i className="fas fa-user-plus me-2"></i>Register</button> </Link>
             </div>
             </div>
             </div>
