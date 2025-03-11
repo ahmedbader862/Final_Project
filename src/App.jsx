@@ -8,7 +8,6 @@ import Error from './Pages/Error/Error'
 import Menu from './Pages/Menu/Menu'
 import Reservation from './Pages/Reservation/Reservation'
 import ContactUs from './Pages/ContactUs/ContactUs'
-import { BrowserRouter , Route,  Routes } from 'react-router-dom'
 import Register from './Pages/Register/Register'
 
 
@@ -26,6 +25,7 @@ function App() {
       <Route path="/reservation" element={<Reservation />} />
       <Route path="/contactus" element={<ContactUs />} />
       <Route path="/welcome" element={<WelcomePage />} />
+      <Route path="/Register" element={<Register />} />
       <Route path="*" element={<Error />} />
 
       </Routes>
