@@ -1,0 +1,51 @@
+.counter {
+    width: 100%;
+    height: 100vh;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+body{
+    background-color: #212126;
+}
+.red{
+    color: #ff6b6b;
+}
+
+/* Counter.css */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Apply animation to the section */
+.animate-section {
+    opacity: 0; /* Start hidden */
+    animation: fadeInUp 1s ease-out forwards;
+}
+
+/* Apply animation to the icons with staggered delays */
+.animate-icon {
+    opacity: 0; /* Start hidden */
+    animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.animate-icon:nth-child(1) {
+    animation-delay: 0.2s;
+}
+
+.animate-icon:nth-child(2) {
+    animation-delay: 0.4s;
+}
+
+.animate-icon:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+.animate-icon:nth-child(4) {
+    animation-delay: 0.8s;
+}

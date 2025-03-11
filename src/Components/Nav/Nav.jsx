@@ -1,5 +1,6 @@
     import React, { useState } from "react";
     import "./Nav.css";
+import { Link } from "react-router-dom";
 
     function Nav() {
     const [activeTab, setActiveTab] = useState("Home");
@@ -9,7 +10,7 @@
         <nav className="navbar h-10 navbar-expand-lg fixed-top">
         <div className="container-fluid d-flex justify-content-between align-items-center">
             {/* Brand Logo */}
-            <a className="navbar-brand text-3xl text-white fw-bold" href="#">
+            <a className="navbar-brand text-3xl text-white fw-bold" href="/">
             Restaurant
             </a>
 
@@ -28,24 +29,24 @@
             <div className={`collapse navbar-collapse ${isOpen ? "show" : ""}`} id="navbarNavDropdown">
             <ul className="navbar-nav mx-auto">
                 <li className="nav-item">
-                <a className={`nav-link ${activeTab === "Home" ? "active" : ""}`} href="#" onClick={() => setActiveTab("Home")}>
+                <Link className={`nav-link ${activeTab === "Home" ? "active" : ""}`} to="/" onClick={() => setActiveTab("Home")}>
                     Home
-                </a>
+                </Link>
                 </li>
                 <li className="nav-item">
-                <a className={`nav-link ${activeTab === "Menu" ? "active" : ""}`} href="#" onClick={() => setActiveTab("Menu")}>
+                <Link className={`nav-link ${activeTab === "Menu" ? "active" : ""}`} to="/menu" onClick={() => setActiveTab("Menu")}>
                     Menu
-                </a>
+                </Link>
                 </li>
                 <li className="nav-item">
-                <a className={`nav-link ${activeTab === "Reservation" ? "active" : ""}`} href="#" onClick={() => setActiveTab("Reservation")}>
+                <Link className={`nav-link ${activeTab === "Reservation" ? "active" : ""}`} to="/reservation" onClick={() => setActiveTab("Reservation")}>
                     Reservation
-                </a>
+                </Link>
                 </li>
                 <li className="nav-item">
-                <a className={`nav-link ${activeTab === "Contact Us" ? "active" : ""}`} href="#" onClick={() => setActiveTab("Contact Us")}>
+                <Link className={`nav-link ${activeTab === "Contact Us" ? "active" : ""}`} to="/contactus" onClick={() => setActiveTab("Contact Us")}>
                     Contact Us
-                </a>
+                </Link>
                 </li>
             </ul>
 
