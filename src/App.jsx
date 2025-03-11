@@ -8,6 +8,9 @@ import Error from './Pages/Error/Error'
 import Menu from './Pages/Menu/Menu'
 import Reservation from './Pages/Reservation/Reservation'
 import ContactUs from './Pages/ContactUs/ContactUs'
+import { BrowserRouter , Route,  Routes } from 'react-router-dom'
+import Register from './Pages/Register/Register'
+
 
 function App() {
   

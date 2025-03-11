@@ -2,6 +2,7 @@
     import "./Nav.css";
 import { Link } from "react-router-dom";
 
+
     function Nav() {
     const [activeTab, setActiveTab] = useState("Home");
     const [isOpen, setIsOpen] = useState(false);
@@ -29,7 +30,7 @@ import { Link } from "react-router-dom";
             <div className={`collapse navbar-collapse ${isOpen ? "show" : ""}`} id="navbarNavDropdown">
             <ul className="navbar-nav mx-auto">
                 <li className="nav-item">
-                <Link className={`nav-link ${activeTab === "Home" ? "active" : ""}`} to="/" onClick={() => setActiveTab("Home")}>
+                <Link to={"/"} className={`nav-link ${activeTab === "Home" ? "active" : ""}`} href="#" onClick={() => setActiveTab("Home")}>
                     Home
                 </Link>
                 </li>
@@ -58,7 +59,7 @@ import { Link } from "react-router-dom";
             </div>
             <div className="buttons d-flex gap-2">
             <button className="btn btn-outline-light btn-md"><i className="fas fa-user me-2"></i>Sign In</button>
-            <button className="btn btn-light btn-md"><i className="fas fa-user-plus me-2"></i>Register</button>
+            <Link to={"/Register"}> <button className="btn btn-light btn-md"><i className="fas fa-user-plus me-2"></i>Register</button> </Link>
             </div>
             </div>
             </div>
