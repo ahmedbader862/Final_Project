@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { auth , createUserWithEmailAndPassword , db , setDoc , doc} from "../../firebase/firebase";
+import { auth , signInWithEmailAndPassword  } from "../../firebase/firebase";
+import { useDispatch } from "react-redux";
+import { setCurentUserData } from "../../redux/reduxtoolkit";
 
 
-function Register() {
+function Signin() {
 
-
-
+    const dispatch = useDispatch();
   const [userUpData, setUserUpData] = useState({
     name: "",
     email: "",
@@ -81,44 +82,31 @@ function Register() {
         return null;
     }
   };
+//   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ const handleSignin = () => {
+
+    signInWithEmailAndPassword(auth, userUpData.email, userUpData.password)
+  .then((userCredential) => {
+
+    const user = userCredential.user;
+    
+    dispatch(setCurentUserData(
+        {
+            uid: user.uid,
+            email: user.email,
+          }
+    ));
+       
+  })
+  .catch((error) => {
+    console.log(error);
+    
+  });
  
-  // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
- const submitForm = () => {
-  console.log("Form Data:", userUpData.name);
-
-  createUserWithEmailAndPassword(auth, userUpData.email, userUpData.password)
-    .then((userCredential) => {
-      // User created successfully
-      var user = userCredential.user;
-      console.log("User created:", user);
- 
-    createUser(user.uid);  // كلام كبار
-
-
-    })
-    .catch((error) => {
-      console.error("Error creating user:", error);
-    });
-
-
 }; 
  
-const  createUser =(uid) => {
-    
+ 
 
-  
-    setDoc(doc(db, "users2", uid), userUpData)
-  
-      .then(() => {
-        console.log("User created successfully!");
-      })
-      .catch((error) => {
-        console.error("Error creating user:", error);
-      });
-
-   
-  
-    }
 
 
 
@@ -156,19 +144,7 @@ const  createUser =(uid) => {
           
             <h2 className="mb-4 text-center">Sign Up Form</h2>
 
-            {/* Name Field */}
-            <div className="mb-3">
-              <label className="form-label">Name</label>
-              <input
-                type="text"
-                className={`form-control ${errorsMsgUp.nameError ? "is-invalid" : ""}`}
-                name="name"
-                value={userUpData.name}
-                onChange={handleData}
-              />
-              {errorsMsgUp.nameError && 
-                <div className="invalid-feedback">{errorsMsgUp.nameError}</div>}
-            </div>
+        
 
             {/* Email Field */}
             <div className="mb-3">
@@ -184,19 +160,7 @@ const  createUser =(uid) => {
                 <div className="invalid-feedback">{errorsMsgUp.emailError}</div>}
             </div>
 
-            {/* Username Field */}
-            <div className="mb-3">
-              <label className="form-label">Username</label>
-              <input
-                type="text"
-                className={`form-control ${errorsMsgUp.usrNameError ? "is-invalid" : ""}`}
-                name="usrName"
-                value={userUpData.usrName}
-                onChange={handleData}
-              />
-              {errorsMsgUp.usrNameError && 
-                <div className="invalid-feedback">{errorsMsgUp.usrNameError}</div>}
-            </div>
+      
 
             {/* Password Field */}
             <div className="mb-3">
@@ -212,26 +176,14 @@ const  createUser =(uid) => {
                 <div className="invalid-feedback">{errorsMsgUp.passwordError}</div>}
             </div>
 
-            {/* Confirm Password Field */}
-            <div className="mb-3">
-              <label className="form-label">Confirm Password</label>
-              <input
-                type="password"
-                className={`form-control ${errorsMsgUp.confPasswordError ? "is-invalid" : ""}`}
-                name="confPassword"
-                value={userUpData.confPassword}
-                onChange={handleData}
-              />
-              {errorsMsgUp.confPasswordError && 
-                <div className="invalid-feedback">{errorsMsgUp.confPasswordError}</div>}
-            </div>
+            
 
             <button 
               type="submit" 
-              onClick={submitForm}
+              onClick={handleSignin}
               className="btn btn-primary w-100 mt-3"
             >
-              Register
+              signIn
             </button>
         </div>
       </div>
@@ -239,4 +191,4 @@ const  createUser =(uid) => {
   );
 }
 
-export default Register;
+export default Signin;

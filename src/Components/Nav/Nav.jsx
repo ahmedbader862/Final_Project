@@ -1,11 +1,62 @@
-    import React, { useState } from "react";
+    import React, { useEffect, useState } from "react";
     import "./Nav.css";
-import { Link } from "react-router-dom";
-import Register from "../../Pages/Register/Register";
+    import { Link } from "react-router-dom";
+    import { useDispatch , useSelector } from "react-redux";
+    import { auth , signOut , onAuthStateChanged} from "../../firebase/firebase";
+import { setUserState } from "../../redux/reduxtoolkit";
 
     function Nav() {
     const [activeTab, setActiveTab] = useState("Home");
     const [isOpen, setIsOpen] = useState(false);
+
+    const dispatch = useDispatch();
+
+        const userState55 = useSelector((state) => state.UserData['UserState']);
+        console.log(userState55);
+        
+
+
+
+
+    const logout=()=>{
+     
+        signOut(auth).then(() => {
+        console.log("%%%%%%%%%% user log out ");
+        dispatch(setUserState("who know"));
+        }).catch((error) => {
+          console.log(error);
+          
+        });
+
+    }
+    
+    useEffect(() => {  
+        const authState = onAuthStateChanged(auth, (user) => {
+          if (user) {
+            console.log(user);
+
+               dispatch(setUserState(
+                    {
+                        name : user.displayName,
+                        uid: user.uid,
+                        email: user.email,
+                      }
+                ));
+
+          } else {
+            console.log("byebye");
+            dispatch(setUserState(
+                
+                "who know"
+            ));
+          }
+        });
+        return () => authState();
+      }, []);
+
+
+// &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+// &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
     return (
         <nav className="navbar h-10 navbar-expand-lg fixed-top">
@@ -58,8 +109,28 @@ import Register from "../../Pages/Register/Register";
                 <a href="#" className="text-white fs-5"><i className="fas fa-shopping-cart"></i></a>
             </div>
             <div className="buttons d-flex gap-2">
-            <button className="btn btn-outline-light btn-md"><i className="fas fa-user me-2"></i>Sign In</button>
+           
+           
+           
+        {userState55 == "who know" ?
+            <>
+          <Link to={"/Signin"}>  <button className="btn btn-outline-light btn-md"><i className="fas fa-user me-2"></i>Sign In</button></Link>
           <Link to={"/Register"}> <button className="btn btn-light btn-md"><i className="fas fa-user-plus me-2"></i>Register</button> </Link>
+          </>
+           
+         : 
+          <Link > <button onClick={logout} className="btn btn-light btn-md"><i className="fas fa-sign-out-alt me-2"></i>Log out</button> </Link>
+        }
+           
+       
+
+           
+           
+           
+           
+
+            
+
             </div>
             </div>
             </div>
