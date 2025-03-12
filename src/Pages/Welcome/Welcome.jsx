@@ -1,7 +1,11 @@
     import React from "react";
     import { motion } from "framer-motion";
+import Home from "../Home/Home";
+import { Navigate, useNavigate } from "react-router-dom";
 
     const WelcomePage = () => {
+        const Navigate = useNavigate(); // Initialize navigate function
+
     return (
         <div className="welcome-container position-relative vh-100 d-flex justify-content-center align-items-center overflow-hidden">
         <div className="overlay position-absolute top-0 start-0 w-100 h-100 bg-black opacity-75"></div>
@@ -25,6 +29,7 @@
             <p className="fs-4 mb-4">Experience the finest cuisine in town</p>
             <div className="buttons d-flex gap-3 justify-content-center">
             <motion.button
+            ref={Home}
                 className="btn btn-outline-light btn-lg position-relative overflow-hidden"
                 whileHover={{
                 scale: 1.02,
@@ -36,6 +41,8 @@
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5, duration: 0.5 }}
+                onClick={() => Navigate("/")}
+                
             >
                 <span className="position-relative z-1">Get Started</span>
                 <motion.span

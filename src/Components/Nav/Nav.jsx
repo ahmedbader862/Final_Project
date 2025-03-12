@@ -4,6 +4,8 @@
     import { useDispatch , useSelector } from "react-redux";
     import { auth , signOut , onAuthStateChanged} from "../../firebase/firebase";
 import { setUserState } from "../../redux/reduxtoolkit";
+import { Link } from "react-router-dom";
+
 
     function Nav() {
     const [activeTab, setActiveTab] = useState("Home");
@@ -62,7 +64,7 @@ import { setUserState } from "../../redux/reduxtoolkit";
         <nav className="navbar h-10 navbar-expand-lg fixed-top">
         <div className="container-fluid d-flex justify-content-between align-items-center">
             {/* Brand Logo */}
-            <a className="navbar-brand text-3xl text-white fw-bold" href="#">
+            <a className="navbar-brand text-3xl text-white fw-bold" href="/">
             Restaurant
             </a>
 
@@ -86,19 +88,19 @@ import { setUserState } from "../../redux/reduxtoolkit";
                 </Link>
                 </li>
                 <li className="nav-item">
-                <a className={`nav-link ${activeTab === "Menu" ? "active" : ""}`} href="#" onClick={() => setActiveTab("Menu")}>
+                <Link className={`nav-link ${activeTab === "Menu" ? "active" : ""}`} to="/menu" onClick={() => setActiveTab("Menu")}>
                     Menu
-                </a>
+                </Link>
                 </li>
                 <li className="nav-item">
-                <a className={`nav-link ${activeTab === "Reservation" ? "active" : ""}`} href="#" onClick={() => setActiveTab("Reservation")}>
+                <Link className={`nav-link ${activeTab === "Reservation" ? "active" : ""}`} to="/reservation" onClick={() => setActiveTab("Reservation")}>
                     Reservation
-                </a>
+                </Link>
                 </li>
                 <li className="nav-item">
-                <a className={`nav-link ${activeTab === "Contact Us" ? "active" : ""}`} href="#" onClick={() => setActiveTab("Contact Us")}>
+                <Link className={`nav-link ${activeTab === "Contact Us" ? "active" : ""}`} to="/contactus" onClick={() => setActiveTab("Contact Us")}>
                     Contact Us
-                </a>
+                </Link>
                 </li>
             </ul>
 
