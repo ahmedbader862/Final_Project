@@ -15,6 +15,7 @@ import Cart from './Pages/Cart/Cart';
 import Shipping from './Pages/Shipping/Shipping';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import AdminPage from './Pages/Admin/AdminPage';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
             <Route path="/welcome" element={<WelcomePage />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/shippingadress" element={<Shipping />} />
+            <Route path="/adminorder" element={<AdminPage />} />
             <Route path="*" element={<Error />} />
           </Routes>
         </main>
