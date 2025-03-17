@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
-import { auth , signInWithEmailAndPassword  } from "../../firebase/firebase";
+import { auth, signInWithEmailAndPassword } from "../../firebase/firebase";
 import { useDispatch } from "react-redux";
-import { setCurrentUserData } from "../../redux/reduxtoolkit";
+import { setCurentUserData } from "../../redux/reduxtoolkit";
+import { useNavigate } from "react-router-dom";
 
 
 function Signin() {
 
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const [userUpData, setUserUpData] = useState({
     name: "",
     email: "",
@@ -29,11 +30,11 @@ function Signin() {
     if (userUpData.password && userUpData.confPassword) {
       setErrorsMsgUp(prev => ({
         ...prev,
-        passwordError: userUpData.password !== userUpData.confPassword 
-          ? "Password Not Matched" 
+        passwordError: userUpData.password !== userUpData.confPassword
+          ? "Password Not Matched"
           : null,
-        confPasswordError: userUpData.password !== userUpData.confPassword 
-          ? "Password Not Matched" 
+        confPasswordError: userUpData.password !== userUpData.confPassword
+          ? "Password Not Matched"
           : null
       }));
     }
@@ -41,7 +42,7 @@ function Signin() {
 
   const handleData = (e) => {
     const { name, value } = e.target;
-    
+
     // تحديث البيانات
     setUserUpData(prev => ({
       ...prev,
@@ -60,52 +61,49 @@ function Signin() {
       case 'name':
         return !value ? "This Field Is Required" :
           !value.match(/^[a-zA-Z0-9_-]{3,15}$/) && "Invalid Name";
-      
+
       case 'email':
         return !value ? "This Field Is Required" :
           !value.match(/^[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+$/) && "Invalid Email Address";
-      
+
       case 'usrName':
         return !value ? "This Field Is Required" :
           !value.match(/^[a-zA-Z0-9_-]{3,15}$/) && "Invalid User Name";
-      
+
       case 'password':
         return !value ? "This Field Is Required" :
-          !value.match(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$/) 
-            ? "Weak Password" 
+          !value.match(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$/)
+            ? "Weak Password"
             : null;
-      
+
       case 'confPassword':
         return !value ? "This Field Is Required" : null;
-      
+
       default:
         return null;
     }
   };
-//   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- const handleSignin = () => {
 
+
+  //   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  const navigate = useNavigate();
+  const handleSignin = () => {
     signInWithEmailAndPassword(auth, userUpData.email, userUpData.password)
-  .then((userCredential) => {
+      .then((userCredential) => {
+        const user = userCredential.user;
 
-    const user = userCredential.user;
-    
-    dispatch(setCurrentUserData(
-        {
-            uid: user.uid,
-            email: user.email,
-          }
-    ));
-       
-  })
-  .catch((error) => {
-    console.log(error);
-    
-  });
- 
-}; 
- 
- 
+        dispatch(setCurentUserData({
+          uid: user.uid,
+          email: user.email,
+        }));
+
+        // Navigate to home page
+        navigate("/");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
 
 
@@ -121,72 +119,62 @@ function Signin() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-//   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  //   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  //   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  //   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   return (
     <>
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          
-            <h2 className="mb-4 text-center">Sign Up Form</h2>
+<div className="container mt-5">
+  <div className="row justify-content-center my-5">
+    <div className="col-12 col-sm-8 col-md-6">
+      <div className="p-4 shadow-lg rounded ">
+        <h2 className="mb-4 text-center text-white mt-3">Sign Up Form</h2>
 
-        
-
-            {/* Email Field */}
-            <div className="mb-3">
-              <label className="form-label">Email</label>
-              <input
-                type="email"
-                className={`form-control ${errorsMsgUp.emailError ? "is-invalid" : ""}`}
-                name="email"
-                value={userUpData.email}
-                onChange={handleData}
-              />
-              {errorsMsgUp.emailError && 
-                <div className="invalid-feedback">{errorsMsgUp.emailError}</div>}
-            </div>
-
-      
-
-            {/* Password Field */}
-            <div className="mb-3">
-              <label className="form-label">Password</label>
-              <input
-                type="password"
-                className={`form-control ${errorsMsgUp.passwordError ? "is-invalid" : ""}`}
-                name="password"
-                value={userUpData.password}
-                onChange={handleData}
-              />
-              {errorsMsgUp.passwordError && 
-                <div className="invalid-feedback">{errorsMsgUp.passwordError}</div>}
-            </div>
-
-            
-
-            <button 
-              type="submit" 
-              onClick={handleSignin}
-              className="btn btn-primary w-100 mt-3"
-            >
-              signIn
-            </button>
+        {/* Email Field */}
+        <div className="mb-3">
+          <label className="form-label text-white">Email</label>
+          <input
+            type="email"
+            className={`form-control ${errorsMsgUp.emailError ? "is-invalid" : ""}`}
+            name="email"
+            value={userUpData.email}
+            onChange={handleData}
+          />
+          {errorsMsgUp.emailError && (
+            <div className="invalid-feedback">{errorsMsgUp.emailError}</div>
+          )}
         </div>
+
+        {/* Password Field */}
+        <div className="mb-3">
+          <label className="form-label text-white">Password</label>
+          <input
+            type="password"
+            className={`form-control ${errorsMsgUp.passwordError ? "is-invalid" : ""}`}
+            name="password"
+            value={userUpData.password}
+            onChange={handleData}
+          />
+          {errorsMsgUp.passwordError && (
+            <div className="invalid-feedback">{errorsMsgUp.passwordError}</div>
+          )}
+        </div>
+
+        {/* Sign In Button */}
+        <button
+          type="submit"
+          onClick={handleSignin}
+          className="btn btn-primary w-100 mt-3"
+        >
+          Sign In
+        </button>
       </div>
+    </div>
+  </div>
+</div>
+
+
+
     </>
   );
 }
