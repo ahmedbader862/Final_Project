@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { auth , signInWithEmailAndPassword  } from "../../firebase/firebase";
 import { useDispatch } from "react-redux";
-import { setCurentUserData } from "../../redux/reduxtoolkit";
+import { setCurrentUserData } from "../../redux/reduxtoolkit";
 
 
 function Signin() {
@@ -90,7 +90,7 @@ function Signin() {
 
     const user = userCredential.user;
     
-    dispatch(setCurentUserData(
+    dispatch(setCurrentUserData(
         {
             uid: user.uid,
             email: user.email,

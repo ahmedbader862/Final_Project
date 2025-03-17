@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react";
 import { auth , createUserWithEmailAndPassword , db , setDoc , doc} from "../../firebase/firebase";
+import { useSelector } from "react-redux";
 
 
 function Register() {
 
+
+  
+  const  allDishes = useSelector((state) => state.wishlist);
+  console.log(allDishes);
 
 
   const [userUpData, setUserUpData] = useState({
@@ -105,9 +110,16 @@ function Register() {
  
 const  createUser =(uid) => {
     
-
+  const userDeatails = {
+      name: userUpData.name,
+      email: userUpData.email,
+      usrName: userUpData.usrName,
+      password: userUpData.password,
+      confPassword: userUpData.confPassword,
+      allDishes: allDishes.wishlist,
+    };
   
-    setDoc(doc(db, "users2", uid), userUpData)
+    setDoc(doc(db, "users2", uid), userDeatails)
   
       .then(() => {
         console.log("User created successfully!");
@@ -120,6 +132,7 @@ const  createUser =(uid) => {
   
     }
 
+  // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 

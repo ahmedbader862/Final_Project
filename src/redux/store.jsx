@@ -1,8 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
-import UserDataSlice from './reduxtoolkit';
+import userDataReducer from './reduxtoolkit'; // Corrected import name
+import { wishlistReducer } from './reduxtoolkit';   
 
 export const mystore = configureStore({
-  reducer: { 
-    UserData: UserDataSlice, // الاسم هنا سيحدد مسار الـ state
-  }, 
+  reducer: {
+    UserData: userDataReducer, 
+    wishlist: wishlistReducer
+  }
 });
