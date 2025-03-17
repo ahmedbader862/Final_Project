@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { auth, signInWithEmailAndPassword } from "../../firebase/firebase";
 import { useDispatch } from "react-redux";
-import { setCurentUserData } from "../../redux/reduxtoolkit";
+// import { setCurentUserData } from "../../redux/reduxtoolkit";
 import { useNavigate } from "react-router-dom";
 
 
