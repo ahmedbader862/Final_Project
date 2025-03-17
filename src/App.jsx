@@ -15,6 +15,8 @@ import Cart from './Pages/Cart/Cart';
 import Shipping from './Pages/Shipping/Shipping';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import Dishes from './Pages/Dishes/dishes';
+import Wishlist from './Pages/Wishlist/wishlist';
 import AdminPage from './Pages/Admin/AdminPage';
 
 function App() {
@@ -28,9 +30,11 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/signin" element={<Signin />} />
             <Route path="/menu" element={<Menu />} />
+            <Route path="/Dishes/:id" element={<Dishes />} />
             <Route path="/reservation" element={<Reservation />} />
             <Route path="/contactus" element={<ContactUs />} />
             <Route path="/welcome" element={<WelcomePage />} />
+            <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/shippingadress" element={<Shipping />} />
             <Route path="/adminorder" element={<AdminPage />} />

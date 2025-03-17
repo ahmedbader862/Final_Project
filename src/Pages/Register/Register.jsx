@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react";
-import { auth, createUserWithEmailAndPassword, db, setDoc, doc } from "../../firebase/firebase";
-import { useNavigate } from "react-router-dom";
+import { auth , createUserWithEmailAndPassword , db , setDoc , doc} from "../../firebase/firebase";
+import { useSelector } from "react-redux";
+// import { useNavigate } from "react-router-dom";
 
 
 function Register() {
 
+
+  
+  const  allDishes = useSelector((state) => state.wishlist);
+  console.log(allDishes);
 
 
   const [userUpData, setUserUpData] = useState({
@@ -84,33 +89,39 @@ function Register() {
   };
 
   // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ const submitForm = () => {
+  console.log("Form Data:", userUpData.name);
 
-  const navigate = useNavigate();
-  const submitForm = () => {
-    console.log("Form Data:", userUpData.name);
+  createUserWithEmailAndPassword(auth, userUpData.email, userUpData.password)
+    .then((userCredential) => {
+      // User created successfully
+      var user = userCredential.user;
+      console.log("User created:", user);
+ 
+    createUser(user.uid);  // كلام كبار
+
+
+    })
+    .catch((error) => {
+      console.error("Error creating user:", error);
+    });
+
+
+}; 
+ 
+const  createUser =(uid) => {
+    
+  const userDeatails = {
+      name: userUpData.name,
+      email: userUpData.email,
+      usrName: userUpData.usrName,
+      password: userUpData.password,
+      confPassword: userUpData.confPassword,
+      allDishes: allDishes.wishlist,
+    };
   
-    createUserWithEmailAndPassword(auth, userUpData.email, userUpData.password)
-      .then((userCredential) => {
-        
-        var user = userCredential.user;
-        console.log("User created:", user);
+    setDoc(doc(db, "users2", uid), userDeatails)
   
-        createUser(user.uid);  // كلام كبار
-  
-      
-        navigate("/Signin");  
-      })
-      .catch((error) => {
-        console.error("Error creating user:", error);
-      });
-  };
-
-  const createUser = (uid) => {
-
-
-
-    setDoc(doc(db, "users2", uid), userUpData)
-
       .then(() => {
         console.log("User created successfully!");
       })
@@ -122,6 +133,7 @@ function Register() {
 
   }
 
+  // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 
