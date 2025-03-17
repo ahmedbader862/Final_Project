@@ -15,6 +15,7 @@
     "@fortawesome/free-regular-svg-icons": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
+    "@paypal/react-paypal-js": "^8.8.2",
     "@reduxjs/toolkit": "^2.6.1",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
@@ -29,7 +30,8 @@
     "react-spinners": "^0.15.0",
     "redux": "^5.0.1",
     "redux-devtools-extension": "^2.13.9",
-    "sweetalert2": "^11.17.2"
+    "sweetalert2": "^11.17.2",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
