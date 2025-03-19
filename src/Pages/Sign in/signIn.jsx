@@ -96,9 +96,17 @@ function Signin() {
           uid: user.uid,
           email: user.email,
         }));
+     
+        if (
+          userUpData.email == "admin@gmail.com" &&
+          userUpData.password == "aaaAAA111!!!" 
 
-        // Navigate to home page
+        ) {
+          navigate(`/admin/${user.uid}`);
+        }
+       else{
         navigate("/");
+       }
       })
       .catch((error) => {
         console.log(error);

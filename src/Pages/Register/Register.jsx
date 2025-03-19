@@ -118,6 +118,7 @@ const  createUser =(uid) => {
       password: userUpData.password,
       confPassword: userUpData.confPassword,
       allDishes: allDishes.wishlist,
+      uid : uid
     };
   
     setDoc(doc(db, "users2", uid), userDeatails)

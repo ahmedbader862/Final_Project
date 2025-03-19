@@ -16,6 +16,7 @@ function Menu() {
   useEffect(() => {
     const getAllDocs = async () => {
       const querySnapshot = await getDocs(collection(db, "menu"))
+      
       const docsData = []
       querySnapshot.forEach((doc) => {
         docsData.push({
