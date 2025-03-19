@@ -1,45 +1,45 @@
-  import { useDispatch, useSelector,  } from "react-redux";
-  import { Link } from "react-router-dom";
-  import '../Card/card.css';
-  import { removWishlist, setWishlist } from "../../redux/reduxtoolkit";
-  import { db,  getDoc, doc, setDoc } from '../../firebase/firebase';
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import '../Card/card.css';
+import { removWishlist, setWishlist } from "../../redux/reduxtoolkit";
+import { db, getDoc, doc, setDoc } from '../../firebase/firebase';
 
-  function Carde(props) {
-    const dispatch = useDispatch();
+function Carde(props) {
+  const dispatch = useDispatch();
 
-    const wishlistRedux = useSelector((state) => state.wishlist.wishlist);
-
-    const userState55 = useSelector((state) => state.UserData['UserState']);
+  const wishlistRedux = useSelector((state) => state.wishlist.wishlist);
+  const userState55 = useSelector((state) => state.UserData['UserState']);
+  const findDishesInWishlist = wishlistRedux.some((dish) => dish.title === props.title);
 
   // ((((((((((((((((((((((((((((((((  wishlistRedux  ))))))))))))))))))))))))))))))))
-    const findDishesInWishlist = wishlistRedux.some((dish) => dish.title === props.title);
 
-    const handleAddWishlist = () => {
-      console.log("ssssssssssssssssssprops");
 
-      console.log(props);
-      
-      dispatch(
-        setWishlist({
-          title: props.title,
-          poster_path: props.poster_path,
-        })
-      );
-    };
+  const handleAddWishlist = () => {
+    console.log("ssssssssssssssssssprops");
 
-    const handleRemoveWishlist = () => {
-      dispatch(removWishlist(props.title));
-      console.log("rRRRRRRRRRRRRRRRRRRRRRRRRR");
-      
-    };
+    console.log(props);
 
-    const handleToggleWishlist = () => {
-      if (findDishesInWishlist) {
-        handleRemoveWishlist();
-      } else {
-        handleAddWishlist();
-      }
-    };
+    dispatch(
+      setWishlist({
+        title: props.title,
+        poster_path: props.poster_path,
+      })
+    );
+  };
+
+  const handleRemoveWishlist = () => {
+    dispatch(removWishlist(props.title));
+    console.log("rRRRRRRRRRRRRRRRRRRRRRRRRR");
+
+  };
+
+  const handleToggleWishlist = () => {
+    if (findDishesInWishlist) {
+      handleRemoveWishlist();
+    } else {
+      handleAddWishlist();
+    }
+  };
   // ((((((((((((((((((((((((((((((((  wishlistRedux  ))))))))))))))))))))))))))))))))
 
 
@@ -84,42 +84,83 @@
 
 
 
+  //  Add to Cart Function
+  const addToCartFirestore = async () => {
+    try {
+      const docRef = doc(db, "users2", userState55.uid);
+      const docSnap = await getDoc(docRef);
 
-    return (
-      <div className="card-container">
-        {/* Favorite Icon */}
-        <button className={`fav-icon ${findDishesInWishlist ? 'active' : ''}`} onClick={
-          userState55 === "who know" ? handleToggleWishlist : toggleFirestore
-        }>
-          <i className="fas fa-heart"></i>
-        </button>
+      if (docSnap.exists()) {
+        const currentCart = docSnap.data().cartItems || [];
 
-        {/* Food Image */}
-        <div className="image-wrapper">
-          <img src={props.poster_path} className="card-image" alt={props.title} />
-        </div>
+        const updatedCart = [
+          ...currentCart,
+          {
+            title: props.title,
+            poster_path: props.poster_path,
+            price: 120,
+            quantity: 1
+          }
+        ];
+        await setDoc(docRef, { cartItems: updatedCart }, { merge: true });
+        console.log("Item successfully added to cart in Firestore!");
+      } else {
+        await setDoc(docRef, {
+          cartItems: [{
+            title: props.title,
+            poster_path: props.poster_path,
+            price: 120,
+            quantity: 1
+          }]
+        });
+        console.log("Document created and item successfully added to cart!");
+      }
+    } catch (error) {
+      console.error("Error adding to cart in Firestore:", error);
+    }
+  };
 
-        {/* Food Details */}
-        <div className="all-details">
+  return (
+    <div className="card-container">
+
+      <button
+        className={`fav-icon ${findDishesInWishlist ? 'active' : ''}`}
+        onClick={userState55 === "who know" ? handleToggleWishlist : toggleFirestore}
+      >
+        <i className="fas fa-heart"></i>
+      </button>
+
+
+      <div className="image-wrapper">
+        <img src={props.poster_path} className="card-image" alt={props.title} />
+      </div>
+
+
+      <div className="all-details">
         <div className="card-details mb-5">
-        <h5 className="food-title">
-    {props.title.split(" ").length > 2
-      ? props.title.split(" ").slice(0, 2).join(" ") + " ..."
-      : props.title}
-  </h5>
-          <p className="food-description ">Lorem ipsum dolor sit amet consectetur adipisicing elit. Alias culpa architecto maxime.</p>
+          <h5 className="food-title">
+            {props.title.split(" ").length > 2
+              ? props.title.split(" ").slice(0, 2).join(" ") + " ..."
+              : props.title}
+          </h5>
+          <p className="food-description">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Alias culpa architecto maxime.
+          </p>
         </div>
-        
-        {/* Price and Add Button at the Bottom */}
+
+
         <div className="price-container mt-5">
-          <span className="food-price">$120</span>
-          <button className="add-btn">
+          <span className="food-price">{props.price || 'Price not available'}</span>
+          <button
+            className="add-btn"
+            onClick={addToCartFirestore}
+          >
             <i className="fas fa-plus"></i>
           </button>
         </div>
-        </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
-  export default Carde;
+export default Carde;
