@@ -1,6 +1,7 @@
 import React from "react";
-import { motion } from "framer-motion";
 import "./Grid.css";
+import {motion} from "framer-motion";
+
 
 function Grid() {
   const galleryData = [

@@ -1,0 +1,75 @@
+body{
+    background-color:#151518;
+}
+
+
+.menu-container {
+    padding-top: 20px;
+    text-align: center;
+  }
+  
+  .menu-title {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    margin-top: 20px;
+  }
+  
+ 
+  a{
+   color: #cc2e2e;
+   font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .category-slider {
+    padding: 10px;
+  }
+  
+  .menu-container {
+    padding: 20px;
+  }
+  
+  /* ✅ تحسين عرض العناوين */
+  .category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .category-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  /* ✅ ضبط أزرار "See All" */
+  .see-all-btn {
+    font-size: 1rem;
+    color: #ff4d4d;
+    cursor: pointer;
+    transition: color 0.3s ease-in-out;
+  }
+  
+  .see-all-btn:hover {
+    color: #ff1a1a;
+  }
+  
+  /* ✅ تحسين عرض السلايدر */
+  .category-slider {
+    padding: 10px 0;
+  }
+  
+  /* ✅ تحسين التباعد والهوامش في الشاشات الصغيرة */
+  @media (max-width: 768px) {
+    .menu-title {
+      font-size: 1.8rem;
+    }
+  
+    .category-header h2 {
+      font-size: 1.3rem;
+    }
+  
+    .see-all-btn {
+      font-size: 0.9rem;
+    }
+  }
+  
+ 
