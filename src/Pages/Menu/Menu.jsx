@@ -227,7 +227,7 @@ function Menu() {
           >
             {desserts.map((dish) => (
               <SwiperSlide key={dish.id}>
-                <Card poster_path={dish.image} title={dish.name} />
+                <Card poster_path={dish.image} title={dish.name} price={dish.price} />
               </SwiperSlide>
             ))}
           </Swiper>
