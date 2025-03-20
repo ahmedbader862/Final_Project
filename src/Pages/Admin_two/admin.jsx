@@ -4,7 +4,10 @@ import {
     getDocs,
     collection,
     where,
-    query
+    query,
+    // getDatabase,
+    // ref,
+    // set
   } from '../../firebase/firebase'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux';
@@ -16,10 +19,12 @@ const [alluser, setAllUser] = useState([])
 
 const [userName , setUserName] = useState('')
 const [userUID , setUserUID] = useState('')
-const [showChat , setShowChat] = useState(false)
+const [showChat , setShowChat] = useState(false)  
+const [inputChat , setInputChat] = useState('')
+
 
   useEffect(() => {
-     const getAllDocs = async () => {
+     const getAllUsers = async () => {
         const q = query(collection(db, "users2"), where("uid", "!=", userState55.uid));
        const querySnapshot = await getDocs(q)
        
@@ -34,7 +39,7 @@ const [showChat , setShowChat] = useState(false)
        console.log(docsData);
        
      }
-     getAllDocs()
+     getAllUsers()
     }, [userState55.uid]);
 
    const handleUserData = (user) => {
@@ -46,6 +51,14 @@ const [showChat , setShowChat] = useState(false)
     console.log(userState55.uid);
 
   };
+
+  const handleInputChat = (e) => {
+   setInputChat(e.target.value)
+   console.log(inputChat);
+   
+  };
+
+
 
   // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&7
 
@@ -68,6 +81,10 @@ const [showChat , setShowChat] = useState(false)
      <h1>ssssssssssssssssssssssss</h1>
      <h1>{userName}</h1>
      <h1>{userUID}</h1>
+     <div className='row'>
+      <input type="text" onChange={handleInputChat} />
+      <button className='btn bg-info'>send</button>
+     </div>
      </>
     }
     </>
