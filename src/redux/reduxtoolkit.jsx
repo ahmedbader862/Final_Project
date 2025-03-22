@@ -16,6 +16,7 @@ export const UserDataSlice = createSlice({
     setCurrentUserData: (state, action) => { // Corrected typo here
       state.CurrentUserData = action.payload; // Corrected typo here
     },
+    
     setUserState: (state, action) => {
       state.UserState = action.payload;
     }

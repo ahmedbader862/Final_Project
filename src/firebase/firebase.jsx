@@ -32,7 +32,8 @@ import {
   get,
   child,
   onValue,
-  update
+  update,
+  serverTimestamp 
 } from "firebase/database";
 
 const firebaseConfig = {
@@ -45,7 +46,6 @@ const firebaseConfig = {
     appId: "1:876611807213:web:f9e4dcb492e4af7202a9e4",
     measurementId: "G-1J2E50QYKR"
   };
-  
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -56,23 +56,18 @@ const db = getFirestore(app);
 const dbR = getDatabase(app);
 
 // Action Code Settings
-
 const actionCodeSettings = {
     url: 'https://fierfier.firebaseapp.com/__/auth/action?mode=action&oobCode=code',
     handleCodeInApp: true,
   }
 
-
 export { 
-
-
   auth,
   db,
   dbR,
   actionCodeSettings,
 
   // ((((((((((((((((((((((((((((( %%  Auth Functions %%)))))))))))))))))))))))))))))
-
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   onAuthStateChanged,
@@ -80,7 +75,6 @@ export {
   sendSignInLinkToEmail,
 
   // ((((((((((((((((((((((((((((( %% Firestore %%)))))))))))))))))))))))))))))
-
   collection,
   addDoc,
   setDoc,
@@ -95,6 +89,7 @@ export {
   limit,
   orderBy,
   onSnapshot,
+
   // ((((((((((((((((((((((((((((( %% Realtime Database %%)))))))))))))))))))))))))))))
   ref,
   set,
@@ -102,6 +97,6 @@ export {
   get,
   child,
   onValue,
-  update
-  
+  update,
+  serverTimestamp 
 };

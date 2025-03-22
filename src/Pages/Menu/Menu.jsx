@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { db, getDocs, collection, set } from "../../firebase/firebase";
+import { db, getDocs, collection} from "../../firebase/firebase";
 import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -29,9 +29,9 @@ function Menu() {
         return {
           id: doc.id,
           name: dishData.name || "Unnamed Dish",
-          image: Array.isArray(dishData[imageKey]) && dishData[imageKey][1]
-            ? dishData[imageKey][1]["lg"]
-            : dishData[imageKey] || "default-image.jpg",
+          // image: Array.isArray(dishData[imageKey]) && dishData[imageKey][1]
+          //   ? dishData[imageKey][1]["lg"]
+          //   : dishData[imageKey] || "default-image.jpg",
         };
       });
 
@@ -41,8 +41,8 @@ function Menu() {
     getCategoryData("mexican", setMexican, "image");
     getCategoryData("sandwiches", setSandwiches, "images");
     getCategoryData("pizaa", setPizza, "img");
-    getCategoryData("drinks", setDrinks, "image");
-    getCategoryData("desserts", setDesserts, "img");
+    getCategoryData("beef sandwich", setDrinks, "image");
+    getCategoryData("chicken  sandwich", setDesserts, "image");
   }, []);
 
   const handleNavigate = (id) => {
@@ -58,7 +58,7 @@ function Menu() {
         <div className="category-header align-items-center d-flex justify-content-between">
           <h2>Mexican</h2>
           <a onClick={() => handleNavigate("mexican")} className="see-all-btn  text-decoration-none">
-            See All<span> <i class="fa-solid fa-greater-than"></i></span>
+            See All<span> <i className="fa-solid fa-greater-than"></i></span>
           </a>
         </div>
 
@@ -94,7 +94,7 @@ function Menu() {
         <div className="category-header align-items-center d-flex justify-content-between">
           <h2>Sandwiches</h2>
           <a onClick={() => handleNavigate("sandwiches")} className="see-all-btn  text-decoration-none">
-            See All<span> <i class="fa-solid fa-greater-than"></i></span>
+            See All<span> <i className="fa-solid fa-greater-than"></i></span>
           </a>
         </div>
 
@@ -131,7 +131,7 @@ function Menu() {
         <div className="category-header align-items-center d-flex justify-content-between">
           <h2>Pizza</h2>
           <a onClick={() => handleNavigate("pizaa")} className="see-all-btn   text-decoration-none">
-            See All <span> <i class="fa-solid fa-greater-than"></i></span>
+            See All <span> <i className="fa-solid fa-greater-than"></i></span>
           </a>
         </div>
 
@@ -168,7 +168,7 @@ function Menu() {
         <div className="category-header align-items-center d-flex justify-content-between">
           <h2>drinks</h2>
           <a onClick={() => handleNavigate("drinks")} className="see-all-btn   text-decoration-none">
-            See All <span> <i class="fa-solid fa-greater-than"></i></span>
+            See All <span> <i className="fa-solid fa-greater-than"></i></span>
           </a>
         </div>
 
@@ -204,7 +204,7 @@ function Menu() {
         <div className="category-header align-items-center d-flex justify-content-between">
           <h2>Desserts</h2>
           <a onClick={() => handleNavigate("desserts")} className="see-all-btn   text-decoration-none">
-            See All <span> <i class="fa-solid fa-greater-than"></i></span>
+            See All <span> <i className="fa-solid fa-greater-than"></i></span>
           </a>
         </div>
 

@@ -91,6 +91,8 @@ function Signin() {
     signInWithEmailAndPassword(auth, userUpData.email, userUpData.password)
       .then((userCredential) => {
         const user = userCredential.user;
+        console.log(user);
+        
 
         dispatch(setCurrentUserData({
           uid: user.uid,

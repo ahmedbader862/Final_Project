@@ -1,4 +1,85 @@
-/* body{
+/* body {
     background-color: aliceblue;
-    
 } */
+
+.admin-container {
+    display: flex;
+    height: 100vh; /* عشان الواجهة تملّي الشاشة كلها */
+  }
+  
+  .sidebar {
+    width: 25%;
+    background-color: #f8f9fa;
+    padding: 10px;
+    overflow-y: auto; /* لو عدد المستخدمين كبير */
+  }
+  
+  .user-card {
+    background-color: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .user-card:hover {
+    background-color: #e9ecef; /* تأثير عند المرور بالماوس */
+  }
+  
+  .user-card.selected {
+    background-color: #007bff; /* لون مختلف للمستخدم المختار */
+    color: white;
+  }
+  
+  .user-card h2 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+  
+  .chat-container {
+    width: 75%;
+    padding: 10px;
+  }
+  
+  .chat-header {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-size: 1.5rem;
+  }
+  
+  .chat-box {
+    background-color: #ffffff;
+    border: 1px solid #ced4da;
+    padding: 10px;
+    margin-top: 0;
+    height: calc(100% - 60px); /* عشان ياخد باقي المساحة بعد الهيدر */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .messages {
+    height: 400px; /* أو حسب احتياجك */
+    overflow-y: auto;
+    border: 1px solid #ced4da;
+    padding: 10px;
+    background-color: #f8f9fa;
+    flex: 1; /* عشان ياخد المساحة المتاحة */
+  }
+  
+  .input-area {
+    display: flex;
+    margin-top: 10px;
+  }
+  
+  .input-area input {
+    flex: 1;
+    margin-right: 10px;
+  }
+  
+  .input-area button {
+    padding: 5px 10px;
+  }
