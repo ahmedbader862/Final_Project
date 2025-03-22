@@ -65,22 +65,24 @@ export default function Cart() {
     }
   };
 
-
   const handleRemoveItem = async (item) => {
     try {
       const docRef = doc(db, "users2", userState55.uid);
-
       const currentCart = [...cartItems];
       console.log("Current cart before removal:", currentCart);
       const updatedCart = currentCart.filter(cartItem => cartItem.title !== item.title);
 
-
       await setDoc(docRef, { cartItems: updatedCart }, { merge: true });
       console.log("Item removed successfully:", item.title);
-
     } catch (error) {
       console.error("Error removing item:", error);
     }
+  };
+
+  // Calculate the total price for an item (price × quantity)
+  const calculateTotalPrice = (item) => {
+    const total = item.price * item.quantity;
+    return total.toFixed(2); // Format to 2 decimal places
   };
 
   return (
@@ -133,10 +135,10 @@ export default function Cart() {
                         </button>
                       </div>
                       <div className="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-                        <h5 className="mb-0">${item.price}</h5>
+                        <h5 className="mb-0">{calculateTotalPrice(item)} LE</h5>
                       </div>
                       <div className="col-md-1 col-lg-1 col-xl-1 text-end">
-                        <button className="text-danger " onClick={() => handleRemoveItem(item)}>
+                        <button className="text-danger" onClick={() => handleRemoveItem(item)}>
                           <i className="bi bi-trash3 icon-visible"></i>
                         </button>
                       </div>
@@ -164,7 +166,7 @@ export default function Cart() {
 
             <div className="card">
               <div className="card-body">
-                <Link to="/shippingaddress" type="button" className="btn clr btn-lg w-100">
+                <Link to="/shippingadress" type="button" className="btn clr btn-lg w-100">
                   Order Now
                 </Link>
               </div>
