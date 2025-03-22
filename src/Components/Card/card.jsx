@@ -11,12 +11,10 @@ function Carde(props) {
   const userState55 = useSelector((state) => state.UserData['UserState']);
   const findDishesInWishlist = wishlistRedux.some((dish) => dish.title === props.title);
 
-  // ((((((((((((((((((((((((((((((((  wishlistRedux  ))))))))))))))))))))))))))))))))
-
+  // ((((((((((((((((((((((((((((((((  wishlistRedux  )))))))))))))))))))))))))))))))
 
   const handleAddWishlist = () => {
     console.log("ssssssssssssssssssprops");
-
     console.log(props);
 
     dispatch(
@@ -30,7 +28,6 @@ function Carde(props) {
   const handleRemoveWishlist = () => {
     dispatch(removWishlist(props.title));
     console.log("rRRRRRRRRRRRRRRRRRRRRRRRRR");
-
   };
 
   const handleToggleWishlist = () => {
@@ -40,8 +37,8 @@ function Carde(props) {
       handleAddWishlist();
     }
   };
-  // ((((((((((((((((((((((((((((((((  wishlistRedux  ))))))))))))))))))))))))))))))))
 
+  // ((((((((((((((((((((((((((((((((  wishlistRedux  )))))))))))))))))))))))))))))))
 
   // ((((((((((((((((((((((((((((((((  wishlistFirestore  ))))))))))))))))))))))))))))))))
 
@@ -82,26 +79,46 @@ function Carde(props) {
 
   // ((((((((((((((((((((((((((((((((  wishlistFirestore  ))))))))))))))))))))))))))))))))
 
-
-
-  //  Add to Cart Function
+  // Add to Cart Function
   const addToCartFirestore = async () => {
+    if (!userState55 || !userState55.uid) {
+      console.log("User not logged in");
+      return;
+    }
+
     try {
       const docRef = doc(db, "users2", userState55.uid);
       const docSnap = await getDoc(docRef);
 
+      // Ensure the price is a number (if it's "Price not available", set it to 0 or handle it differently)
+      const itemPrice = props.price === "Price not available" ? 0 : parseFloat(props.price);
+
       if (docSnap.exists()) {
         const currentCart = docSnap.data().cartItems || [];
 
-        const updatedCart = [
-          ...currentCart,
-          {
-            title: props.title,
-            poster_path: props.poster_path,
-            price: 120,
-            quantity: 1
-          }
-        ];
+        // Check if the item already exists in the cart
+        const itemIndex = currentCart.findIndex(item => item.title === props.title);
+
+        let updatedCart;
+        if (itemIndex >= 0) {
+          // Item already in cart, update quantity
+          updatedCart = currentCart.map((item, index) =>
+            index === itemIndex ? { ...item, quantity: item.quantity + 1 } : item
+          );
+        } else {
+          // Item not in cart, add new item
+          updatedCart = [
+            ...currentCart,
+            {
+              title: props.title,
+              poster_path: props.poster_path,
+              price: itemPrice, // Use the dynamic price from props
+              quantity: 1,
+              description: props.description // Include description
+            }
+          ];
+        }
+
         await setDoc(docRef, { cartItems: updatedCart }, { merge: true });
         console.log("Item successfully added to cart in Firestore!");
       } else {
@@ -109,8 +126,9 @@ function Carde(props) {
           cartItems: [{
             title: props.title,
             poster_path: props.poster_path,
-            price: 120,
-            quantity: 1
+            price: itemPrice, // Use the dynamic price from props
+            quantity: 1,
+            description: props.description // Include description
           }]
         });
         console.log("Document created and item successfully added to cart!");
@@ -122,7 +140,6 @@ function Carde(props) {
 
   return (
     <div className="card-container">
-
       <button
         className={`fav-icon ${findDishesInWishlist ? 'active' : ''}`}
         onClick={userState55 === "who know" ? handleToggleWishlist : toggleFirestore}
@@ -130,11 +147,9 @@ function Carde(props) {
         <i className="fas fa-heart"></i>
       </button>
 
-
       <div className="image-wrapper">
         <img src={props.poster_path} className="card-image" alt={props.title} />
       </div>
-
 
       <div className="all-details">
         <div className="card-details mb-5">
@@ -144,13 +159,14 @@ function Carde(props) {
               : props.title}
           </h5>
           <p className="food-description">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Alias culpa architecto maxime.
+            {props.description.split(" ").length > 10
+              ? props.description.split(" ").slice(0, 10).join(" ") + " ..."
+              : props.description}
           </p>
         </div>
 
-
         <div className="price-container mt-5">
-          <span className="food-price">{props.price || 'Price not available'}</span>
+          <span className="food-price">{props.price || 'Price not available'} LE</span>
           <button
             className="add-btn"
             onClick={addToCartFirestore}
