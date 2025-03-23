@@ -5,7 +5,11 @@ import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
   signOut,
-  sendSignInLinkToEmail
+  sendSignInLinkToEmail,
+  GoogleAuthProvider ,
+  signInWithPopup,
+  FacebookAuthProvider
+
 } from "firebase/auth";
 import {
   getFirestore,
@@ -54,18 +58,23 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const dbR = getDatabase(app);
+const providerG = new GoogleAuthProvider();
+const providerF = new FacebookAuthProvider();
 
 // Action Code Settings
 const actionCodeSettings = {
     url: 'https://fierfier.firebaseapp.com/__/auth/action?mode=action&oobCode=code',
     handleCodeInApp: true,
   }
-
 export { 
   auth,
   db,
   dbR,
   actionCodeSettings,
+  providerG,
+  providerF,
+  
+  
 
   // ((((((((((((((((((((((((((((( %%  Auth Functions %%)))))))))))))))))))))))))))))
   createUserWithEmailAndPassword,
@@ -73,6 +82,9 @@ export {
   onAuthStateChanged,
   signOut,
   sendSignInLinkToEmail,
+  signInWithPopup,
+  
+  
 
   // ((((((((((((((((((((((((((((( %% Firestore %%)))))))))))))))))))))))))))))
   collection,

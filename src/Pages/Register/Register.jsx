@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { auth , createUserWithEmailAndPassword , db , setDoc , doc} from "../../firebase/firebase";
+import { auth , providerG  ,providerF , signInWithPopup , createUserWithEmailAndPassword , db , setDoc , doc} from "../../firebase/firebase";
 import { useSelector } from "react-redux";
+import { GoogleAuthProvider , FacebookAuthProvider} from "firebase/auth";
 // import { useNavigate } from "react-router-dom";
 
 
 function Register() {
 
 
-  
+
   const  allDishes = useSelector((state) => state.wishlist);
   console.log(allDishes);
 
@@ -97,7 +98,7 @@ function Register() {
       // User created successfully
       var user = userCredential.user;
       console.log("User created:", user);
- 
+    
     createUser(user.uid);  // كلام كبار
 
 
@@ -130,9 +131,111 @@ const  createUser =(uid) => {
         console.error("Error creating user:", error);
       });
 
-
-
   }
+
+  // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
+  // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
+  const logInGoogle = ()=>{
+   
+    console.log("Ssssssssssssssssssssss");
+    
+
+    // providerG.addScope('https://www.googleapis.com/auth/contacts.readonly');
+
+    signInWithPopup(auth, providerG)
+    .then((result) => {
+      // This gives you a Google Access Token. You can use it to access the Google API.
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token = credential.accessToken;
+      console.log(token);
+      
+      // The signed-in user info.
+      const user = result.user;
+
+      createUserGoogle(user , token)
+      // IdP data available using getAdditionalUserInfo(result)
+      // ...
+    }).catch((error) => {
+      // Handle Errors here.
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(errorMessage);
+      console.log(errorCode);
+      
+      // The email of the user's account used.
+      const email = error.customData.email;
+      console.log(email);
+
+      // The AuthCredential type that was used.
+      const credential = GoogleAuthProvider.credentialFromError(error);
+      console.log(credential);
+      
+      // ...
+    });
+  }    
+
+  const  createUserGoogle =(user , token) => {
+    
+    const userData = {
+        name: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+        allDishes: allDishes.wishlist,
+        uid : user.uid,
+        token : token
+      };
+    
+      setDoc(doc(db, "users2", user.uid), userData)
+    
+        .then(() => {
+          console.log("User created successfully!");
+        })
+        .catch((error) => {
+          console.error("Error creating user:", error);
+        });
+  
+    }
+
+    // ((((((((((((((((((((((((((9))))))))))))))))))))))))))
+
+    const logInFacebook = ()=>{
+     
+      signInWithPopup(auth, providerF)
+  .then((result) => {
+    // The signed-in user info.
+    const user = result.user;
+    console.log(user);
+
+    // This gives you a Facebook Access Token. You can use it to access the Facebook API.
+    const credential = FacebookAuthProvider.credentialFromResult(result);
+    const accessToken = credential.accessToken;
+    console.log(accessToken);
+
+    // IdP data available using getAdditionalUserInfo(result)
+    // ...
+  })
+  .catch((error) => {
+    // Handle Errors here.
+    const errorCode = error.code;
+    console.log(errorCode);
+    
+    const errorMessage = error.message;
+    console.log(errorMessage);
+
+    // The email of the user's account used.
+    const email = error.customData.email;
+    console.log(email);
+    
+    // The AuthCredential type that was used.
+    const credential = FacebookAuthProvider.credentialFromError(error);
+    console.log(credential);
+
+    // ...
+  });
+      
+    }
+  
+
 
   // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -254,6 +357,20 @@ const  createUser =(uid) => {
               >
                 Register
               </button>
+ 
+ <br/>
+ <br/>
+
+            <button  
+            onClick={logInGoogle}
+            className="btn bg-body-secondary">
+              goole</button>
+
+              <button  
+            onClick={logInFacebook}
+            className="btn bg-body-secondary">
+              facebook</button>
+
             </div>
           </div>
         </div>

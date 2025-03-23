@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./Nav.css";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { auth, signOut, onAuthStateChanged } from "../../firebase/firebase";
+import { auth, signOut, onAuthStateChanged, collection, query, db, where, getDocs } from "../../firebase/firebase";
 import { setUserState } from "../../redux/reduxtoolkit";
 
 
@@ -14,10 +14,6 @@ function Nav() {
     const dispatch = useDispatch();
 
     const userState55 = useSelector((state) => state.UserData['UserState']);
-    // console.log(userState55);
-
-
-
 
 
     const logout = () => {
@@ -33,10 +29,17 @@ function Nav() {
     }
 
     useEffect(() => {
-        const authState = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // console.log(user);
 
+       
+ 
+
+        const authState = onAuthStateChanged(auth, (user) => {
+            
+            if (user.displayName == null) {
+                getCurrentUserDataFireStore(user);
+            }
+
+            if (user) {
                 dispatch(setUserState(
                     {
                         name: user.displayName,
@@ -45,16 +48,43 @@ function Nav() {
                     }
                 ));
 
-            } else {
-                console.log("byebye");
-                dispatch(setUserState(
 
+
+            } else {
+                dispatch(setUserState(
                     "who know"
                 ));
             }
         });
+
+// (((((((((((((((((((((((((((( ( %%  get data from  firestore %%))))))))))))))))))))))))))))))))))))))
+        const getCurrentUserDataFireStore = async (user) => {
+            const q = query(collection(db, "users2"), where("uid", "==", user.uid));
+            const querySnapshot = await getDocs(q);
+    
+            querySnapshot.forEach((doc) => {
+    
+                console.log(doc.data().name);
+                
+                dispatch(setUserState(
+                    {
+                        name: doc.data().name,
+                        uid: user.uid,
+                        email: user.email,
+                    }
+                ));
+                console.log(user.uid);
+
+
+              });     
+          };
+
+
         return () => authState();
+        
     }, [dispatch]);
+
+   
 
 
     // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
