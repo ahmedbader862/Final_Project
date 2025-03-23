@@ -19,6 +19,7 @@ import Dishes from './Pages/Dishes/dishes';
 import Wishlist from './Pages/Wishlist/wishlist';
 import AdminPage from './Pages/Admin/AdminPage';
 import Admin from './Pages/Admin_two/admin';
+import OrderConfirmation from './Pages/OrderConfirmation/OrderConfirmation';
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
             <Route path="/shippingadress" element={<Shipping />} />
             <Route path="/adminorder" element={<AdminPage />} />
             <Route path="/admin/:uid" element={<Admin />} />
+            <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="*" element={<Error />} />
           </Routes>
         </main>

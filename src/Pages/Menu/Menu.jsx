@@ -3,11 +3,13 @@ import { db, getDocs, collection } from "../../firebase/firebase";
 import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
-import "swiper/css/navigation";
 import "swiper/css/free-mode";
 import './Menu.css';
-import { Navigation, FreeMode } from "swiper/modules";
+import { FreeMode } from "swiper/modules";
 import Card from "../../Components/Card/card";
+// Import Toastify
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Menu() {
   const navigate = useNavigate();
@@ -20,15 +22,8 @@ function Menu() {
 
   useEffect(() => {
     const getCategoryData = async (category, setCategory) => {
-      // Reference to the "items" subcollection under "menu > category"
       const itemsCollectionRef = collection(db, "menu", category, "items");
       const querySnapshot = await getDocs(itemsCollectionRef);
-
-      // Log the number of documents and their data for debugging
-      console.log(`Documents in ${category} > items:`, querySnapshot.docs.length);
-      querySnapshot.docs.forEach((doc) => {
-        console.log(`Document ID: ${doc.id}, Data:`, doc.data());
-      });
 
       const categoryData = querySnapshot.docs.map((doc) => {
         const itemData = doc.data();
@@ -36,7 +31,7 @@ function Menu() {
           id: doc.id,
           title: itemData.title || "Unnamed Item",
           description: itemData.description || "No description available",
-          image: itemData.image || "default-image.jpg", // Adjust based on your image field
+          image: itemData.image || "default-image.jpg",
           price: itemData.price || "Price not available",
         };
       });
@@ -44,16 +39,89 @@ function Menu() {
       setCategory(categoryData);
     };
 
-    // Fetch data for all categories
     getCategoryData("soft drinks", setSoftDrinks);
     getCategoryData("chicken sandwich ", setChickenSandwiches);
     getCategoryData("beef sandwich", setBeefSandwiches);
     getCategoryData("hot drinks ", setHotDrinks);
   }, []);
 
+  // Add to Cart handler
+  const handleAddToCart = (item) => {
+    // Here you would typically add the item to your cart state/context
+    toast.success(`${item.title} added to cart!`, {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
+  };
+
+  // Add to Wishlist handler
+  const handleAddToWishlist = (item) => {
+    // Here you would typically add the item to your wishlist state/context
+    toast.info(`${item.title} added to wishlist!`, {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
+  };
+
   const handleNavigate = (category) => {
     navigate(`/Dishes/${category}`);
   };
+
+  // Component to render each category section
+  const renderCategorySection = (title, items, categoryKey) => (
+    <div className="category-section mt-5">
+      <div className="category-header align-items-center d-flex justify-content-between">
+        <h2>{title}</h2>
+        <a
+          onClick={() => handleNavigate(categoryKey)}
+          className="see-all-btn text-decoration-none"
+        >
+          See All <span><i className="fa-solid fa-greater-than"></i></span>
+        </a>
+      </div>
+
+      {items.length > 0 ? (
+        <Swiper
+          modules={[FreeMode]}
+          freeMode={true}
+          loop={true}
+          speed={600}
+          spaceBetween={20}
+          slidesPerView={4}
+          breakpoints={{
+            480: { slidesPerView: 1 },
+            768: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+            1280: { slidesPerView: 4 },
+          }}
+          className="category-slider"
+        >
+          {items.map((item) => (
+            <SwiperSlide key={item.id}>
+              <Card
+                poster_path={item.image}
+                title={item.title}
+                price={item.price}
+                description={item.description}
+                onAddToCart={() => handleAddToCart(item)}
+                onAddToWishlist={() => handleAddToWishlist(item)}
+              />
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      ) : (
+        <p>No {title} Available</p>
+      )}
+    </div>
+  );
 
   return (
     <div className="menu-container container mx-auto text-white mt-5">
@@ -61,188 +129,15 @@ function Menu() {
         Our <span className="text-danger">Menu</span>
       </h1>
 
-      {/* 🥤 Soft Drinks Section */}
-      <div className="category-section mt-5">
-        <div className="category-header align-items-center d-flex justify-content-between">
-          <h2>Soft Drinks</h2>
-          <a
-            onClick={() => handleNavigate("soft drinks")}
-            className="see-all-btn text-decoration-none"
-          >
-            See All <span><i className="fa-solid fa-greater-than"></i></span>
-          </a>
-        </div>
+      {renderCategorySection("Soft Drinks", softDrinks, "soft drinks")}
+      {renderCategorySection("Chicken Sandwiches", chickenSandwiches, "chicken sandwich")}
+      {renderCategorySection("Beef Sandwiches", beefSandwiches, "beef sandwich")}
+      {renderCategorySection("Hot Drinks", hotDrinks, "hot drinks")}
 
-        {softDrinks.length > 0 ? (
-          <Swiper
-            modules={[Navigation, FreeMode]}
-            navigation
-            freeMode={true}
-            loop={true}
-            speed={600}
-            spaceBetween={20}
-            slidesPerView={4}
-            breakpoints={{
-              480: { slidesPerView: 1 },
-              768: { slidesPerView: 2 },
-              1024: { slidesPerView: 3 },
-              1280: { slidesPerView: 4 },
-            }}
-            className="category-slider"
-          >
-            {softDrinks.map((drink) => (
-              <SwiperSlide key={drink.id}>
-                <Card
-                  poster_path={drink.image}
-                  title={drink.title}
-                  price={drink.price}
-                  description={drink.description}
-                />
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        ) : (
-          <p>No Soft Drinks Available</p>
-        )}
-      </div>
-
-      {/* 🍔 Chicken Sandwich Section */}
-      <div className="category-section mt-5">
-        <div className="category-header align-items-center d-flex justify-content-between">
-          <h2>Chicken Sandwiches</h2>
-          <a
-            onClick={() => handleNavigate("chicken sandwich")}
-            className="see-all-btn text-decoration-none"
-          >
-            See All <span><i className="fa-solid fa-greater-than"></i></span>
-          </a>
-        </div>
-
-        {chickenSandwiches.length > 0 ? (
-          <Swiper
-            modules={[Navigation, FreeMode]}
-            navigation
-            freeMode={true}
-            loop={true}
-            speed={600}
-            spaceBetween={20}
-            slidesPerView={4}
-            breakpoints={{
-              480: { slidesPerView: 1 },
-              768: { slidesPerView: 2 },
-              1024: { slidesPerView: 3 },
-              1280: { slidesPerView: 4 },
-            }}
-            className="category-slider"
-          >
-            {chickenSandwiches.map((sandwich) => (
-              <SwiperSlide key={sandwich.id}>
-                <Card
-                  poster_path={sandwich.image}
-                  title={sandwich.title}
-                  price={sandwich.price}
-                  description={sandwich.description}
-                />
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        ) : (
-          <p>No Chicken Sandwiches Available</p>
-        )}
-      </div>
-
-      {/* 🍔 Beef Sandwich Section */}
-      <div className="category-section mt-5">
-        <div className="category-header align-items-center d-flex justify-content-between">
-          <h2>Beef Sandwiches</h2>
-          <a
-            onClick={() => handleNavigate("beef sandwich")}
-            className="see-all-btn text-decoration-none"
-          >
-            See All <span><i className="fa-solid fa-greater-than"></i></span>
-          </a>
-        </div>
-
-        {beefSandwiches.length > 0 ? (
-          <Swiper
-            modules={[Navigation, FreeMode]}
-            navigation
-            freeMode={true}
-            loop={true}
-            speed={600}
-            spaceBetween={20}
-            slidesPerView={4}
-            breakpoints={{
-              480: { slidesPerView: 1 },
-              768: { slidesPerView: 2 },
-              1024: { slidesPerView: 3 },
-              1280: { slidesPerView: 4 },
-            }}
-            className="category-slider"
-          >
-            {beefSandwiches.map((sandwich) => (
-              <SwiperSlide key={sandwich.id}>
-                <Card
-                  poster_path={sandwich.image}
-                  title={sandwich.title}
-                  price={sandwich.price}
-                  description={sandwich.description}
-                />
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        ) : (
-          <p>No Beef Sandwiches Available</p>
-        )}
-      </div>
-
-      {/* ☕ Hot Drinks Section */}
-      <div className="category-section mt-5">
-        <div className="category-header align-items-center d-flex justify-content-between">
-          <h2>Hot Drinks</h2>
-          <a
-            onClick={() => handleNavigate(" hot drinks")}
-            className="see-all-btn text-decoration-none"
-          >
-            See All <span><i className="fa-solid fa-greater-than"></i></span>
-          </a>
-        </div>
-
-        {hotDrinks.length > 0 ? (
-          <Swiper
-            modules={[Navigation, FreeMode]}
-            navigation
-            freeMode={true}
-            loop={true}
-            speed={600}
-            spaceBetween={20}
-            slidesPerView={4}
-            breakpoints={{
-              480: { slidesPerView: 1 },
-              768: { slidesPerView: 2 },
-              1024: { slidesPerView: 3 },
-              1280: { slidesPerView: 4 },
-            }}
-            className="category-slider"
-          >
-            {hotDrinks.map((drink) => (
-              <SwiperSlide key={drink.id}>
-                <Card
-                  poster_path={drink.image}
-                  title={drink.title}
-                  price={drink.price}
-                  description={drink.description}
-                />
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        ) : (
-          <p>No Hot Drinks Available</p>
-        )}
-      </div>
+      {/* Add ToastContainer to display the notifications */}
+      <ToastContainer />
     </div>
   );
 }
 
 export default Menu;
-

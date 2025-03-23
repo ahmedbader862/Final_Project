@@ -1,21 +1,24 @@
+// src/Pages/Cart/Cart.js
 import React, { useState, useEffect } from 'react';
 import './Cart.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { db, doc, setDoc, onSnapshot } from '../../firebase/firebase';
 
 export default function Cart() {
   const userState55 = useSelector((state) => state.UserData['UserState']);
   const [cartItems, setCartItems] = useState([]);
+  const [couponCode, setCouponCode] = useState('');
+  const [discountApplied, setDiscountApplied] = useState(false);
+  const navigate = useNavigate();
 
-  // Fetch and listen to cart items in real-time
   useEffect(() => {
     if (userState55 && userState55.uid) {
       const docRef = doc(db, "users2", userState55.uid);
       const unsubscribe = onSnapshot(docRef, (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
-          console.log("Real-time cart data:", data.cartItems); // Debug log
+          console.log("Real-time cart data:", data.cartItems);
           setCartItems(data.cartItems || []);
         } else {
           console.log("No document found, cart is empty");
@@ -29,37 +32,53 @@ export default function Cart() {
     }
   }, [userState55]);
 
-  // Handle quantity decrease
+  const calculateSubtotal = () => {
+    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2);
+  };
+
+  const calculateTotal = () => {
+    const subtotal = parseFloat(calculateSubtotal());
+    if (discountApplied) {
+      return (subtotal * 0.8).toFixed(2);
+    }
+    return subtotal;
+  };
+
+  const handleApplyCoupon = () => {
+    if (couponCode.toLowerCase() === 'discount20') {
+      setDiscountApplied(true);
+      console.log("20% discount applied");
+    } else {
+      setDiscountApplied(false);
+      alert("Invalid coupon code");
+    }
+  };
+
   const handleStepDown = async (item) => {
     try {
       const docRef = doc(db, "users2", userState55.uid);
-      const currentCart = cartItems;
-      const updatedCart = currentCart.map(cartItem => {
+      const updatedCart = cartItems.map(cartItem => {
         if (cartItem.title === item.title && cartItem.quantity > 1) {
           return { ...cartItem, quantity: cartItem.quantity - 1 };
         }
         return cartItem;
       });
       await setDoc(docRef, { cartItems: updatedCart }, { merge: true });
-      console.log("Quantity decreased for:", item.title);
     } catch (error) {
       console.error("Error decreasing quantity:", error);
     }
   };
 
-  // Handle quantity increase
   const handleStepUp = async (item) => {
     try {
       const docRef = doc(db, "users2", userState55.uid);
-      const currentCart = cartItems;
-      const updatedCart = currentCart.map(cartItem => {
+      const updatedCart = cartItems.map(cartItem => {
         if (cartItem.title === item.title) {
           return { ...cartItem, quantity: cartItem.quantity + 1 };
         }
         return cartItem;
       });
       await setDoc(docRef, { cartItems: updatedCart }, { merge: true });
-      console.log("Quantity increased for:", item.title);
     } catch (error) {
       console.error("Error increasing quantity:", error);
     }
@@ -68,21 +87,32 @@ export default function Cart() {
   const handleRemoveItem = async (item) => {
     try {
       const docRef = doc(db, "users2", userState55.uid);
-      const currentCart = [...cartItems];
-      console.log("Current cart before removal:", currentCart);
-      const updatedCart = currentCart.filter(cartItem => cartItem.title !== item.title);
-
+      const updatedCart = cartItems.filter(cartItem => cartItem.title !== item.title);
       await setDoc(docRef, { cartItems: updatedCart }, { merge: true });
-      console.log("Item removed successfully:", item.title);
     } catch (error) {
       console.error("Error removing item:", error);
     }
   };
 
-  // Calculate the total price for an item (price × quantity)
   const calculateTotalPrice = (item) => {
-    const total = item.price * item.quantity;
-    return total.toFixed(2); // Format to 2 decimal places
+    return (item.price * item.quantity).toFixed(2);
+  };
+
+  // Navigate to shipping address page with cart details
+  const handleOrderNow = () => {
+    if (cartItems.length === 0) {
+      alert("Your cart is empty. Add items to proceed.");
+      return;
+    }
+    navigate('/shippingadress', {
+      state: {
+        cartItems,
+        total: calculateTotal(),
+        discountApplied,
+        userId: userState55.uid,
+        customer: userState55.displayName || userState55.email || "Anonymous",
+      },
+    });
   };
 
   return (
@@ -91,15 +121,7 @@ export default function Cart() {
         <div className="row d-flex justify-content-center align-items-center h-100">
           <div className="col-10">
             <div className="d-flex justify-content-between align-items-center mb-4">
-              <h3 className="fw-normal mb-0">Restaurant Cart</h3>
-              <div>
-                <p className="mb-0">
-                  <span className="text-muted">Sort by:</span>{' '}
-                  <a href="#!" className="text-body">
-                    price <i className="bi bi-chevron-down mt-1"></i>
-                  </a>
-                </p>
-              </div>
+              <h3 className="fw-normal mb-0 res ">Restaurant Cart</h3>
             </div>
 
             {cartItems.length > 0 ? (
@@ -124,7 +146,6 @@ export default function Cart() {
                         </button>
                         <input
                           min="1"
-                          name="quantity"
                           value={item.quantity}
                           type="number"
                           className="form-control form-control-sm"
@@ -138,39 +159,77 @@ export default function Cart() {
                         <h5 className="mb-0">{calculateTotalPrice(item)} LE</h5>
                       </div>
                       <div className="col-md-1 col-lg-1 col-xl-1 text-end">
-                        <button className="text-danger" onClick={() => handleRemoveItem(item)}>
+                        <a className="text-danger" onClick={() => handleRemoveItem(item)}>
                           <i className="bi bi-trash3 icon-visible"></i>
-                        </button>
+                        </a>
                       </div>
                     </div>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-center">Your cart is empty.</p>
+              <p className="text-center text-white">Your cart is empty.</p>
             )}
 
             <div className="card mb-4">
               <div className="card-body p-4 d-flex flex-row">
                 <div className="form-outline flex-fill">
-                  <input type="text" id="discountCode" className="form-control form-control-lg" />
+                  <input 
+                    type="text" 
+                    id="discountCode" 
+                    className="form-control form-control-lg"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    disabled={cartItems.length === 0}
+                  />
                   <label className="form-label badge bdg px-2 text-white mt-1" htmlFor="discountCode">
                     Coupon Code
                   </label>
                 </div>
-                <button type="button" className="btn aclr btn-lg ms-3">
+                <button 
+                  type="button" 
+                  className="btn aclr btn-lg ms-3"
+                  onClick={handleApplyCoupon}
+                >
                   Apply
                 </button>
               </div>
             </div>
 
-            <div className="card">
-              <div className="card-body">
-                <Link to="/shippingadress" type="button" className="btn clr btn-lg w-100">
-                  Order Now
-                </Link>
+            {cartItems.length > 0 && (
+              <div className="card mb-4">
+                <div className="card-body">
+                  <div className="d-flex justify-content-between mb-2">
+                    <p className="mb-0">Subtotal:</p>
+                    <p className="mb-0">{calculateSubtotal()} LE</p>
+                  </div>
+                  {discountApplied && (
+                    <div className="d-flex justify-content-between mb-2 text-success">
+                      <p className="mb-0">Discount (20%):</p>
+                      <p className="mb-0">-{((calculateSubtotal() * 0.2)).toFixed(2)} LE</p>
+                    </div>
+                  )}
+                  <div className="d-flex justify-content-between">
+                    <h5 className="mb-0">Total:</h5>
+                    <h5 className="mb-0">{calculateTotal()} LE</h5>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
+
+            {cartItems.length > 0 && (
+              <div className="card">
+                <div className="card-body">
+                  <button
+                    type="button"
+                    className="btn aclr btn-lg w-100"
+                    onClick={handleOrderNow}
+                  >
+                    Order Now
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

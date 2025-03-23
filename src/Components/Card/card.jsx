@@ -1,14 +1,16 @@
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link } from "react-router-dom"; // Note: This import wasn't being used, but I kept it as per your original
 import '../Card/card.css';
 import { removWishlist, setWishlist } from "../../redux/reduxtoolkit";
 import { db, getDoc, doc, setDoc } from '../../firebase/firebase';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Carde(props) {
   const dispatch = useDispatch();
 
-  const wishlistRedux = useSelector((state) => state.wishlist.wishlist);
-  const userState55 = useSelector((state) => state.UserData['UserState']);
+  const wishlistRedux = useSelector((state) => state.wishlist?.wishlist || []);
+  const userState55 = useSelector((state) => state.UserData?.['UserState'] || null);
   const findDishesInWishlist = wishlistRedux.some((dish) => dish.title === props.title);
 
   // ((((((((((((((((((((((((((((((((  wishlistRedux  )))))))))))))))))))))))))))))))
@@ -23,11 +25,19 @@ function Carde(props) {
         poster_path: props.poster_path,
       })
     );
+    toast.success(`${props.title} added to wishlist!`, {
+      position: "top-right",
+      autoClose: 2000,
+    });
   };
 
   const handleRemoveWishlist = () => {
     dispatch(removWishlist(props.title));
     console.log("rRRRRRRRRRRRRRRRRRRRRRRRRR");
+    toast.info(`${props.title} removed from wishlist`, {
+      position: "top-right",
+      autoClose: 2000,
+    });
   };
 
   const handleToggleWishlist = () => {
@@ -43,6 +53,14 @@ function Carde(props) {
   // ((((((((((((((((((((((((((((((((  wishlistFirestore  ))))))))))))))))))))))))))))))))
 
   const toggleFirestore = async () => {
+    if (!userState55?.uid) {
+      toast.error("User not authenticated", {
+        position: "top-right",
+        autoClose: 2000,
+      });
+      return;
+    }
+
     try {
       const docRef = doc(db, "users2", userState55.uid);
       const docSnap = await getDoc(docRef);
@@ -58,6 +76,10 @@ function Carde(props) {
           const updatedDishes = currentDishes.filter(dish => dish.title !== props.title);
           await setDoc(docRef, { allDishes: updatedDishes }, { merge: true });
           console.log("تم حذف الطبق من Firestore!");
+          toast.info(`${props.title} removed from wishlist`, {
+            position: "top-right",
+            autoClose: 2000,
+          });
         } else {
           // لو الطبق مش موجود، هنضيفه للمصفوفة
           const updatedDishes = [
@@ -66,14 +88,26 @@ function Carde(props) {
           ];
           await setDoc(docRef, { allDishes: updatedDishes }, { merge: true });
           console.log("تمت إضافة الطبق إلى Firestore!");
+          toast.success(`${props.title} added to wishlist!`, {
+            position: "top-right",
+            autoClose: 2000,
+          });
         }
       } else {
         // لو المستند مش موجود، هنعمله إنشاء وهنضيف الطبق
         await setDoc(docRef, { allDishes: [{ title: props.title, poster_path: props.poster_path }] });
         console.log("المستند مش موجود، تم إنشاءه وإضافة الطبق!");
+        toast.success(`${props.title} added to wishlist!`, {
+          position: "top-right",
+          autoClose: 2000,
+        });
       }
     } catch (error) {
       console.error("خطأ أثناء تحديث Firestore:", error);
+      toast.error("Error updating wishlist", {
+        position: "top-right",
+        autoClose: 2000,
+      });
     }
   };
 
@@ -83,6 +117,10 @@ function Carde(props) {
   const addToCartFirestore = async () => {
     if (!userState55 || !userState55.uid) {
       console.log("User not logged in");
+      toast.error("Please login to add items to cart", {
+        position: "top-right",
+        autoClose: 2000,
+      });
       return;
     }
 
@@ -121,6 +159,10 @@ function Carde(props) {
 
         await setDoc(docRef, { cartItems: updatedCart }, { merge: true });
         console.log("Item successfully added to cart in Firestore!");
+        toast.success(`${props.title} added to cart!`, {
+          position: "top-right",
+          autoClose: 2000,
+        });
       } else {
         await setDoc(docRef, {
           cartItems: [{
@@ -132,11 +174,25 @@ function Carde(props) {
           }]
         });
         console.log("Document created and item successfully added to cart!");
+        toast.success(`${props.title} added to cart!`, {
+          position: "top-right",
+          autoClose: 2000,
+        });
       }
     } catch (error) {
       console.error("Error adding to cart in Firestore:", error);
+      toast.error("Error adding to cart", {
+        position: "top-right",
+        autoClose: 2000,
+      });
     }
   };
+
+  // Add default props to prevent undefined errors
+  const safeTitle = props.title || "Unnamed Item";
+  const safeDescription = props.description || "No description";
+  const safePosterPath = props.poster_path || "default-image.jpg";
+  const safePrice = props.price || "Price not available";
 
   return (
     <div className="card-container">
@@ -148,25 +204,25 @@ function Carde(props) {
       </button>
 
       <div className="image-wrapper">
-        <img src={props.poster_path} className="card-image" alt={props.title} />
+        <img src={safePosterPath} className="card-image" alt={safeTitle} />
       </div>
 
       <div className="all-details">
         <div className="card-details mb-5">
           <h5 className="food-title">
-            {props.title.split(" ").length > 2
-              ? props.title.split(" ").slice(0, 2).join(" ") + " ..."
-              : props.title}
+            {safeTitle.split(" ").length > 2
+              ? safeTitle.split(" ").slice(0, 2).join(" ") + " ..."
+              : safeTitle}
           </h5>
           <p className="food-description">
-            {props.description.split(" ").length > 10
-              ? props.description.split(" ").slice(0, 10).join(" ") + " ..."
-              : props.description}
+            {safeDescription.split(" ").length > 10
+              ? safeDescription.split(" ").slice(0, 10).join(" ") + " ..."
+              : safeDescription}
           </p>
         </div>
 
         <div className="price-container mt-5">
-          <span className="food-price">{props.price || 'Price not available'} LE</span>
+          <span className="food-price">{safePrice} LE</span>
           <button
             className="add-btn"
             onClick={addToCartFirestore}
