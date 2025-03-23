@@ -1,9 +1,8 @@
-// src/App.js
 import './App.css';
 import Nav from './Components/Nav/Nav';
 import Home from './Pages/Home/Home';
 import Footer from './Components/Footer/Footer';
-import { BrowserRouter, Routes, Route } from 'react-router-dom'; // Corrected import
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import WelcomePage from './Pages/Welcome/Welcome';
 import Error from './Pages/Error/Error';
 import Menu from './Pages/Menu/Menu';
@@ -20,6 +19,8 @@ import Wishlist from './Pages/Wishlist/wishlist';
 import AdminPage from './Pages/Admin/AdminPage';
 import Admin from './Pages/Admin_two/admin';
 import OrderConfirmation from './Pages/OrderConfirmation/OrderConfirmation';
+import { ToastContainer } from 'react-toastify'; // Add ToastContainer import
+import 'react-toastify/dist/ReactToastify.css'; // Add Toastify CSS import
 
 function App() {
   return (
@@ -46,6 +47,19 @@ function App() {
           </Routes>
         </main>
         <Footer />
+        {/* Add ToastContainer here */}
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light" // Optional: you can change to "dark" or "colored"
+        />
       </div>
     </BrowserRouter>
   );

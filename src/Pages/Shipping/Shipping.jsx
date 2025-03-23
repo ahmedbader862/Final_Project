@@ -1,26 +1,25 @@
-// src/Pages/Shipping/Shipping.js
 import React, { useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { db, doc, setDoc, collection, addDoc } from '../../firebase/firebase';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Shipping() {
-  const { state } = useLocation(); // Get cart details from navigation state
+  const { state } = useLocation();
   const navigate = useNavigate();
-  const [showPayment, setShowPayment] = useState(false); // Control PayPal visibility
+  const [showPayment, setShowPayment] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState(null);
 
-  // Extract cart details from navigation state
   const { cartItems, total, discountApplied, userId, customer } = state || {};
 
-  // If no cart details are passed, redirect back to cart
   if (!cartItems || !total || !userId) {
     navigate('/cart');
     return null;
   }
 
-  // Form validation schema using Yup
   const validationSchema = Yup.object({
     city: Yup.string().required('City is required'),
     phone: Yup.string()
@@ -38,11 +37,50 @@ export default function Shipping() {
     validationSchema,
     onSubmit: (values) => {
       console.log('Shipping Form Submitted:', values);
-      setShowPayment(true); // Show PayPal buttons after form submission
+      setShowPayment(true);
     },
   });
 
   const paypalClientId = "AcsvtygcLDvhx31he8A2uov0YggkozkSZ3TomOH8PRclYHtxLoVJkcV9yu8hvPTpQDSpeeUpKIsbH0Az";
+
+  const handleCashOnDelivery = async () => {
+    try {
+      const orderDetails = {
+        customer,
+        items: cartItems.map(item => `${item.title} (${item.quantity})`).join(", "),
+        total: `${total} LE`,
+        status: "pending",
+        timestamp: new Date().toISOString(),
+        userId,
+        shipping: {
+          city: formik.values.city,
+          phone: formik.values.phone,
+          details: formik.values.details,
+        },
+        paymentMethod: "cash_on_delivery",
+        discountApplied,
+      };
+
+      const ordersCollection = collection(db, "orders");
+      const docRef = await addDoc(ordersCollection, orderDetails);
+      const orderId = docRef.id;
+
+      const cartDocRef = doc(db, "users2", userId);
+      await setDoc(cartDocRef, { cartItems: [] }, { merge: true });
+
+      toast.success("Order placed successfully with Cash on Delivery!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      navigate('/order-confirmation', { state: { total, orderId } });
+    } catch (error) {
+      console.error("COD error:", error);
+      toast.error("An error occurred while processing your order. Please try again.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+  };
 
   return (
     <div className="container">
@@ -118,64 +156,108 @@ export default function Shipping() {
           </form>
         ) : (
           <div className="max-w-md mx-auto">
-            <h3 className="mb-3">Complete Your Payment</h3>
-            <PayPalScriptProvider options={{ "client-id": paypalClientId, currency: "USD" }}>
-              <PayPalButtons
-                style={{ layout: "vertical" }}
-                createOrder={(data, actions) => {
-                  return actions.order.create({
-                    purchase_units: [
-                      {
-                        amount: {
-                          value: total, // Use the total passed from Cart
-                          currency_code: "USD",
+            <h3 className="mb-3 text-white">Choose Payment Method</h3>
+            <div className="payment-options">
+              <div className="payment-button-container mb-3">
+                <button 
+                  className="btn btn-primary"
+                  onClick={handleCashOnDelivery}
+                >
+                  Cash on Delivery
+                </button>
+              </div>
+              
+              <div className="payment-button-container">
+                <PayPalScriptProvider options={{ "client-id": paypalClientId, currency: "USD" }}>
+                  <PayPalButtons
+                    style={{ layout: "vertical" }}
+                    createOrder={(data, actions) => {
+                      return actions.order.create({
+                        purchase_units: [
+                          {
+                            amount: {
+                              value: total,
+                              currency_code: "USD",
+                            },
+                            description: "Restaurant Cart Purchase",
+                          },
+                        ],
+                      });
+                    }}
+                    onApprove={async (data, actions) => {
+                      const order = await actions.order.capture();
+                      console.log("Payment successful:", order);
+
+                      const orderDetails = {
+                        customer,
+                        items: cartItems.map(item => `${item.title} (${item.quantity})`).join(", "),
+                        total: `${total} LE`,
+                        status: "pending",
+                        timestamp: new Date().toISOString(),
+                        userId,
+                        shipping: {
+                          city: formik.values.city,
+                          phone: formik.values.phone,
+                          details: formik.values.details,
                         },
-                        description: "Restaurant Cart Purchase",
-                      },
-                    ],
-                  });
-                }}
-                onApprove={async (data, actions) => {
-                  const order = await actions.order.capture();
-                  console.log("Payment successful:", order);
+                        paymentMethod: "paypal",
+                        discountApplied,
+                      };
 
-                  // Prepare order details including shipping info
-                  const orderDetails = {
-                    customer,
-                    items: cartItems.map(item => `${item.title} (${item.quantity})`).join(", "),
-                    total: `${total} LE`,
-                    status: "pending",
-                    timestamp: new Date().toISOString(),
-                    userId,
-                    shipping: {
-                      city: formik.values.city,
-                      phone: formik.values.phone,
-                      details: formik.values.details,
-                    },
-                    discountApplied,
-                  };
+                      const ordersCollection = collection(db, "orders");
+                      const docRef = await addDoc(ordersCollection, orderDetails);
+                      const orderId = docRef.id;
 
-                  // Save order to Firebase
-                  const ordersCollection = collection(db, "orders");
-                  const docRef = await addDoc(ordersCollection, orderDetails);
-                  const orderId = docRef.id;
+                      const cartDocRef = doc(db, "users2", userId);
+                      await setDoc(cartDocRef, { cartItems: [] }, { merge: true });
 
-                  // Clear cart after successful payment
-                  const cartDocRef = doc(db, "users2", userId);
-                  await setDoc(cartDocRef, { cartItems: [] }, { merge: true });
-
-                  alert("Order placed successfully!");
-                  navigate('/order-confirmation', { state: { total, orderId } });
-                }}
-                onError={(err) => {
-                  console.error("PayPal error:", err);
-                  alert("An error occurred during payment. Please try again.");
-                }}
-              />
-            </PayPalScriptProvider>
+                      toast.success("Order placed successfully!", {
+                        position: "top-right",
+                        autoClose: 3000,
+                      });
+                      navigate('/order-confirmation', { state: { total, orderId } });
+                    }}
+                    onError={(err) => {
+                      console.error("PayPal error:", err);
+                      toast.error("An error occurred during payment. Please try again.", {
+                        position: "top-right",
+                        autoClose: 3000,
+                      });
+                    }}
+                  />
+                </PayPalScriptProvider>
+              </div>
+            </div>
           </div>
         )}
       </div>
+      
+      <style jsx>{`
+        .payment-button-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          max-width: 300px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .payment-button-container .btn {
+          width: 100%;
+          max-width: 300px;
+        }
+
+        .payment-options {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 1rem;
+        }
+      `}</style>
+
+      {/* Add ToastContainer at the end */}
+      <ToastContainer />
     </div>
   );
 }

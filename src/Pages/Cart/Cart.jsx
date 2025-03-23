@@ -1,9 +1,9 @@
-// src/Pages/Cart/Cart.js
 import React, { useState, useEffect } from 'react';
 import './Cart.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { db, doc, setDoc, onSnapshot } from '../../firebase/firebase';
+import Swal from 'sweetalert2';
 
 export default function Cart() {
   const userState55 = useSelector((state) => state.UserData['UserState']);
@@ -45,12 +45,17 @@ export default function Cart() {
   };
 
   const handleApplyCoupon = () => {
-    if (couponCode.toLowerCase() === 'discount20') {
+    if (couponCode.toLowerCase() === 'iti20') {
       setDiscountApplied(true);
       console.log("20% discount applied");
     } else {
       setDiscountApplied(false);
-      alert("Invalid coupon code");
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Coupon',
+        text: 'The coupon code you entered is invalid.',
+        confirmButtonColor: '#3085d6',
+      });
     }
   };
 
@@ -85,23 +90,53 @@ export default function Cart() {
   };
 
   const handleRemoveItem = async (item) => {
-    try {
-      const docRef = doc(db, "users2", userState55.uid);
-      const updatedCart = cartItems.filter(cartItem => cartItem.title !== item.title);
-      await setDoc(docRef, { cartItems: updatedCart }, { merge: true });
-    } catch (error) {
-      console.error("Error removing item:", error);
-    }
+    Swal.fire({
+      title: 'Remove Item',
+      text: `Are you sure you want to remove "${item.title}" from your cart?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, remove it!'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const docRef = doc(db, "users2", userState55.uid);
+          const updatedCart = cartItems.filter(cartItem => cartItem.title !== item.title);
+          await setDoc(docRef, { cartItems: updatedCart }, { merge: true });
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Removed!',
+            text: `"${item.title}" has been removed from your cart.`,
+            showConfirmButton: false,
+            timer: 1500
+          });
+        } catch (error) {
+          console.error("Error removing item:", error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'There was an error removing the item from your cart.',
+            confirmButtonColor: '#3085d6',
+          });
+        }
+      }
+    });
   };
 
   const calculateTotalPrice = (item) => {
     return (item.price * item.quantity).toFixed(2);
   };
 
-  // Navigate to shipping address page with cart details
   const handleOrderNow = () => {
     if (cartItems.length === 0) {
-      alert("Your cart is empty. Add items to proceed.");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Empty Cart',
+        text: 'Your cart is empty. Add items to proceed.',
+        confirmButtonColor: '#3085d6',
+      });
       return;
     }
     navigate('/shippingadress', {
