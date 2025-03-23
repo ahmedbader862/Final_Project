@@ -1,13 +1,10 @@
 import { useState, useEffect } from "react";
 import { auth, signInWithEmailAndPassword } from "../../firebase/firebase";
-import { useDispatch } from "react-redux";
-import { setCurrentUserData } from "../../redux/reduxtoolkit";
 import { useNavigate } from "react-router-dom";
 
 
 function Signin() {
 
-  const dispatch = useDispatch();
   const [userUpData, setUserUpData] = useState({
     name: "",
     email: "",
@@ -92,13 +89,7 @@ function Signin() {
       .then((userCredential) => {
         const user = userCredential.user;
         console.log(user);
-        
 
-        dispatch(setCurrentUserData({
-          uid: user.uid,
-          email: user.email,
-        }));
-     
         if (
           userUpData.email == "admin@gmail.com" &&
           userUpData.password == "aaaAAA111!!!" 

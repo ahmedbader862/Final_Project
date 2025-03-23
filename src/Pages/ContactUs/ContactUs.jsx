@@ -7,9 +7,11 @@ console.log(userState55.uid);
 
     return (
         <>
-
+   <br />
+   <br />
+   <br />
         <Chat
-        userName = {"userName"}
+        userName = {"admin"}
         uidChats = {userState55.uid}
         showChat = {true}
         />
