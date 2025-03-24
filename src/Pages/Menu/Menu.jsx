@@ -7,18 +7,17 @@ import "swiper/css/free-mode";
 import './Menu.css';
 import { FreeMode } from "swiper/modules";
 import Card from "../../Components/Card/card";
-// Import Toastify
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 function Menu() {
   const navigate = useNavigate();
 
-  // 🟢 State for all categories
   const [softDrinks, setSoftDrinks] = useState([]);
   const [chickenSandwiches, setChickenSandwiches] = useState([]);
   const [beefSandwiches, setBeefSandwiches] = useState([]);
   const [hotDrinks, setHotDrinks] = useState([]);
+  const [pizzas, setPizzas] = useState([]);
 
   useEffect(() => {
     const getCategoryData = async (category, setCategory) => {
@@ -39,15 +38,14 @@ function Menu() {
       setCategory(categoryData);
     };
 
-    getCategoryData("soft drinks", setSoftDrinks);
-    getCategoryData("chicken sandwich ", setChickenSandwiches);
+    getCategoryData("chicken sandwich", setChickenSandwiches);
     getCategoryData("beef sandwich", setBeefSandwiches);
-    getCategoryData("hot drinks ", setHotDrinks);
+    getCategoryData("pizaa", setPizzas);
+    getCategoryData("soft drinks", setSoftDrinks);
+    getCategoryData("hot drinks", setHotDrinks);
   }, []);
 
-  // Add to Cart handler
   const handleAddToCart = (item) => {
-    // Here you would typically add the item to your cart state/context
     toast.success(`${item.title} added to cart!`, {
       position: "top-right",
       autoClose: 2000,
@@ -58,9 +56,7 @@ function Menu() {
     });
   };
 
-  // Add to Wishlist handler
   const handleAddToWishlist = (item) => {
-    // Here you would typically add the item to your wishlist state/context
     toast.info(`${item.title} added to wishlist!`, {
       position: "top-right",
       autoClose: 2000,
@@ -75,7 +71,6 @@ function Menu() {
     navigate(`/Dishes/${category}`);
   };
 
-  // Component to render each category section
   const renderCategorySection = (title, items, categoryKey) => (
     <div className="category-section mt-5">
       <div className="category-header align-items-center d-flex justify-content-between">
@@ -128,13 +123,12 @@ function Menu() {
       <h1 className="text-center menu-title">
         Our <span className="text-danger">Menu</span>
       </h1>
-
-      {renderCategorySection("Soft Drinks", softDrinks, "soft drinks")}
       {renderCategorySection("Chicken Sandwiches", chickenSandwiches, "chicken sandwich")}
       {renderCategorySection("Beef Sandwiches", beefSandwiches, "beef sandwich")}
+      {renderCategorySection("Pizzas", pizzas, "pizaa")}
+      {renderCategorySection("Soft Drinks", softDrinks, "soft drinks")}
       {renderCategorySection("Hot Drinks", hotDrinks, "hot drinks")}
 
-      {/* Add ToastContainer to display the notifications */}
       <ToastContainer />
     </div>
   );

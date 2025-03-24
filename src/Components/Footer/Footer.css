@@ -36,3 +36,151 @@
     .footer .list-unstyled li a:hover {
         color: #ff6b6b !important;
     }
+
+
+    .footer {
+        background-color: #1a1a1a; /* Darker shade to match navbar */
+      }
+      
+      .text-white {
+        color: #ffffff !important;
+      }
+      
+      .text-danger {
+        color: #dc3545 !important;
+      }
+      
+      .social-list .list-inline-item a:hover {
+        color: #dc3545; /* Red hover effect */
+      }
+      
+      .btn-danger {
+        background-color: #dc3545;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1rem;
+        border-radius: 5px;
+      }
+      
+      .btn-danger:hover {
+        background-color: #c82333;
+      }
+      
+      /* QR Code Section */
+      .qr-code-section {
+        margin-top: 40px;
+      }
+      
+      .qr-code-card {
+        background-color: #2c2c2c; /* Slightly lighter dark for contrast */
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        display: inline-block;
+        max-width: 350px; /* Constrain width */
+      }
+      
+      .qr-code-card h3 {
+        color: #ffffff;
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+      }
+      
+      .qr-code-card p {
+        color: #cccccc;
+        font-size: 1rem;
+        margin-bottom: 15px;
+      }
+      
+      .qr-code-wrapper {
+        padding: 15px; /* Quiet zone */
+        background-color: #ffffff; /* White background for QR code */
+        border-radius: 8px;
+        display: inline-block;
+        transition: transform 0.2s; /* Hover effect */
+      }
+      
+      .qr-code-wrapper:hover {
+        transform: scale(1.05); /* Slight zoom on hover */
+      }
+      
+      /* Responsive adjustments */
+      @media (max-width: 767px) {
+        .qr-code-card {
+          max-width: 100%;
+        }
+      }
+
+
+      .footer {
+        background-color: #1a1a1a; /* Darker shade to match navbar */
+      }
+      
+      .text-white {
+        color: #ffffff !important;
+      }
+      
+      .text-danger {
+        color: #dc3545 !important;
+      }
+      
+      .social-list .list-inline-item a:hover {
+        color: #dc3545; /* Red hover effect */
+      }
+      
+      .btn-danger {
+        background-color: #dc3545;
+        border: none;
+        padding: 8px 16px; /* Slightly smaller padding */
+        font-size: 0.9rem; /* Smaller font */
+        border-radius: 5px;
+      }
+      
+      .btn-danger:hover {
+        background-color: #c82333;
+      }
+      
+      /* QR Code Section */
+      .qr-code-section {
+        text-align: center;
+      }
+      
+      .qr-code-section h4 {
+        color: #ffffff;
+        font-size: 1.2rem;
+        margin-bottom: 8px;
+      }
+      
+      .qr-code-section p {
+        color: #cccccc;
+        font-size: 0.85rem;
+        margin-bottom: 10px;
+      }
+      
+      .qr-code-wrapper {
+        padding: 10px; /* Reduced quiet zone for smaller size */
+        background-color: #ffffff; /* White background for QR code */
+        border-radius: 5px;
+        display: inline-block;
+        transition: transform 0.2s; /* Hover effect */
+      }
+      
+      .qr-code-wrapper:hover {
+        transform: scale(1.05); /* Slight zoom on hover */
+      }
+      
+      .btn-sm {
+        padding: 6px 12px; /* Smaller button */
+        font-size: 0.85rem;
+      }
+      
+      /* Responsive adjustments */
+      @media (max-width: 767px) {
+        .qr-code-section {
+          margin-top: 20px; /* Add spacing on mobile when columns stack */
+        }
+      
+        .qr-code-wrapper {
+          padding: 8px; /* Even smaller padding on mobile */
+        }
+      }

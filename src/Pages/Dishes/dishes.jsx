@@ -2,27 +2,23 @@ import { useState, useEffect } from 'react';
 import { db, collection, getDocs } from '../../firebase/firebase';
 import { useParams } from 'react-router-dom';
 import Card from '../../Components/Card/card';
-import '../Dishes/dishes.css'
+import '../Dishes/dishes.css';
+
 function Dishes() {
   const { id } = useParams(); 
   const [dishes, setDishes] = useState([]);
-  const [image , setImage]  = useState('image')
-  const [title , setTiltle]  = useState('title')
-
-   
-
+  const [image, setImage] = useState('image');
+  const [title, setTitle] = useState('title');
 
   useEffect(() => {
-
-    if (id == 'sandwiches') {
-    setImage('images')
-    setTiltle('name')
-
-   }
-   else if (id == 'pizaa' || id == 'desserts'){
-    setImage('img')
-    setTiltle('name')
-   }
+    // Set image and title keys based on category
+    if (id === 'sandwiches') {
+      setImage('images');
+      setTitle('name');
+    } else if (id === 'pizaa' || id === 'desserts') {
+      setImage('image');
+      setTitle('title');
+    }
 
     const getDishes = async () => {
       try {
@@ -43,40 +39,33 @@ function Dishes() {
       }
     };
 
-    
-      getDishes();
-    
+    getDishes();
   }, [id]);
 
   console.log(dishes);
-  
 
   return (
-    
-    <div id='aa'>
+    <div className="container my-5"> {/* Added container and margin */}
+      <div className="row g-4 mt-5"> {/* Responsive grid with gutter spacing */}
         {dishes.map(dish => (
-          <>
-          <Card
-         title={
-          Array.isArray(dish[title]) 
-          ? dish[title]// للسندويشات
-          : dish[title] 
-
-        }
-
-
-         poster_path={
-          Array.isArray(dish[image]) 
-                      ? dish[image][1]['lg']// للسندويشات
-                      : dish[image] 
-
-         }
-         />
-          </>
+          <div className="col-12 col-md-6 col-lg-4" key={dish.id}> {/* Responsive columns */}
+            <Card
+              title={
+                Array.isArray(dish[title]) 
+                  ? dish[title] // For sandwiches
+                  : dish[title]
+              }
+              poster_path={
+                Array.isArray(dish[image]) 
+                  ? dish[image][1]['lg'] // For sandwiches
+                  : dish[image]
+              }
+              price={dish.price}
+              description={dish.description}
+            />
+          </div>
         ))}
-      
-      
-      
+      </div>
     </div>
   );
 }

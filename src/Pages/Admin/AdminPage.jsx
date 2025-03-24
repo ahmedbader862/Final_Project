@@ -4,12 +4,17 @@ import { Line, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import Swal from 'sweetalert2';
 
-// Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend);
 
-const OrderCard = ({ order, updateStatus, deleteOrder }) => {
+const OrderCard = ({ order, updateStatus, updateTrackingStatus, deleteOrder }) => {
   const paymentStatus = order.paymentMethod === "cash_on_delivery" ? "Cash on Delivery" : "Paid (PayPal)";
   const paymentBadgeClass = order.paymentMethod === "cash_on_delivery" ? "bg-info" : "bg-success";
+  const trackingStatuses = [
+    "Order Placed",
+    "Processing",
+    "Out for Delivery",
+    "Delivered"
+  ];
 
   return (
     <div className="card mb-3 shadow-sm">
@@ -30,16 +35,25 @@ const OrderCard = ({ order, updateStatus, deleteOrder }) => {
             </>
           )}
           <strong>Discount Applied:</strong> {order.discountApplied ? "Yes (20%)" : "No"} <br />
-          <strong>Payment:</strong> <span className={`badge ${paymentBadgeClass} ms-2`}>{paymentStatus}</span>
+          <strong>Payment:</strong> <span className={`badge ${paymentBadgeClass} ms-2`}>{paymentStatus}</span> <br />
+          <strong>Tracking Status:</strong>
+          <select
+            className="form-select d-inline-block w-auto ms-2"
+            value={order.trackingStatus || "Order Placed"}
+            onChange={(e) => updateTrackingStatus(order.id, e.target.value)}
+          >
+            {trackingStatuses.map(status => (
+              <option key={status} value={status}>{status}</option>
+            ))}
+          </select>
         </p>
         <span
-          className={`badge ${
-            order.status === "pending"
+          className={`badge ${order.status === "pending"
               ? "bg-warning text-dark"
               : order.status === "accepted"
-              ? "bg-success"
-              : "bg-danger"
-          }`}
+                ? "bg-success"
+                : "bg-danger"
+            }`}
         >
           {order.status.toUpperCase()}
         </span>
@@ -91,7 +105,96 @@ const AdminOrdersPage = () => {
     return () => unsubscribe();
   }, []);
 
-  // Calculate statistics
+  const updateStatus = async (orderId, newStatus) => {
+    try {
+      const orderRef = doc(db, "orders", orderId);
+      await updateDoc(orderRef, { status: newStatus });
+      console.log(`Order ${orderId} status updated to ${newStatus}`);
+
+      if (newStatus === "rejected") {
+        setRefundMessage(`Order #${orderId}: Your money is refunding as soon as possible (if paid via PayPal).`);
+        setTimeout(() => setRefundMessage(null), 5000);
+      }
+    } catch (error) {
+      console.error("Error updating order status:", error);
+    }
+  };
+
+  const updateTrackingStatus = async (orderId, newTrackingStatus) => {
+    try {
+      const orderRef = doc(db, "orders", orderId);
+      await updateDoc(orderRef, { trackingStatus: newTrackingStatus });
+      console.log(`Order ${orderId} tracking status updated to ${newTrackingStatus}`);
+    } catch (error) {
+      console.error("Error updating tracking status:", error);
+    }
+  };
+
+  const deleteOrder = async (orderId) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `You are about to delete Order #${orderId}. This action cannot be undone.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const orderRef = doc(db, "orders", orderId);
+          await deleteDoc(orderRef);
+          Swal.fire(
+            'Deleted!',
+            `Order #${orderId} has been deleted.`,
+            'success'
+          );
+        } catch (error) {
+          console.error("Error deleting order:", error);
+          Swal.fire(
+            'Error!',
+            'There was an error deleting the order.',
+            'error'
+          );
+        }
+      }
+    });
+  };
+
+  const clearAllOrders = async () => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You are about to delete ALL orders. This action cannot be undone!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete all!'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const ordersCollection = collection(db, "orders");
+          const snapshot = await getDocs(ordersCollection);
+          const deletePromises = snapshot.docs.map((doc) => deleteDoc(doc.ref));
+          await Promise.all(deletePromises);
+          Swal.fire(
+            'Deleted!',
+            'All orders have been deleted.',
+            'success'
+          );
+        } catch (error) {
+          console.error("Error clearing all orders:", error);
+          Swal.fire(
+            'Error!',
+            'There was an error deleting all orders.',
+            'error'
+          );
+        }
+      }
+    });
+  };
+
+  // Statistics calculations (unchanged)
   const totalOrders = orders.length;
   const totalRevenue = orders.reduce((sum, order) => {
     const amount = parseFloat(order.total.replace(" LE", ""));
@@ -108,7 +211,7 @@ const AdminOrdersPage = () => {
     paid: orders.filter(order => order.paymentMethod === "paypal").length,
   };
 
-  // Prepare data for charts
+  // Chart data (unchanged)
   const ordersByDate = orders.reduce((acc, order) => {
     const date = new Date(order.timestamp).toLocaleDateString();
     acc[date] = (acc[date] || 0) + 1;
@@ -167,87 +270,6 @@ const AdminOrdersPage = () => {
     ],
   };
 
-  const updateStatus = async (orderId, newStatus) => {
-    try {
-      const orderRef = doc(db, "orders", orderId);
-      await updateDoc(orderRef, { status: newStatus });
-      console.log(`Order ${orderId} status updated to ${newStatus}`);
-
-      if (newStatus === "rejected") {
-        setRefundMessage(`Order #${orderId}: Your money is refunding as soon as possible (if paid via PayPal).`);
-        setTimeout(() => setRefundMessage(null), 5000);
-      }
-    } catch (error) {
-      console.error("Error updating order status:", error);
-    }
-  };
-
-  const deleteOrder = async (orderId) => {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: `You are about to delete Order #${orderId}. This action cannot be undone.`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, delete it!'
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const orderRef = doc(db, "orders", orderId);
-          await deleteDoc(orderRef);
-          Swal.fire(
-            'Deleted!',
-            `Order #${orderId} has been deleted.`,
-            'success'
-          );
-          console.log(`Order ${orderId} deleted`);
-        } catch (error) {
-          console.error("Error deleting order:", error);
-          Swal.fire(
-            'Error!',
-            'There was an error deleting the order.',
-            'error'
-          );
-        }
-      }
-    });
-  };
-
-  const clearAllOrders = async () => {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "You are about to delete ALL orders. This action cannot be undone!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, delete all!'
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const ordersCollection = collection(db, "orders");
-          const snapshot = await getDocs(ordersCollection);
-          const deletePromises = snapshot.docs.map((doc) => deleteDoc(doc.ref));
-          await Promise.all(deletePromises);
-          Swal.fire(
-            'Deleted!',
-            'All orders have been deleted.',
-            'success'
-          );
-          console.log("All orders deleted");
-        } catch (error) {
-          console.error("Error clearing all orders:", error);
-          Swal.fire(
-            'Error!',
-            'There was an error deleting all orders.',
-            'error'
-          );
-        }
-      }
-    });
-  };
-
   return (
     <div className="container mt-5">
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -268,7 +290,6 @@ const AdminOrdersPage = () => {
         </div>
       )}
 
-      {/* Statistics Section */}
       <div className="row mb-4">
         <div className="col-md-3">
           <div className="card shadow-sm text-center">
@@ -304,7 +325,6 @@ const AdminOrdersPage = () => {
         </div>
       </div>
 
-      {/* Charts Section */}
       {orders.length > 0 && (
         <div className="row mb-4">
           <div className="col-md-6">
@@ -334,7 +354,6 @@ const AdminOrdersPage = () => {
         </div>
       )}
 
-      {/* Orders List */}
       {orders.length === 0 ? (
         <p>No orders found.</p>
       ) : (
@@ -344,6 +363,7 @@ const AdminOrdersPage = () => {
               <OrderCard
                 order={order}
                 updateStatus={updateStatus}
+                updateTrackingStatus={updateTrackingStatus}
                 deleteOrder={deleteOrder}
               />
             </div>

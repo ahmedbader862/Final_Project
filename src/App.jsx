@@ -19,10 +19,15 @@ import Wishlist from './Pages/Wishlist/wishlist';
 import AdminPage from './Pages/Admin/AdminPage';
 import Admin from './Pages/Admin_two/admin';
 import OrderConfirmation from './Pages/OrderConfirmation/OrderConfirmation';
-import { ToastContainer } from 'react-toastify'; // Add ToastContainer import
-import 'react-toastify/dist/ReactToastify.css'; // Add Toastify CSS import
+import OrderTracking from './Pages/OrderTracking/OrderTracking'; // Add this import
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useSelector } from 'react-redux'; // Add this import for Redux state
 
 function App() {
+  // Access userState from Redux store
+  const userState = useSelector((state) => state.UserData['UserState']);
+
   return (
     <BrowserRouter>
       <div className="min-vh-100 d-flex flex-column">
@@ -43,11 +48,14 @@ function App() {
             <Route path="/adminorder" element={<AdminPage />} />
             <Route path="/admin/:uid" element={<Admin />} />
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
+            <Route
+              path="/track-order"
+              element={<OrderTracking userId={userState !== "who know" ? userState.uid : null} />}
+            />
             <Route path="*" element={<Error />} />
           </Routes>
         </main>
         <Footer />
-        {/* Add ToastContainer here */}
         <ToastContainer
           position="top-right"
           autoClose={3000}
@@ -58,7 +66,7 @@ function App() {
           pauseOnFocusLoss
           draggable
           pauseOnHover
-          theme="light" // Optional: you can change to "dark" or "colored"
+          theme="light"
         />
       </div>
     </BrowserRouter>
