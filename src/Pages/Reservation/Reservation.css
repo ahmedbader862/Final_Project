@@ -1,0 +1,15 @@
+.table-layout{
+    margin-top: 50px;
+}
+/* .table-img:hover{
+    drop-shadow:3px 10px 10px  #ff4d4d;
+} */
+p {
+    transition: box-shadow 0.3s ease-in-out;
+  }
+  
+  p:hover {
+    /* box-shadow: 10px 0 10px 3px #ff4d4d; Change color */
+    color: #ff4d4d !important;
+  }
+  

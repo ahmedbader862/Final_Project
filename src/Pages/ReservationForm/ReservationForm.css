@@ -1,0 +1,15 @@
+input{
+    background-color: #212126 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 22px !important;
+}
+select{
+    background-color: #212126 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 22px !important;
+}
+.name{
+    color: white !important;
+}

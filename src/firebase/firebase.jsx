@@ -6,10 +6,9 @@ import {
   onAuthStateChanged,
   signOut,
   sendSignInLinkToEmail,
-  GoogleAuthProvider ,
+  GoogleAuthProvider,
   signInWithPopup,
   FacebookAuthProvider
-
 } from "firebase/auth";
 import {
   getFirestore,
@@ -39,6 +38,12 @@ import {
   update,
   serverTimestamp 
 } from "firebase/database";
+import {
+  getStorage,
+  ref as storageRef,
+  uploadBytesResumable,
+  getDownloadURL
+} from "firebase/storage";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDXEQhdNyJkZpliy0V4AJQoxYOh13KEgJg",
@@ -49,7 +54,7 @@ const firebaseConfig = {
     messagingSenderId: "876611807213",
     appId: "1:876611807213:web:f9e4dcb492e4af7202a9e4",
     measurementId: "G-1J2E50QYKR"
-  };
+};
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -58,6 +63,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const dbR = getDatabase(app);
+const storage = getStorage(app);
 const providerG = new GoogleAuthProvider();
 const providerF = new FacebookAuthProvider();
 
@@ -65,28 +71,26 @@ const providerF = new FacebookAuthProvider();
 const actionCodeSettings = {
     url: 'https://fierfier.firebaseapp.com/__/auth/action?mode=action&oobCode=code',
     handleCodeInApp: true,
-  }
+};
+
 export { 
   auth,
   db,
   dbR,
+  storage,  // ✅ تمت إضافة التخزين السحابي (Firebase Storage)
   actionCodeSettings,
   providerG,
   providerF,
-  
-  
 
-  // ((((((((((((((((((((((((((((( %%  Auth Functions %%)))))))))))))))))))))))))))))
+  // ((((((((((((((((((((((((((((( %%  Auth Functions %%)))))))))))))))))))))))))))))))
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   onAuthStateChanged,
   signOut,
   sendSignInLinkToEmail,
   signInWithPopup,
-  
-  
 
-  // ((((((((((((((((((((((((((((( %% Firestore %%)))))))))))))))))))))))))))))
+  // ((((((((((((((((((((((((((((( %% Firestore %%)))))))))))))))))))))))))))))))
   collection,
   addDoc,
   setDoc,
@@ -102,7 +106,7 @@ export {
   orderBy,
   onSnapshot,
 
-  // ((((((((((((((((((((((((((((( %% Realtime Database %%)))))))))))))))))))))))))))))
+  // ((((((((((((((((((((((((((((( %% Realtime Database %%)))))))))))))))))))))))))))))))
   ref,
   set,
   push,
@@ -110,5 +114,10 @@ export {
   child,
   onValue,
   update,
-  serverTimestamp 
+  serverTimestamp,
+
+  // ((((((((((((((((((((((((((((( %% Firebase Storage %%)))))))))))))))))))))))))))))))
+  storageRef,  // لإنشاء مراجع التخزين
+  uploadBytesResumable,  // لرفع الملفات بعملية تدريجية
+  getDownloadURL  // لجلب رابط التحميل بعد رفع الصورة
 };

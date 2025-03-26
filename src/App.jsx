@@ -21,6 +21,7 @@ import Admin from './Pages/Admin_two/admin';
 import OrderConfirmation from './Pages/OrderConfirmation/OrderConfirmation';
 import { ToastContainer } from 'react-toastify'; // Add ToastContainer import
 import 'react-toastify/dist/ReactToastify.css'; // Add Toastify CSS import
+import AdminControl from './Pages/Admin/AdminControl';
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/shippingadress" element={<Shipping />} />
             <Route path="/adminorder" element={<AdminPage />} />
+            <Route path="/AdminControl" element={<AdminControl />} />
             <Route path="/admin/:uid" element={<Admin />} />
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="*" element={<Error />} />
