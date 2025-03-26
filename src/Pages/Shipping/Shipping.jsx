@@ -50,6 +50,7 @@ export default function Shipping() {
         items: cartItems.map(item => `${item.title} (${item.quantity})`).join(", "),
         total: `${total} LE`,
         status: "pending",
+        trackingStatus: "Order Placed", // Added tracking status
         timestamp: new Date().toISOString(),
         userId,
         shipping: {
@@ -193,6 +194,7 @@ export default function Shipping() {
                         items: cartItems.map(item => `${item.title} (${item.quantity})`).join(", "),
                         total: `${total} LE`,
                         status: "pending",
+                        trackingStatus: "Order Placed", // Added tracking status
                         timestamp: new Date().toISOString(),
                         userId,
                         shipping: {
@@ -256,7 +258,6 @@ export default function Shipping() {
         }
       `}</style>
 
-      {/* Add ToastContainer at the end */}
       <ToastContainer />
     </div>
   );
