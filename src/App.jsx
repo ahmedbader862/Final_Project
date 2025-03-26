@@ -19,13 +19,15 @@ import Wishlist from './Pages/Wishlist/wishlist';
 import AdminPage from './Pages/Admin/AdminPage';
 import Admin from './Pages/Admin_two/admin';
 import OrderConfirmation from './Pages/OrderConfirmation/OrderConfirmation';
-import OrderTracking from './Pages/OrderTracking/OrderTracking'; // Add this import
+import OrderTracking from './Pages/OrderTracking/OrderTracking';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useSelector } from 'react-redux'; // Add this import for Redux state
+import { useSelector } from 'react-redux';
+import ProtectedRoute from './Pages/ProtectedRoute/ProtectedRoute';
+import AdminOrdersPage from './Pages/Admin/AdminPage';
+
 
 function App() {
-  // Access userState from Redux store
   const userState = useSelector((state) => state.UserData['UserState']);
 
   return (
@@ -43,9 +45,23 @@ function App() {
             <Route path="/contactus" element={<ContactUs />} />
             <Route path="/welcome" element={<WelcomePage />} />
             <Route path="/wishlist" element={<Wishlist />} />
-            <Route path="/cart" element={<Cart />} />
+
+
+            <Route
+              path="/cart"
+              element={<ProtectedRoute element={Cart} />}
+            />
+
             <Route path="/shippingadress" element={<Shipping />} />
-            <Route path="/adminorder" element={<AdminPage />} />
+
+
+            {/* <Route
+              path="/adminorder"
+              element={<ProtectedRoute element={AdminPage} isAdminRoute={true} />}
+            /> */}
+
+            <Route path="/adminorder" element={<AdminOrdersPage/>} />
+
             <Route path="/admin/:uid" element={<Admin />} />
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route

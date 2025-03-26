@@ -3,7 +3,7 @@ import "./Footer.css"; // Import the CSS file for styling
 import QRCode from 'react-qr-code';
 
 function Footer() {
-    const qrCodeUrl = "https://drive.google.com/file/d/1FqC_wTQYeYa-4k073ntUuo3YZUM8YBRW/view?usp=sharing";
+    const qrCodeUrl = "https://drive.google.com/file/d/14tz-OEZjVpH6hk4fBBl7ZZ1AGk8KnxVu/view?usp=sharing";
 
     return (
         <footer className="footer py-5 bg-dark text-white">
@@ -15,7 +15,7 @@ function Footer() {
                             <h2 className="text-uppercase mb-0">Restaurant</h2>
                         </div>
                         <p className="text-white">
-                            Mealify is a restaurant landing page that offers a delicious dining experience to its customers.
+                            TastyBites is a restaurant landing page that offers a delicious dining experience to its customers.
                         </p>
                         <h4 className="text-uppercase mb-3">Social Media</h4>
                         <ul className="list-inline social-list">

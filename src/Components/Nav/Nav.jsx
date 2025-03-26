@@ -59,7 +59,7 @@ function Nav() {
             <div className="container-fluid d-flex justify-content-between align-items-center">
                 {/* Brand Logo */}
                 <a className="navbar-brand text-3xl text-white fw-bold" href="/">
-                    Restaurant
+                    TastyBites
                 </a>
 
                 {/* Toggle Button for Mobile */}
