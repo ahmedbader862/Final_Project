@@ -23,7 +23,7 @@ import OrderTracking from './Pages/OrderTracking/OrderTracking'; // Add this imp
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector } from 'react-redux'; // Add this import for Redux state
-
+import AdminControl from './Pages/AdminControl/AdminControl';
 function App() {
   // Access userState from Redux store
   const userState = useSelector((state) => state.UserData['UserState']);
