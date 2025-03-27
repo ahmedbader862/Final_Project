@@ -212,12 +212,12 @@ export default function Cart() {
                   <input 
                     type="text" 
                     id="discountCode" 
-                    className="form-control form-control-lg"
+                    className="form-control form-control-lg "
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
                     disabled={cartItems.length === 0}
                   />
-                  <label className="form-label badge bdg px-2 text-white mt-1" htmlFor="discountCode">
+                  <label className="form-label badge bdg px-2 text-white  mt-1" htmlFor="discountCode">
                     Coupon Code
                   </label>
                 </div>

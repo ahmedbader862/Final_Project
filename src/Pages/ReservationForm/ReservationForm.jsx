@@ -56,14 +56,14 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
       <h2 className="text-white text-center mb-3">Reservation Form</h2>
       {selectedTable && <p>Selected Table: {selectedTable}</p>}
       <form className="d-flex flex-column gap-2" onSubmit={handleSubmit}>
-        <input className="form-control text-white name" type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} required />
-        <input className="form-control" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
-        <select className="form-control" value={numPersons} onChange={(e) => setNumPersons(Number(e.target.value))}>
+        <input  className="form-control text-white name res" type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} required />
+        <input className="form-control res" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+        <select className="form-control sel" value={numPersons} onChange={(e) => setNumPersons(Number(e.target.value))}>
           <option value={4}>4 Persons</option>
           <option value={6}>6 Persons</option>
         </select>
-        <input className="form-control" type="time" value={timeArriving} onChange={(e) => setTimeArriving(e.target.value)} required />
-        <input className="form-control" type="time" value={timeLeaving} onChange={(e) => setTimeLeaving(e.target.value)} required />
+        <input className="form-control res" type="time" value={timeArriving} onChange={(e) => setTimeArriving(e.target.value)} required />
+        <input className="form-control res" type="time" value={timeLeaving} onChange={(e) => setTimeLeaving(e.target.value)} required />
         {error && <p style={{ color: "red" }}>{error}</p>}
         <button className="btn btn-outline-light mt-4" type="submit">Reserve</button>
       </form>

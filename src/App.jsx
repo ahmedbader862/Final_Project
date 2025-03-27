@@ -23,7 +23,10 @@ import OrderTracking from './Pages/OrderTracking/OrderTracking';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector } from 'react-redux'; // Add this import for Redux state
-import AdminControl from './Pages/AdminControl/AdminControl';
+
+import ProtectedRoute from './Pages/ProtectedRoute/ProtectedRoute';
+import AdminControl from './Pages/Admin/AdminControl';
+
 function App() {
   const userState = useSelector((state) => state.UserData['UserState']);
 
@@ -52,6 +55,7 @@ function App() {
             <Route path="/shippingadress" element={<Shipping />} />
             <Route path="/adminorder" element={<AdminPage />} />
             <Route path="/AdminControl" element={<AdminControl />} />
+            
             <Route path="/admin/:uid" element={<Admin />} />
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route
