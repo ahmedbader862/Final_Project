@@ -2,35 +2,36 @@ import React, { useState, useEffect } from 'react';
 import { auth, db } from '../../firebase/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, getDocs, onSnapshot, addDoc, updateDoc, deleteDoc, setDoc, doc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../../firebase/firebase';
 import { Container, Row, Col, Button, Card, Modal, Form, Dropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faEdit, faTrash, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 
-// Custom CSS for image styling
 const styles = `
   .menu-card-img {
-    width: 180px; /* Slightly larger square */
+    width: 180px;
     height: 180px;
-    object-fit: cover; /* Maintain aspect ratio */
-    border-radius: 50%; /* Circular images for a modern look */
-    border: 2px solid #e0e0e0; /* Subtle border */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow */
-    margin: 15px auto; /* Center with some spacing */
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #e0e0e0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 15px auto;
     display: block;
-    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effect */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
 
   .menu-card-img:hover {
-    transform: scale(1.05); /* Slight zoom on hover */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
   }
 
   .modal-image-preview {
-    width: 120px; /* Smaller square for modal */
+    width: 120px;
     height: 120px;
     object-fit: cover;
-    border-radius: 50%; /* Circular preview */
+    border-radius: 50%;
     border: 2px solid #e0e0e0;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
     margin: 15px auto;
@@ -38,14 +39,14 @@ const styles = `
   }
 
   .card-body {
-    text-align: center; /* Center the content below the image */
+    text-align: center;
     padding: 15px;
   }
 
   .card {
-    border: none; /* Remove default card border for a cleaner look */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle card shadow */
-    border-radius: 12px; /* Rounded card corners */
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
   }
 `;
 
@@ -56,7 +57,7 @@ function AdminPanel() {
   const [menuItems, setMenuItems] = useState([]);
   const [showModal, setShowModal] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [formData, setFormData] = useState({ id: '', title: '', description: '', price: '', image: '' });
+  const [formData, setFormData] = useState({ id: '', title: '', description: '', price: '', image: '', imageFile: null });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -90,10 +91,42 @@ function AdminPanel() {
     return unsubscribe;
   }, [selectedCategory]);
 
+  const uploadImageToStorage = async (file) => {
+    if (!file) return null;
+    try {
+      console.log('Uploading file:', file.name);
+      const sanitizedFileName = file.name.replace(/\s+/g, '_'); // Sanitize filename
+      // Updated path to include /items/image/
+      const storageRef = ref(storage, `menu/${selectedCategory}/items/image/${Date.now()}_${sanitizedFileName}`);
+      console.log('Storage Reference:', storageRef.fullPath);
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+      console.log('Download URL:', downloadURL);
+      return downloadURL;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error(`Failed to upload image: ${error.message}`);
+      throw error;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const itemData = { ...formData, price: parseFloat(formData.price) };
+    let imageUrl = formData.image;
+
     try {
+      if (formData.imageFile) {
+        imageUrl = await uploadImageToStorage(formData.imageFile);
+      }
+
+      const itemData = { 
+        id: formData.id,
+        title: formData.title,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        image: imageUrl || '',
+      };
+
       if (showModal === 'add') {
         await addDoc(collection(db, `menu/${selectedCategory}/items`), itemData);
         toast.success('Item added!');
@@ -107,6 +140,7 @@ function AdminPanel() {
         toast.success('Item updated!');
       }
       setShowModal(null);
+      setFormData({ id: '', title: '', description: '', price: '', image: '', imageFile: null });
     } catch (error) {
       console.error('Error saving item:', error);
       toast.error(`Error saving item: ${error.message}`);
@@ -132,7 +166,7 @@ function AdminPanel() {
       await setDoc(doc(db, 'menu', newCategory), { name: newCategory });
       toast.success('Category added!');
       setShowModal(null);
-      setFormData({ id: '', title: '', description: '', price: '', image: '' });
+      setFormData({ id: '', title: '', description: '', price: '', image: '', imageFile: null });
     } catch (error) {
       console.error('Error adding category:', error);
       toast.error('Error adding category');
@@ -147,7 +181,8 @@ function AdminPanel() {
       title: item.title || '',
       description: item.description || '',
       price: item.price || '',
-      image: item.image || ''
+      image: item.image || '',
+      imageFile: null
     });
     setShowModal('edit');
   };
@@ -156,9 +191,7 @@ function AdminPanel() {
 
   return (
     <>
-      {/* Inject custom styles */}
       <style>{styles}</style>
-
       <Container fluid className="mt-5">
         <Row>
           <Col md={2} className="bg-dark text-white p-3">
@@ -185,20 +218,19 @@ function AdminPanel() {
                   </Dropdown.Menu>
                 </Dropdown>
               </div>
-              <Button onClick={() => { setFormData({ id: '', title: '', description: '', price: '', image: '' }); setShowModal('add'); }}>
+              <Button onClick={() => { setFormData({ id: '', title: '', description: '', price: '', image: '', imageFile: null }); setShowModal('add'); }}>
                 <FontAwesomeIcon icon={faPlus} /> Add Item
               </Button>
             </div>
-
             <Row>
               {menuItems.map(item => (
                 <Col md={4} key={item.docId} className="mb-4">
                   <Card>
                     <Card.Img 
                       variant="top" 
-                      src={item.image || 'https://via.placeholder.com/180'} // Updated placeholder to match size
+                      src={item.image || 'https://via.placeholder.com/180'} 
                       onError={(e) => e.target.src = 'https://via.placeholder.com/180'} 
-                      className="menu-card-img" // Apply custom class for styling
+                      className="menu-card-img" 
                     />
                     <Card.Body className="card-body">
                       <Card.Title>{item.title}</Card.Title>
@@ -208,7 +240,7 @@ function AdminPanel() {
                         variant="outline-warning" 
                         size="sm" 
                         onClick={() => openEditModal(item)}
-                        className="me-2" // Add spacing between buttons
+                        className="me-2"
                       >
                         <FontAwesomeIcon icon={faEdit} /> Edit
                       </Button>
@@ -226,7 +258,6 @@ function AdminPanel() {
             </Row>
           </Col>
         </Row>
-
         <Modal show={!!showModal} onHide={() => setShowModal(null)}>
           <Modal.Header closeButton>
             <Modal.Title>
@@ -274,18 +305,18 @@ function AdminPanel() {
                   />
                 </Form.Group>
                 <Form.Group className="mb-3">
-                  <Form.Label>Image URL</Form.Label>
+                  <Form.Label>Upload Image</Form.Label>
                   <Form.Control 
-                    name="image" 
-                    value={formData.image} 
-                    onChange={e => setFormData({ ...formData, image: e.target.value })} 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={e => setFormData({ ...formData, imageFile: e.target.files[0] })} 
                   />
-                  {formData.image && (
+                  {(formData.image || formData.imageFile) && (
                     <img 
-                      src={formData.image} 
+                      src={formData.imageFile ? URL.createObjectURL(formData.imageFile) : formData.image} 
                       alt="Preview" 
-                      className="modal-image-preview" // Apply custom class for styling
-                      onError={(e) => e.target.src = 'https://via.placeholder.com/120'} // Updated placeholder
+                      className="modal-image-preview" 
+                      onError={(e) => e.target.src = 'https://via.placeholder.com/120'} 
                     />
                   )}
                 </Form.Group>

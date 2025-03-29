@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { db, collection, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from '../../firebase/firebase';
+import { db, collection, onSnapshot, doc, updateDoc, deleteDoc, getDocs, getDoc, arrayUnion } from '../../firebase/firebase';
 import { Line, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import Swal from 'sweetalert2';
@@ -49,10 +49,10 @@ const OrderCard = ({ order, updateStatus, updateTrackingStatus, deleteOrder }) =
         </p>
         <span
           className={`badge ${order.status === "pending"
-              ? "bg-warning text-dark"
-              : order.status === "accepted"
-                ? "bg-success"
-                : "bg-danger"
+            ? "bg-warning text-dark"
+            : order.status === "accepted"
+              ? "bg-success"
+              : "bg-danger"
             }`}
         >
           {order.status.toUpperCase()}
@@ -107,16 +107,64 @@ const AdminOrdersPage = () => {
 
   const updateStatus = async (orderId, newStatus) => {
     try {
+      console.log(`Starting updateStatus for order ${orderId} with status ${newStatus}`);
+
       const orderRef = doc(db, "orders", orderId);
+      const orderSnapshot = await getDoc(orderRef);
+      if (!orderSnapshot.exists()) {
+        console.error("Order not found in Firestore:", orderId);
+        Swal.fire('Error!', 'Order not found in Firestore.', 'error');
+        return;
+      }
+      const orderData = orderSnapshot.data();
+      console.log("Order data:", orderData);
+
       await updateDoc(orderRef, { status: newStatus });
       console.log(`Order ${orderId} status updated to ${newStatus}`);
+
+      if (newStatus === "accepted") {
+        const userId = orderData.userId; // Use the userId field from the order
+        console.log("User ID from order:", userId);
+
+        if (!userId) {
+          console.error("User ID not found in order data for order:", orderId);
+          Swal.fire('Error!', 'User ID not found in order data.', 'error');
+          return;
+        }
+
+        const userRef = doc(db, "users2", userId); // Reference the user document directly
+        const userSnapshot = await getDoc(userRef);
+        if (!userSnapshot.exists()) {
+          console.error("User not found in users2 collection:", userId);
+          Swal.fire('Error!', `User not found for ID: ${userId}`, 'error');
+          return;
+        }
+
+        const orderToStore = {
+          orderId: orderId,
+          items: orderData.items,
+          total: orderData.total,
+          timestamp: orderData.timestamp,
+          trackingStatus: orderData.trackingStatus || "Order Placed",
+          paymentMethod: orderData.paymentMethod,
+          customer: orderData.customer,
+        };
+        console.log("Order to store in acceptedOrders:", orderToStore);
+
+        await updateDoc(userRef, {
+          acceptedOrders: arrayUnion(orderToStore),
+        });
+        console.log(`Order ${orderId} successfully added to acceptedOrders for user ${userId}`);
+        Swal.fire('Success!', `Order ${orderId} added to accepted orders for user ${userId}`, 'success');
+      }
 
       if (newStatus === "rejected") {
         setRefundMessage(`Order #${orderId}: Your money is refunding as soon as possible (if paid via PayPal).`);
         setTimeout(() => setRefundMessage(null), 5000);
       }
     } catch (error) {
-      console.error("Error updating order status:", error);
+      console.error("Error in updateStatus:", error);
+      Swal.fire('Error!', `Failed to update order status: ${error.message}`, 'error');
     }
   };
 
@@ -194,7 +242,6 @@ const AdminOrdersPage = () => {
     });
   };
 
-  // Statistics calculations (unchanged)
   const totalOrders = orders.length;
   const totalRevenue = orders.reduce((sum, order) => {
     const amount = parseFloat(order.total.replace(" LE", ""));
@@ -211,7 +258,6 @@ const AdminOrdersPage = () => {
     paid: orders.filter(order => order.paymentMethod === "paypal").length,
   };
 
-  // Chart data (unchanged)
   const ordersByDate = orders.reduce((acc, order) => {
     const date = new Date(order.timestamp).toLocaleDateString();
     acc[date] = (acc[date] || 0) + 1;
