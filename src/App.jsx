@@ -22,10 +22,10 @@ import OrderConfirmation from './Pages/OrderConfirmation/OrderConfirmation';
 import OrderTracking from './Pages/OrderTracking/OrderTracking';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useSelector } from 'react-redux'; // Add this import for Redux state
-
+import { useSelector } from 'react-redux';
 import ProtectedRoute from './Pages/ProtectedRoute/ProtectedRoute';
 import AdminControl from './Pages/Admin/AdminControl';
+import Banner from './Components/Banner/Banner'; // Already imported
 
 function App() {
   const userState = useSelector((state) => state.UserData['UserState']);
@@ -33,6 +33,8 @@ function App() {
   return (
     <BrowserRouter>
       <div className="min-vh-100 d-flex flex-column">
+        {/* Add the Banner component here, above the Nav */}
+        <Banner />
         <Nav />
         <main className="flex-grow-1">
           <Routes>
@@ -45,17 +47,10 @@ function App() {
             <Route path="/contactus" element={<ContactUs />} />
             <Route path="/welcome" element={<WelcomePage />} />
             <Route path="/wishlist" element={<Wishlist />} />
-
-
-            <Route
-              path="/cart"
-              element={<ProtectedRoute element={Cart} />}
-            />
-
+            <Route path="/cart" element={<ProtectedRoute element={Cart} />} />
             <Route path="/shippingadress" element={<Shipping />} />
             <Route path="/adminorder" element={<AdminPage />} />
             <Route path="/AdminControl" element={<AdminControl />} />
-            
             <Route path="/admin/:uid" element={<Admin />} />
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route

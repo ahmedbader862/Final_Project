@@ -4,3 +4,20 @@
     bottom: 0;
     left: 0;
 }
+
+
+/* ./App.css */
+.min-vh-100.d-flex.flex-column {
+    padding-top: 40px; /* Adjust this value based on your banner height */
+  }
+
+
+  /* ./App.css */
+.min-vh-100.d-flex.flex-column {
+    padding-top: 40px; /* Space for the banner */
+  }
+  
+  /* Push the navbar down */
+  .navbar {
+    top: 32px !important; /* Height of the banner */
+  }

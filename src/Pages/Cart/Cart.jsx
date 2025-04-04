@@ -156,7 +156,7 @@ export default function Cart() {
         <div className="row d-flex justify-content-center align-items-center h-100">
           <div className="col-10">
             <div className="d-flex justify-content-between align-items-center mb-4">
-              <h3 className="fw-normal mb-0 res ">Restaurant Cart</h3>
+              <h3 className="fw-normal mb-0 text-white ">Restaurant Cart</h3>
             </div>
 
             {cartItems.length > 0 ? (
