@@ -1,9 +1,9 @@
-import { 
-    dbR,
-    ref,
-    push,
-    onValue,
-  } from '../../firebase/firebase'
+import {
+  dbR,
+  ref,
+  push,
+  onValue,
+} from '../../firebase/firebase'
 import { useEffect, useState } from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useSelector } from 'react-redux';
@@ -22,12 +22,12 @@ function Chat(props) {
 
     const newMessage = {
       message: inputChat,
-      timestamp: new Date().getTime(), 
-      sender: userState55.uid,         
+      timestamp: new Date().getTime(),
+      sender: userState55.uid,
     };
     push(messagesRef, newMessage);
 
-    setInputChat(''); 
+    setInputChat('');
   };
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-/* ./Components/Banner/Banner.css */
+
 .discount-banner {
     background-color: #000000;
     color: white;
@@ -8,24 +8,24 @@
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 1100; /* Above Bootstrap navbar */
+    z-index: 1100; 
     overflow: hidden;
     font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 14px; /* Already reduced */
+    font-size: 14px; 
   }
   
   .marquee {
     display: inline-block;
     white-space: nowrap;
-    animation: marquee 15s linear infinite; /* Already slowed down */
+    animation: marquee 15s linear infinite; 
   }
   
   .marquee span {
     display: inline-block;
-    margin-right: 100px; /* Increased gap between the two sentences */
+    margin-right: 100px; 
   }
   
   .discount-banner strong {

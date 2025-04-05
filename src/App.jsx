@@ -16,7 +16,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import Dishes from './Pages/Dishes/dishes';
 import Wishlist from './Pages/Wishlist/wishlist';
-import AdminPage from './Pages/Admin/AdminPage';
+import AdminPage from './Pages/AdminOrder/AdminPage';
 import Admin from './Pages/Admin_two/admin';
 import OrderConfirmation from './Pages/OrderConfirmation/OrderConfirmation';
 import OrderTracking from './Pages/OrderTracking/OrderTracking';
@@ -24,16 +24,15 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector } from 'react-redux';
 import ProtectedRoute from './Pages/ProtectedRoute/ProtectedRoute';
-import AdminControl from './Pages/Admin/AdminControl';
 import Banner from './Components/Banner/Banner'; // Already imported
-
+import AdminControl from './Pages/AdminControl/AdminControl';
 function App() {
   const userState = useSelector((state) => state.UserData['UserState']);
 
   return (
     <BrowserRouter>
       <div className="min-vh-100 d-flex flex-column">
-        {/* Add the Banner component here, above the Nav */}
+
         <Banner />
         <Nav />
         <main className="flex-grow-1">
