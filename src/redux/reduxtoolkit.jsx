@@ -1,12 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const userInitialState = {
-  CurrentUserData: 'aaaaaaaaaaaaaa', // Corrected typo here
   UserState: "who know"
 };
-
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 const wishlistInitialState = {
   wishlist: []
+};
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+const FireDataInitialState = {
+  FireData: []
 };
 
 export const UserDataSlice = createSlice({
@@ -23,6 +26,9 @@ export const UserDataSlice = createSlice({
   }
 });
 
+// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
 export const WishlistSlice = createSlice({
   name: 'Wishlist',
   initialState: wishlistInitialState, 
@@ -38,9 +44,24 @@ export const WishlistSlice = createSlice({
     }
   }
 );
+// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+export const FireDataSlice = createSlice({
+  name: 'FireData',
+  initialState: FireDataInitialState, 
+  reducers: {
+    setFireData: (state, action) => {
+      state.FireData = [...state.FireData,action.payload]; },
+
+    }
+  }
+);
 
 export const { setCurrentUserData, setUserState } = UserDataSlice.actions; // Corrected typo here
 export const { setWishlist , removWishlist} = WishlistSlice.actions;
-export const wishlistReducer = WishlistSlice.reducer;
+export const { setFireData } = FireDataSlice.actions;
 
+
+export const wishlistReducer = WishlistSlice.reducer;
+export const fireDataReducer = FireDataSlice.reducer;
 export default UserDataSlice.reducer;
