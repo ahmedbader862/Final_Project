@@ -7,7 +7,6 @@ import ChartsSection from './ChartsSection';
 import OrdersList from './OrdersList';
 import RefundMessage from './RefundMessage';
 
-
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend);
 
 const AdminOrdersPage = () => {
@@ -96,14 +95,14 @@ const AdminOrdersPage = () => {
       pendingOrders: statusBreakdown.pending,
       lineChartData: {
         labels: Object.keys(ordersByDate),
-        datasets: [{ label: "Orders Over Time", data: Object.values(ordersByDate), borderColor: "rgb(75, 192, 192)", tension: 0.1 }]
+        datasets: [{ label: "Orders Over Time", data: Object.values(ordersByDate), borderColor: "#4A919E", tension: 0.1 }]
       },
       statusPieChartData: {
         labels: ["Pending", "Accepted", "Rejected"],
         datasets: [{
           data: [statusBreakdown.pending, statusBreakdown.accepted, statusBreakdown.rejected],
-          backgroundColor: ["rgba(255, 206, 86, 0.6)", "rgba(54, 162, 235, 0.6)", "rgba(255, 99, 132, 0.6)"],
-          borderColor: ["rgba(255, 206, 86, 1)", "rgba(54, 162, 235, 1)", "rgba(255, 99, 132, 1)"],
+          backgroundColor: ["#D4A017", "#4A919E", "#B73E3E"],
+          borderColor: ["#E0B02A", "#5AA5B2", "#C94E4E"],
           borderWidth: 1
         }]
       },
@@ -111,8 +110,8 @@ const AdminOrdersPage = () => {
         labels: ["Cash on Delivery", "Paid (PayPal)"],
         datasets: [{
           data: [paymentBreakdown.cod, paymentBreakdown.paid],
-          backgroundColor: ["rgba(75, 192, 192, 0.6)", "rgba(54, 162, 235, 0.6)"],
-          borderColor: ["rgba(75, 192, 192, 1)", "rgba(54, 162, 235, 1)"],
+          backgroundColor: ["#4A919E", "#3A6D8C"],
+          borderColor: ["#5AA5B2", "#4A7D9C"],
           borderWidth: 1
         }]
       }
@@ -122,12 +121,15 @@ const AdminOrdersPage = () => {
   const { totalOrders, totalRevenue, avgOrderValue, pendingOrders, lineChartData, statusPieChartData, paymentPieChartData } = getChartData();
 
   return (
-    <div className="container mt-5">
-      <div className="d-flex justify-content-between mb-4">
-        <h2 className="text-white">Orders Management</h2>
-        {orders.length > 0 && <button className="btn btn-danger btn-sm" onClick={clearAllOrders}>Clear All Orders</button>}
+    <div className="orders-management">
+      <div className="d-flex justify-content-between align-items-center mb-5">
+        <h2 className="section-title">Orders Management</h2>
+        {orders.length > 0 && (
+          <button className="btn btn-danger btn-sm clear-all-btn" onClick={clearAllOrders}>
+            Clear All Orders
+          </button>
+        )}
       </div>
-
       <RefundMessage message={refundMessage} />
       <StatsSection totalOrders={totalOrders} totalRevenue={totalRevenue} avgOrderValue={avgOrderValue} pendingOrders={pendingOrders} />
       {orders.length > 0 && (
@@ -136,7 +138,7 @@ const AdminOrdersPage = () => {
           <OrdersList orders={orders} updateStatus={updateStatus} updateTrackingStatus={updateTrackingStatus} deleteOrder={deleteOrder} />
         </>
       )}
-      {orders.length === 0 && <p>No orders found.</p>}
+      {orders.length === 0 && <p className="no-orders-text">No orders found.</p>}
     </div>
   );
 };

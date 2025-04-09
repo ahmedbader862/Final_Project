@@ -1,83 +1,109 @@
-import React from 'react'
+import React from 'react';
+import { CheckCircle, XCircle, Trash } from 'react-bootstrap-icons'; // Import icons
 
 const OrderCard = ({ order, updateStatus, updateTrackingStatus, deleteOrder }) => {
-    const paymentStatus = order.paymentMethod === "cash_on_delivery" ? "Cash on Delivery" : "Paid (PayPal)";
-    const paymentBadgeClass = order.paymentMethod === "cash_on_delivery" ? "bg-info" : "bg-success";
-    const trackingStatuses = [
-      "Order Placed",
-      "Processing",
-      "Out for Delivery",
-      "Delivered"
-    ];
-  
-    return (
-      <div className="card mb-3 shadow-sm">
-        <div className="card-body">
-          <h5 className="card-title">Order #{order.id} - {order.customer}</h5>
-          <p className="card-text">
-            <strong>Items:</strong> {order.items} <br />
-            <strong>Total:</strong> {order.total} <br />
-            <strong>Placed:</strong> {new Date(order.timestamp).toLocaleString()} <br />
-            {order.shipping && (
-              <>
-                <strong>Shipping Details:</strong> <br />
-                <span className="ms-2">
-                  <strong>City:</strong> {order.shipping.city} <br />
-                  <strong>Phone:</strong> {order.shipping.phone} <br />
-                  <strong>Details:</strong> {order.shipping.details} <br />
-                </span>
-              </>
-            )}
-            <strong>Discount Applied:</strong> {order.discountApplied ? "Yes (20%)" : "No"} <br />
-            <strong>Payment:</strong> <span className={`badge ${paymentBadgeClass} ms-2`}>{paymentStatus}</span> <br />
-            <strong>Tracking Status:</strong>
-            <select
-              className="form-select d-inline-block w-auto ms-2"
-              value={order.trackingStatus || "Order Placed"}
-              onChange={(e) => updateTrackingStatus(order.id, e.target.value)}
-            >
-              {trackingStatuses.map(status => (
-                <option key={status} value={status}>{status}</option>
-              ))}
-            </select>
-          </p>
-          <span
-            className={`badge ${order.status === "pending"
-              ? "bg-warning text-dark"
+  const paymentStatus = order.paymentMethod === "cash_on_delivery" ? "Cash on Delivery" : "Paid (PayPal)";
+  const trackingStatuses = [
+    "Order Placed",
+    "Processing",
+    "Out for Delivery",
+    "Delivered"
+  ];
+
+  return (
+    <div className="order-card mb-4">
+      {/* Header */}
+      <div className="order-header">
+        <h5>Order #{order.id}</h5>
+        <p className="order-customer">{order.customer}</p>
+        <span
+          className={`status-badge ${
+            order.status === "pending"
+              ? "status-pending"
               : order.status === "accepted"
-                ? "bg-success"
-                : "bg-danger"
-              }`}
-          >
-            {order.status.toUpperCase()}
-          </span>
-          <div className="mt-2 d-flex gap-2">
-            {order.status === "pending" && (
-              <>
-                <button
-                  className="btn btn-success btn-sm"
-                  onClick={() => updateStatus(order.id, "accepted")}
-                >
-                  ✅ Accept
-                </button>
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={() => updateStatus(order.id, "rejected")}
-                >
-                  ❌ Reject
-                </button>
-              </>
-            )}
-            <button
-              className="btn btn-danger btn-sm"
-              onClick={() => deleteOrder(order.id)}
-            >
-              <i className="bi bi-trash3"></i> Delete
-            </button>
+              ? "status-accepted"
+              : "status-rejected"
+          }`}
+        >
+          {order.status.toUpperCase()}
+        </span>
+      </div>
+
+      {/* Body */}
+      <div className="order-body">
+        <div className="order-section">
+          <span className="section-label">Items:</span>
+          <span>{order.items}</span>
+        </div>
+        <div className="order-section">
+          <span className="section-label">Total:</span>
+          <span className="order-total">{order.total}</span>
+        </div>
+        <div className="order-section">
+          <span className="section-label">Placed:</span>
+          <span>{new Date(order.timestamp).toLocaleString()}</span>
+        </div>
+        {order.shipping && (
+          <div className="order-section">
+            <span className="section-label">Shipping Details:</span>
+            <div className="shipping-details">
+              <p>City: {order.shipping.city}</p>
+              <p>Phone: {order.shipping.phone}</p>
+              <p>Details: {order.shipping.details}</p>
+            </div>
           </div>
+        )}
+        <div className="order-section">
+          <span className="section-label">Discount Applied:</span>
+          <span>{order.discountApplied ? "Yes (20%)" : "No"}</span>
+        </div>
+        <div className="order-section">
+          <span className="section-label">Payment:</span>
+          <span className={`payment-badge ${order.paymentMethod === "cash_on_delivery" ? "payment-cod" : "payment-paid"}`}>
+            {paymentStatus}
+          </span>
+        </div>
+        <div className="order-section">
+          <span className="section-label">Tracking Status:</span>
+          <select
+            className="tracking-select"
+            value={order.trackingStatus || "Order Placed"}
+            onChange={(e) => updateTrackingStatus(order.id, e.target.value)}
+          >
+            {trackingStatuses.map(status => (
+              <option key={status} value={status}>{status}</option>
+            ))}
+          </select>
         </div>
       </div>
-    );
-  };
 
-  export default OrderCard;
+      {/* Footer */}
+      <div className="order-footer">
+        {order.status === "pending" && (
+          <>
+            <button
+              className="btn btn-accept"
+              onClick={() => updateStatus(order.id, "accepted")}
+            >
+              <CheckCircle size={16} className="me-1" /> Accept
+            </button>
+            <button
+              className="btn btn-reject"
+              onClick={() => updateStatus(order.id, "rejected")}
+            >
+              <XCircle size={16} className="me-1" /> Reject
+            </button>
+          </>
+        )}
+        <button
+          className="btn btn-delete"
+          onClick={() => deleteOrder(order.id)}
+        >
+          <Trash size={16} className="me-1" /> Delete
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default OrderCard;
