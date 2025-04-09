@@ -18,10 +18,9 @@ console.log(userState55.uid);
         uidChats = {userState55.uid}
         showChat = {true}
         />
-        <Chat_AI/>
+       </div>
         
-        <FirestoreData/>
-        </>
+        
     );
 
 }                
