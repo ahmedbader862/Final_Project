@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./Nav.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { auth, signOut, onAuthStateChanged, collection, query, db, where, getDocs } from "../../firebase/firebase";
 import { setUserState } from "../../redux/reduxtoolkit";
@@ -11,11 +11,13 @@ function Nav() {
 
     const dispatch = useDispatch();
     const userState55 = useSelector((state) => state.UserData['UserState']);
+    const navigate = useNavigate();
 
     const logout = () => {
         signOut(auth).then(() => {
             console.log("%%%%%%%%%% user log out ");
             dispatch(setUserState("who know"));
+            navigate("/signin");
         }).catch((error) => {
             console.log(error);
         });

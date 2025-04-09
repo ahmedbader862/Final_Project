@@ -1,21 +1,33 @@
+import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { auth } from '../../firebase/firebase'; // Adjust path to your Firebase config
+import { onAuthStateChanged } from 'firebase/auth';
 
 const ProtectedRoute = ({ element: Component, isAdminRoute = false, ...rest }) => {
   const userState = useSelector((state) => state.UserData['UserState']);
+  const [loading, setLoading] = useState(true);
+  const [firebaseUser, setFirebaseUser] = useState(null);
 
-  // Check if user is authenticated (assuming 'uid' exists when logged in)
-  const isAuthenticated = userState && userState.uid && userState.uid !== "who know";
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setFirebaseUser(user);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  // Check if user is an admin (you might need to adjust this based on your Redux state structure)
-  const isAdmin = isAuthenticated && userState.role === 'admin'; // Example: assuming 'role' field exists
+  if (loading) {
+    return <div className="text-center text-white">Loading...</div>; // Or a spinner
+  }
+
+  const isAuthenticated = firebaseUser && firebaseUser.uid && firebaseUser.uid !== "who know";
+  const isAdmin = isAuthenticated && userState?.role === 'admin'; // Use optional chaining for safety
 
   if (isAdminRoute) {
-    // For admin routes, check both authentication and admin privileges
     return isAuthenticated && isAdmin ? <Component {...rest} /> : <Navigate to="/signin" />;
   }
 
-  // For regular protected routes (e.g., Cart), only check authentication
   return isAuthenticated ? <Component {...rest} /> : <Navigate to="/signin" />;
 };
 

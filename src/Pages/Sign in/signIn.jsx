@@ -95,7 +95,7 @@ function Signin() {
           userUpData.password == "aaaAAA111!!!" 
 
         ) {
-          navigate(`/admin/${user.uid}`);
+          navigate(`/admin/`);
         }
        else{
         navigate("/");
