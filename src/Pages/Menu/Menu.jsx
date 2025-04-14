@@ -42,7 +42,7 @@ function Menu() {
     getCategoryData("beef sandwich", setBeefSandwiches);
     getCategoryData("pizaa", setPizzas);
     getCategoryData("soft drinks", setSoftDrinks);
-    getCategoryData("hot drinks", setHotDrinks);
+    getCategoryData("drinks", setHotDrinks);
   }, []);
 
   const handleAddToCart = (item) => {

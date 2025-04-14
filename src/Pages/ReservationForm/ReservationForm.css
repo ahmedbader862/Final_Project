@@ -1,10 +1,10 @@
-input{
+.res{
     background-color: #212126 !important;
     color: white !important;
     border: none !important;
     border-radius: 22px !important;
 }
-select{
+.sel{
     background-color: #212126 !important;
     color: white !important;
     border: none !important;
@@ -13,3 +13,4 @@ select{
 .name{
     color: white !important;
 }
+

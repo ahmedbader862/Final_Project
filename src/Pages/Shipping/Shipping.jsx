@@ -50,7 +50,7 @@ export default function Shipping() {
         items: cartItems.map(item => `${item.title} (${item.quantity})`).join(", "),
         total: `${total} LE`,
         status: "pending",
-        trackingStatus: "Order Placed", // Added tracking status
+        trackingStatus: "Order Placed",
         timestamp: new Date().toISOString(),
         userId,
         shipping: {
@@ -73,7 +73,7 @@ export default function Shipping() {
         position: "top-right",
         autoClose: 3000,
       });
-      navigate('/order-confirmation', { state: { total, orderId } });
+      navigate('/track-order', { state: { total, orderId } }); // Changed to /track-order
     } catch (error) {
       console.error("COD error:", error);
       toast.error("An error occurred while processing your order. Please try again.", {
@@ -194,7 +194,7 @@ export default function Shipping() {
                         items: cartItems.map(item => `${item.title} (${item.quantity})`).join(", "),
                         total: `${total} LE`,
                         status: "pending",
-                        trackingStatus: "Order Placed", // Added tracking status
+                        trackingStatus: "Order Placed",
                         timestamp: new Date().toISOString(),
                         userId,
                         shipping: {
@@ -217,7 +217,7 @@ export default function Shipping() {
                         position: "top-right",
                         autoClose: 3000,
                       });
-                      navigate('/order-confirmation', { state: { total, orderId } });
+                      navigate('/track-order', { state: { total, orderId } }); // Changed to /track-order
                     }}
                     onError={(err) => {
                       console.error("PayPal error:", err);

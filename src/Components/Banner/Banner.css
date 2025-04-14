@@ -1,0 +1,65 @@
+
+.discount-banner {
+    background-color: #000000;
+    color: white;
+    text-align: center;
+    padding: 8px 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1100; 
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px; 
+  }
+  
+  .marquee {
+    display: inline-block;
+    white-space: nowrap;
+    animation: marquee 15s linear infinite; 
+  }
+  
+  .marquee span {
+    display: inline-block;
+    margin-right: 100px; 
+  }
+  
+  .discount-banner strong {
+    font-weight: bold;
+    background-color: #ffffff33;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  
+  .close-button {
+    position: absolute;
+    right: 15px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 10px;
+    line-height: 1;
+  }
+  
+  .close-button:hover {
+    color: #ccc;
+  }
+  
+  @keyframes marquee {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+  
+  .discount-banner:hover .marquee {
+    animation-play-state: paused;
+  }
