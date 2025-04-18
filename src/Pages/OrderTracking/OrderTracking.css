@@ -242,3 +242,130 @@
   .delete-btn:hover {
     box-shadow: 0 0 25px rgba(255, 77, 77, 0.8);
   } */
+
+
+  .order-tracking-container {
+    background-color: #212529; /* Matches the dashboard background */
+    padding: 1.5rem;
+    border-radius: 8px;
+  }
+  
+  .order-card {
+    background-color: #2a2f34; /* Slightly lighter than the main background */
+    border: 1px solid #343a40; /* Matches the border color of other elements */
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .order-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  
+  .card-body {
+    padding: 1.5rem;
+  }
+  
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  
+  .card-text {
+    font-size: 0.95rem;
+    color: #adb5bd; /* Muted text color for secondary info */
+  }
+  
+  .item-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0;
+  }
+  
+  .item-list li {
+    color: #fff;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .text-muted {
+    color: #adb5bd !important; /* Override Bootstrap's default muted color */
+  }
+  
+  .progress {
+    background-color: #343a40; /* Dark background for the progress bar */
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  .progress-bar {
+    font-weight: 500;
+    transition: width 0.3s ease;
+  }
+  
+  /* Custom progress bar colors */
+  .bg-order-placed {
+    background-color: #4A919E; /* Primary blue */
+  }
+  
+  .bg-processing {
+    background-color: #D4A017; /* Yellow */
+  }
+  
+  .bg-shipped {
+    background-color: #5AA5B2; /* Lighter blue */
+  }
+  
+  .bg-out-for-delivery {
+    background-color: #3A6D8C; /* Darker blue */
+  }
+  
+  .bg-delivered {
+    background-color: #4A919E; /* Primary blue */
+  }
+  
+  .bg-default {
+    background-color: #adb5bd; /* Fallback color */
+  }
+  
+  .btn-danger-custom {
+    background-color: #B73E3E; /* Matches the red accent for delete actions */
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-danger-custom:hover {
+    background-color: #C94E4E; /* Lighter red on hover */
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .order-tracking-container {
+      padding: 1rem;
+    }
+  
+    .order-card {
+      margin-bottom: 1rem;
+    }
+  
+    .card-body {
+      padding: 1rem;
+    }
+  
+    .card-title {
+      font-size: 1.1rem;
+    }
+  
+    .card-text {
+      font-size: 0.9rem;
+    }
+  
+    .btn-danger-custom {
+      font-size: 0.85rem;
+      padding: 0.4rem 0.8rem;
+    }
+  }

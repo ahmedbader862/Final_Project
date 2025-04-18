@@ -1,17 +1,16 @@
 import { useState, useEffect } from "react";
-import { auth , providerG  ,providerF , signInWithPopup , createUserWithEmailAndPassword , db , setDoc , doc} from "../../firebase/firebase";
+import { auth, providerG, providerF, signInWithPopup, createUserWithEmailAndPassword, signOut, db, setDoc, doc } from "../../firebase/firebase";
 import { useSelector } from "react-redux";
-import { GoogleAuthProvider , FacebookAuthProvider} from "firebase/auth";
-// import { useNavigate } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
+import { GoogleAuthProvider, FacebookAuthProvider } from "firebase/auth";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser, faEnvelope, faAt, faLock } from '@fortawesome/free-solid-svg-icons';
+import { faGoogle as faGoogleBrand, faFacebook as faFacebookBrand } from '@fortawesome/free-brands-svg-icons';
+import './Register.css';
 
 function Register() {
-
-
-
-  const  allDishes = useSelector((state) => state.wishlist);
-  console.log(allDishes);
-
+  const allDishes = useSelector((state) => state.wishlist);
+  console.log("Redux wishlist:", allDishes); // Debug log for wishlist
 
   const [userUpData, setUserUpData] = useState({
     name: "",
@@ -21,7 +20,6 @@ function Register() {
     confPassword: ""
   });
 
-
   const [errorsMsgUp, setErrorsMsgUp] = useState({
     nameError: null,
     emailError: null,
@@ -30,31 +28,29 @@ function Register() {
     confPasswordError: null
   });
 
-  // تحقق من تطابق الباسوورد عند التغيير
+  const navigate = useNavigate();
+
   useEffect(() => {
-    if (userUpData.password && userUpData.confPassword) {
+    // Validate password matching only if both fields are filled
+    if (userUpData.password || userUpData.confPassword) {
       setErrorsMsgUp(prev => ({
         ...prev,
         passwordError: userUpData.password !== userUpData.confPassword
-          ? "Password Not Matched"
-          : null,
+          ? "Passwords Do Not Match"
+          : validateField('password', userUpData.password),
         confPasswordError: userUpData.password !== userUpData.confPassword
-          ? "Password Not Matched"
-          : null
+          ? "Passwords Do Not Match"
+          : validateField('confPassword', userUpData.confPassword)
       }));
     }
   }, [userUpData.password, userUpData.confPassword]);
 
   const handleData = (e) => {
     const { name, value } = e.target;
-
-    // تحديث البيانات
     setUserUpData(prev => ({
       ...prev,
       [name]: value
     }));
-
-    // التحقق من الأخطاء
     setErrorsMsgUp(prev => ({
       ...prev,
       [`${name}Error`]: validateField(name, value)
@@ -65,317 +61,339 @@ function Register() {
     switch (name) {
       case 'name':
         return !value ? "This Field Is Required" :
-          !value.match(/^[a-zA-Z0-9_-]{3,15}$/) && "Invalid Name";
-
+          !value.match(/^[a-zA-Z0-9_-]{3,15}$/) ? "Invalid Name (3-15 characters, letters, numbers, _, -)" : null;
       case 'email':
         return !value ? "This Field Is Required" :
-          !value.match(/^[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+$/) && "Invalid Email Address";
-
+          !value.match(/^[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+$/) ? "Invalid Email Address" : null;
       case 'usrName':
         return !value ? "This Field Is Required" :
-          !value.match(/^[a-zA-Z0-9_-]{3,15}$/) && "Invalid User Name";
-
+          !value.match(/^[a-zA-Z0-9_-]{3,15}$/) ? "Invalid Username (3-15 characters, letters, numbers, _, -)" : null;
       case 'password':
         return !value ? "This Field Is Required" :
           !value.match(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$/)
-            ? "Weak Password"
+            ? "Password must be 8+ characters with uppercase, lowercase, number, and special character"
             : null;
-
       case 'confPassword':
         return !value ? "This Field Is Required" : null;
-
       default:
         return null;
     }
   };
 
-  // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
- const submitForm = () => {
-  console.log("Form Data:", userUpData.name);
+  const submitForm = () => {
+    console.log("submitForm called with data:", userUpData);
+    console.log("Current errors:", errorsMsgUp);
 
-  createUserWithEmailAndPassword(auth, userUpData.email, userUpData.password)
-    .then((userCredential) => {
-      // User created successfully
-      var user = userCredential.user;
-      console.log("User created:", user);
-    
-    createUser(user.uid);  // كلام كبار
-
-
-    })
-    .catch((error) => {
-      console.error("Error creating user:", error);
-    });
-
-
-}; 
- 
-const  createUser =(uid) => {
-    
-  const userDeatails = {
-      name: userUpData.name,
-      email: userUpData.email,
-      usrName: userUpData.usrName,
-      password: userUpData.password,
-      confPassword: userUpData.confPassword,
-      allDishes: allDishes.wishlist,
-      uid : uid
+    // Revalidate all fields
+    const updatedErrors = {
+      nameError: validateField('name', userUpData.name),
+      emailError: validateField('email', userUpData.email),
+      usrNameError: validateField('usrName', userUpData.usrName),
+      passwordError: validateField('password', userUpData.password),
+      confPasswordError: validateField('confPassword', userUpData.confPassword)
     };
-  
-    setDoc(doc(db, "users2", uid), userDeatails)
-  
+
+    // Check password match
+    if (userUpData.password !== userUpData.confPassword) {
+      updatedErrors.passwordError = "Passwords Do Not Match";
+      updatedErrors.confPasswordError = "Passwords Do Not Match";
+    }
+
+    setErrorsMsgUp(updatedErrors);
+    console.log("Updated errors:", updatedErrors);
+
+    // Check for any errors
+    const hasErrors = Object.values(updatedErrors).some(error => error !== null);
+    if (hasErrors) {
+      console.log("Form submission blocked due to validation errors");
+      return;
+    }
+
+    console.log("Proceeding with registration");
+    createUserWithEmailAndPassword(auth, userUpData.email, userUpData.password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        console.log("User created:", user);
+        createUser(user.uid);
+        // Sign out to prevent auto-login
+        return signOut(auth);
+      })
       .then(() => {
-        console.log("User created successfully!");
+        console.log("Signed out after registration");
+        navigate("/signin");
       })
       .catch((error) => {
-        console.error("Error creating user:", error);
+        console.error("Registration error:", error);
+        setErrorsMsgUp(prev => ({
+          ...prev,
+          emailError: error.code === "auth/email-already-in-use" ? "Email already in use" :
+                      error.code === "auth/invalid-email" ? "Invalid email" : error.message
+        }));
       });
+  };
 
-  }
+  const createUser = (uid) => {
+    const userDetails = {
+      name: userUpData.name || "",
+      email: userUpData.email || "",
+      usrName: userUpData.usrName || "",
+      allDishes: allDishes.wishlist || [],
+      uid: uid
+    };
+    console.log("Saving user data:", userDetails);
+    setDoc(doc(db, "users2", uid), userDetails)
+      .then(() => {
+        console.log("User data saved to Firestore");
+      })
+      .catch((error) => {
+        console.error("Error saving user data:", error);
+      });
+  };
 
-  // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
-  // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
-  const logInGoogle = ()=>{
-   
-    console.log("Ssssssssssssssssssssss");
-    
-
-    // providerG.addScope('https://www.googleapis.com/auth/contacts.readonly');
-
+  const logInGoogle = () => {
+    console.log("Attempting Google Sign-Up");
     signInWithPopup(auth, providerG)
-    .then((result) => {
-      // This gives you a Google Access Token. You can use it to access the Google API.
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const token = credential.accessToken;
-      console.log(token);
-      
-      // The signed-in user info.
-      const user = result.user;
-
-      createUserGoogle(user , token)
-      // IdP data available using getAdditionalUserInfo(result)
-      // ...
-    }).catch((error) => {
-      // Handle Errors here.
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.log(errorMessage);
-      console.log(errorCode);
-      
-      // The email of the user's account used.
-      const email = error.customData.email;
-      console.log(email);
-
-      // The AuthCredential type that was used.
-      const credential = GoogleAuthProvider.credentialFromError(error);
-      console.log(credential);
-      
-      // ...
-    });
-  }    
-
-  const  createUserGoogle =(user , token) => {
-    
-    const userData = {
-        name: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL,
-        allDishes: allDishes.wishlist,
-        uid : user.uid,
-        token : token
-      };
-    
-      setDoc(doc(db, "users2", user.uid), userData)
-    
-        .then(() => {
-          console.log("User created successfully!");
-        })
-        .catch((error) => {
-          console.error("Error creating user:", error);
+      .then((result) => {
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        const user = result.user;
+        console.log("Google user:", user);
+        createUserGoogle(user, token);
+        // Sign out to prevent auto-login
+        return signOut(auth);
+      })
+      .then(() => {
+        console.log("Signed out after Google sign-up");
+        navigate("/signin");
+      })
+      .catch((error) => {
+        console.log("Google Sign-Up Error:", {
+          code: error.code,
+          message: error.message,
+          email: error.customData?.email
         });
-  
-    }
+        setErrorsMsgUp(prev => ({
+          ...prev,
+          emailError: error.message
+        }));
+      });
+  };
 
-    // ((((((((((((((((((((((((((9))))))))))))))))))))))))))
+  const createUserGoogle = (user, token) => {
+    const userData = {
+      name: user.displayName || "",
+      email: user.email || "",
+      photoURL: user.photoURL || "",
+      allDishes: allDishes.wishlist || [],
+      uid: user.uid,
+      token: token
+    };
+    console.log("Saving Google user data:", userData);
+    setDoc(doc(db, "users2", user.uid), userData)
+      .then(() => {
+        console.log("Google user data saved to Firestore");
+      })
+      .catch((error) => {
+        console.error("Error saving Google user data:", error);
+      });
+  };
 
-    const logInFacebook = ()=>{
-     
-      signInWithPopup(auth, providerF)
-  .then((result) => {
-    // The signed-in user info.
-    const user = result.user;
-    console.log(user);
+  const logInFacebook = () => {
+    console.log("Attempting Facebook Sign-Up");
+    signInWithPopup(auth, providerF)
+      .then((result) => {
+        const user = result.user;
+        const credential = FacebookAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        console.log("Facebook user:", user);
+        createUserFacebook(user, token);
+        // Sign out to prevent auto-login
+        return signOut(auth);
+      })
+      .then(() => {
+        console.log("Signed out after Facebook sign-up");
+        navigate("/signin");
+      })
+      .catch((error) => {
+        console.log("Facebook Sign-Up Error:", {
+          code: error.code,
+          message: error.message,
+          email: error.customData?.email
+        });
+        setErrorsMsgUp(prev => ({
+          ...prev,
+          emailError: error.message
+        }));
+      });
+  };
 
-    // This gives you a Facebook Access Token. You can use it to access the Facebook API.
-    const credential = FacebookAuthProvider.credentialFromResult(result);
-    const accessToken = credential.accessToken;
-    console.log(accessToken);
+  const createUserFacebook = (user, token) => {
+    const userData = {
+      name: user.displayName || "",
+      email: user.email || "",
+      photoURL: user.photoURL || "",
+      allDishes: allDishes.wishlist || [],
+      uid: user.uid,
+      token: token
+    };
+    console.log("Saving Facebook user data:", userData);
+    setDoc(doc(db, "users2", user.uid), userData)
+      .then(() => {
+        console.log("Facebook user data saved to Firestore");
+      })
+      .catch((error) => {
+        console.error("Error saving Facebook user data:", error);
+      });
+  };
 
-    // IdP data available using getAdditionalUserInfo(result)
-    // ...
-  })
-  .catch((error) => {
-    // Handle Errors here.
-    const errorCode = error.code;
-    console.log(errorCode);
-    
-    const errorMessage = error.message;
-    console.log(errorMessage);
-
-    // The email of the user's account used.
-    const email = error.customData.email;
-    console.log(email);
-    
-    // The AuthCredential type that was used.
-    const credential = FacebookAuthProvider.credentialFromError(error);
-    console.log(credential);
-
-    // ...
-  });
-      
-    }
-  
-
-
-  // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  //   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  //   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  //   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   return (
     <>
       <div className="container mt-5">
         <div className="row justify-content-center my-5">
-          <div className="col-12 col-sm-8 col-md-6">
-            <div className="p-4 shadow-lg rounded  text-white">
-              <h2 className="mb-4 text-center">Sign Up Form</h2>
+          <div className="col-12 col-sm-8 col-md-6 col-lg-5">
+            <div className="p-4 p-md-5 shadow-lg rounded-3 bg-white form-container">
+              <h2 className="mb-4 text-center text-dark fw-bold">Create Account</h2>
 
               {/* Name Field */}
               <div className="mb-3">
-                <label className="form-label">Name</label>
-                <input
-                  type="text"
-                  className={`form-control ${errorsMsgUp.nameError ? "is-invalid" : ""}`}
-                  name="name"
-                  value={userUpData.name}
-                  onChange={handleData}
-                />
-                {errorsMsgUp.nameError && (
-                  <div className="invalid-feedback">{errorsMsgUp.nameError}</div>
-                )}
+                <label className="form-label text-dark">Name</label>
+                <div className="input-group">
+                  <span className="input-group-text bg-light">
+                    <FontAwesomeIcon icon={faUser} />
+                  </span>
+                  <input
+                    type="text"
+                    className={`form-control rounded-end ${errorsMsgUp.nameError ? "is-invalid" : ""}`}
+                    name="name"
+                    value={userUpData.name}
+                    onChange={handleData}
+                    placeholder="Enter your name"
+                  />
+                  {errorsMsgUp.nameError && (
+                    <div className="invalid-feedback">{errorsMsgUp.nameError}</div>
+                  )}
+                </div>
               </div>
 
               {/* Email Field */}
               <div className="mb-3">
-                <label className="form-label">Email</label>
-                <input
-                  type="email"
-                  className={`form-control ${errorsMsgUp.emailError ? "is-invalid" : ""}`}
-                  name="email"
-                  value={userUpData.email}
-                  onChange={handleData}
-                />
-                {errorsMsgUp.emailError && (
-                  <div className="invalid-feedback">{errorsMsgUp.emailError}</div>
-                )}
+                <label className="form-label text-dark">Email</label>
+                <div className="input-group">
+                  <span className="input-group-text bg-light">
+                    <FontAwesomeIcon icon={faEnvelope} />
+                  </span>
+                  <input
+                    type="email"
+                    className={`form-control rounded-end ${errorsMsgUp.emailError ? "is-invalid" : ""}`}
+                    name="email"
+                    value={userUpData.email}
+                    onChange={handleData}
+                    placeholder="Enter your email"
+                  />
+                  {errorsMsgUp.emailError && (
+                    <div className="invalid-feedback">{errorsMsgUp.emailError}</div>
+                  )}
+                </div>
               </div>
 
               {/* Username Field */}
               <div className="mb-3">
-                <label className="form-label">Username</label>
-                <input
-                  type="text"
-                  className={`form-control ${errorsMsgUp.usrNameError ? "is-invalid" : ""}`}
-                  name="usrName"
-                  value={userUpData.usrName}
-                  onChange={handleData}
-                />
-                {errorsMsgUp.usrNameError && (
-                  <div className="invalid-feedback">{errorsMsgUp.usrNameError}</div>
-                )}
+                <label className="form-label text-dark">Username</label>
+                <div className="input-group">
+                  <span className="input-group-text bg-light">
+                    <FontAwesomeIcon icon={faAt} />
+                  </span>
+                  <input
+                    type="text"
+                    className={`form-control rounded-end ${errorsMsgUp.usrNameError ? "is-invalid" : ""}`}
+                    name="usrName"
+                    value={userUpData.usrName}
+                    onChange={handleData}
+                    placeholder="Choose a username"
+                  />
+                  {errorsMsgUp.usrNameError && (
+                    <div className="invalid-feedback">{errorsMsgUp.usrNameError}</div>
+                  )}
+                </div>
               </div>
 
               {/* Password Field */}
               <div className="mb-3">
-                <label className="form-label">Password</label>
-                <input
-                  type="password"
-                  className={`form-control ${errorsMsgUp.passwordError ? "is-invalid" : ""}`}
-                  name="password"
-                  value={userUpData.password}
-                  onChange={handleData}
-                />
-                {errorsMsgUp.passwordError && (
-                  <div className="invalid-feedback">{errorsMsgUp.passwordError}</div>
-                )}
+                <label className="form-label text-dark">Password</label>
+                <div className="input-group">
+                  <span className="input-group-text bg-light">
+                    <FontAwesomeIcon icon={faLock} />
+                  </span>
+                  <input
+                    type="password"
+                    className={`form-control rounded-end ${errorsMsgUp.passwordError ? "is-invalid" : ""}`}
+                    name="password"
+                    value={userUpData.password}
+                    onChange={handleData}
+                    placeholder="Enter your password"
+                  />
+                  {errorsMsgUp.passwordError && (
+                    <div className="invalid-feedback">{errorsMsgUp.passwordError}</div>
+                  )}
+                </div>
               </div>
 
               {/* Confirm Password Field */}
-              <div className="mb-3">
-                <label className="form-label">Confirm Password</label>
-                <input
-                  type="password"
-                  className={`form-control ${errorsMsgUp.confPasswordError ? "is-invalid" : ""}`}
-                  name="confPassword"
-                  value={userUpData.confPassword}
-                  onChange={handleData}
-                />
-                {errorsMsgUp.confPasswordError && (
-                  <div className="invalid-feedback">{errorsMsgUp.confPasswordError}</div>
-                )}
+              <div className="mb-4">
+                <label className="form-label text-dark">Confirm Password</label>
+                <div className="input-group">
+                  <span className="input-group-text bg-light">
+                    <FontAwesomeIcon icon={faLock} />
+                  </span>
+                  <input
+                    type="password"
+                    className={`form-control rounded-end ${errorsMsgUp.confPasswordError ? "is-invalid" : ""}`}
+                    name="confPassword"
+                    value={userUpData.confPassword}
+                    onChange={handleData}
+                    placeholder="Confirm your password"
+                  />
+                  {errorsMsgUp.confPasswordError && (
+                    <div className="invalid-feedback">{errorsMsgUp.confPasswordError}</div>
+                  )}
+                </div>
               </div>
 
+              {/* Register Button */}
               <button
                 type="submit"
                 onClick={submitForm}
-                className="btn btn-primary w-100 mt-3"
+                className="btn btn-primary w-100 mb-3 fw-semibold"
               >
                 Register
               </button>
- 
- <br/>
- <br/>
 
-            <button  
-            onClick={logInGoogle}
-            className="btn bg-body-secondary">
-              goole</button>
+              {/* Divider */}
+              <div className="d-flex align-items-center my-4">
+                <hr className="flex-grow-1" />
+                <span className="px-2 text-muted">or</span>
+                <hr className="flex-grow-1" />
+              </div>
 
-              <button  
-            onClick={logInFacebook}
-            className="btn bg-body-secondary">
-              facebook</button>
-
+              {/* Social Login Buttons */}
+              <div className="d-flex gap-2">
+                <button
+                  onClick={logInGoogle}
+                  className="btn btn-outline-danger w-50 d-flex align-items-center justify-content-center gap-2"
+                >
+                  <FontAwesomeIcon icon={faGoogleBrand} /> Google
+                </button>
+                <button
+                  onClick={logInFacebook}
+                  className="btn btn-outline-primary w-50 d-flex align-items-center justify-content-center gap-2"
+                >
+                  <FontAwesomeIcon icon={faFacebookBrand} /> Facebook
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-
     </>
   );
 }

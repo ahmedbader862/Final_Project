@@ -17,7 +17,7 @@ import {
   where,
   addDoc,
   setDoc,
-  signOut, // Import signOut from Firebase
+  signOut,
 } from "../../firebase/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend } from "chart.js";
@@ -36,10 +36,6 @@ import ItemModal from "../AdminControl/ItemModal";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend);
 
-// AdminOrdersPage, AdminPanel, AdminChat components remain unchanged
-// [Insert AdminOrdersPage, AdminPanel, AdminChat code here as in your original file]
-
-// Main Dashboard Component
 const AdminDashboard = () => {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -59,7 +55,7 @@ const AdminDashboard = () => {
       } else {
         setUser(null);
         setIsAdmin(false);
-        navigate("/signin"); // Redirect to signin page if not logged in
+        navigate("/signin");
       }
     });
 
@@ -70,7 +66,7 @@ const AdminDashboard = () => {
     try {
       await signOut(auth);
       toast.success("Logged out successfully!");
-      navigate("/signin"); // Redirect to signin page after logout
+      navigate("/signin");
     } catch (error) {
       console.error("Error logging out:", error);
       toast.error("Failed to log out: " + error.message);
@@ -107,7 +103,6 @@ const AdminDashboard = () => {
                   Chat
                 </NavLink>
               </li>
-              {/* Add Logout Button */}
               <li className="nav-item mt-3">
                 <Button variant="danger" onClick={handleLogout} className="w-100">
                   Logout
@@ -130,21 +125,64 @@ const AdminDashboard = () => {
   );
 };
 
-// [Insert AdminOrdersPage, AdminPanel, AdminChat code here as in your original file]
 const AdminOrdersPage = () => {
   const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
   const [refundMessage, setRefundMessage] = useState(null);
+  const [sortOrder, setSortOrder] = useState("newest"); // "newest" or "oldest"
+  const [statusFilter, setStatusFilter] = useState("all"); // "all", "pending", "accepted", "rejected"
+  const [paymentFilter, setPaymentFilter] = useState("all"); // "all", "cash_on_delivery", "paypal"
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
       collection(db, "orders"),
       (snapshot) => {
-        setOrders(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+        const fetchedOrders = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setOrders(fetchedOrders);
+        applyFilters(fetchedOrders, sortOrder, statusFilter, paymentFilter);
       },
       (error) => console.error("Error fetching orders:", error)
     );
     return () => unsubscribe();
   }, []);
+
+  const applyFilters = (ordersToFilter, sort, status, payment) => {
+    let filtered = [...ordersToFilter];
+
+    // Filter by status
+    if (status !== "all") {
+      filtered = filtered.filter(order => order.status === status);
+    }
+
+    // Filter by payment method
+    if (payment !== "all") {
+      filtered = filtered.filter(order => order.paymentMethod === payment);
+    }
+
+    // Sort by date
+    filtered.sort((a, b) => {
+      const dateA = a.timestamp?.seconds ? a.timestamp.toDate() : new Date(a.timestamp);
+      const dateB = b.timestamp?.seconds ? b.timestamp.toDate() : new Date(b.timestamp);
+      return sort === "newest" ? dateB - dateA : dateA - dateB;
+    });
+
+    setFilteredOrders(filtered);
+  };
+
+  const handleSortChange = (newSortOrder) => {
+    setSortOrder(newSortOrder);
+    applyFilters(orders, newSortOrder, statusFilter, paymentFilter);
+  };
+
+  const handleStatusFilterChange = (newStatus) => {
+    setStatusFilter(newStatus);
+    applyFilters(orders, sortOrder, newStatus, paymentFilter);
+  };
+
+  const handlePaymentFilterChange = (newPayment) => {
+    setPaymentFilter(newPayment);
+    applyFilters(orders, sortOrder, statusFilter, newPayment);
+  };
 
   const updateStatus = async (orderId, newStatus) => {
     try {
@@ -203,21 +241,28 @@ const AdminOrdersPage = () => {
       }
     });
 
-  const getChartData = () => {
-    const totalOrders = orders.length;
-    const totalRevenue = orders
-      .reduce((sum, order) => sum + parseFloat(order.total.replace(" LE", "")), 0)
+  const getChartData = (ordersData) => {
+    const totalOrders = ordersData.length;
+    const totalRevenue = ordersData
+      .reduce((sum, order) => {
+        if (typeof order.total !== 'number') {
+          console.warn(`Invalid total for order ${order.id}:`, order.total);
+          return sum;
+        }
+        return sum + order.total;
+      }, 0)
       .toFixed(2);
+
     const statusBreakdown = {
-      pending: orders.filter((o) => o.status === "pending").length,
-      accepted: orders.filter((o) => o.status === "accepted").length,
-      rejected: orders.filter((o) => o.status === "rejected").length,
+      pending: ordersData.filter((o) => o.status === "pending").length,
+      accepted: ordersData.filter((o) => o.status === "accepted").length,
+      rejected: ordersData.filter((o) => o.status === "rejected").length,
     };
     const paymentBreakdown = {
-      cod: orders.filter((o) => o.paymentMethod === "cash_on_delivery").length,
-      paid: orders.filter((o) => o.paymentMethod === "paypal").length,
+      cod: ordersData.filter((o) => o.paymentMethod === "cash_on_delivery").length,
+      paid: ordersData.filter((o) => o.paymentMethod === "paypal").length,
     };
-    const ordersByDate = orders.reduce((acc, o) => {
+    const ordersByDate = ordersData.reduce((acc, o) => {
       const date = new Date(o.timestamp).toLocaleDateString();
       acc[date] = (acc[date] || 0) + 1;
       return acc;
@@ -259,31 +304,150 @@ const AdminOrdersPage = () => {
     };
   };
 
-  const { totalOrders, totalRevenue, avgOrderValue, pendingOrders, lineChartData, statusPieChartData, paymentPieChartData } = getChartData();
+  const { totalOrders, totalRevenue, avgOrderValue, pendingOrders, lineChartData, statusPieChartData, paymentPieChartData } = getChartData(filteredOrders);
 
   return (
     <div className="container mt-5">
-      <div className="d-flex justify-content-between mb-4">
-        <h2 className="text-white">Orders Management</h2>
+      <div className="d-flex justify-content-between mb-4 align-items-center flex-wrap">
+        <h2 className="text-white mb-3">Orders Management</h2>
         {orders.length > 0 && (
-          <Button className="btn btn-danger btn-sm" onClick={clearAllOrders}>
+          <Button className="btn btn-danger btn-sm mb-3" onClick={clearAllOrders}>
             Clear All Orders
           </Button>
         )}
       </div>
+      <div className="d-flex flex-wrap gap-3 mb-4 justify-content-center">
+        {/* Sort Dropdown */}
+        <div className="dropdown">
+          <button
+            className="btn btn-outline-light dropdown-toggle"
+            type="button"
+            id="sortDropdown"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Sort: {sortOrder === "newest" ? "Newest First" : "Oldest First"}
+          </button>
+          <ul className="dropdown-menu dropdown-menu-dark" aria-labelledby="sortDropdown">
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() => handleSortChange("newest")}
+              >
+                Newest First
+              </button>
+            </li>
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() => handleSortChange("oldest")}
+              >
+                Oldest First
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        {/* Status Filter Dropdown */}
+        <div className="dropdown">
+          <button
+            className="btn btn-outline-light dropdown-toggle"
+            type="button"
+            id="statusDropdown"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Status: {statusFilter === "all" ? "All" : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+          </button>
+          <ul className="dropdown-menu dropdown-menu-dark" aria-labelledby="statusDropdown">
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() => handleStatusFilterChange("all")}
+              >
+                All
+              </button>
+            </li>
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() => handleStatusFilterChange("pending")}
+              >
+                Pending
+              </button>
+            </li>
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() => handleStatusFilterChange("accepted")}
+              >
+                Accepted
+              </button>
+            </li>
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() => handleStatusFilterChange("rejected")}
+              >
+                Rejected
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        {/* Payment Method Filter Dropdown */}
+        <div className="dropdown">
+          <button
+            className="btn btn-outline-light dropdown-toggle"
+            type="button"
+            id="paymentDropdown"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Payment: {paymentFilter === "all" ? "All" : paymentFilter === "cash_on_delivery" ? "Cash on Delivery" : "PayPal"}
+          </button>
+          <ul className="dropdown-menu dropdown-menu-dark" aria-labelledby="paymentDropdown">
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() => handlePaymentFilterChange("all")}
+              >
+                All
+              </button>
+            </li>
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() => handlePaymentFilterChange("cash_on_delivery")}
+              >
+                Cash on Delivery
+              </button>
+            </li>
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() => handlePaymentFilterChange("paypal")}
+              >
+                PayPal
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
       <RefundMessage message={refundMessage} />
       <StatsSection totalOrders={totalOrders} totalRevenue={totalRevenue} avgOrderValue={avgOrderValue} pendingOrders={pendingOrders} />
-      {orders.length > 0 && (
+      {filteredOrders.length > 0 && (
         <>
           <ChartsSection lineChartData={lineChartData} statusPieChartData={statusPieChartData} paymentPieChartData={paymentPieChartData} />
-          <OrdersList orders={orders} updateStatus={updateStatus} updateTrackingStatus={updateTrackingStatus} deleteOrder={deleteOrder} />
+          <OrdersList orders={filteredOrders} updateStatus={updateStatus} updateTrackingStatus={updateTrackingStatus} deleteOrder={deleteOrder} />
         </>
       )}
-      {orders.length === 0 && <p>No orders found.</p>}
+      {filteredOrders.length === 0 && <p>No orders match the selected filters.</p>}
     </div>
   );
 };
 
+// AdminPanel and AdminChat remain unchanged
 const AdminPanel = () => {
   const [user, setUser] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -454,26 +618,46 @@ const AdminPanel = () => {
 
 const AdminChat = () => {
   const userState55 = useSelector((state) => state.UserData["UserState"]);
-  const [alluser, setAllUser] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
   const [userName, setUserName] = useState("");
   const [userUID, setUserUID] = useState("");
   const [showChat, setShowChat] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const getAllUsers = async () => {
-      const q = query(collection(db, "users2"), where("uid", "!=", userState55.uid));
-      const querySnapshot = await getDocs(q);
-      const docsData = [];
-      querySnapshot.forEach((doc) => {
-        docsData.push({
-          id: doc.id,
-          ...doc.data(),
+    const fetchUsers = async () => {
+      if (!userState55 || !userState55.uid) {
+        setError("User data not available. Please try logging in again.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const q = query(collection(db, "users2"), where("uid", "!=", userState55.uid));
+        const querySnapshot = await getDocs(q);
+        const docsData = [];
+        querySnapshot.forEach((doc) => {
+          docsData.push({
+            id: doc.id,
+            ...doc.data(),
+          });
         });
-      });
-      setAllUser(docsData);
+
+        setAllUsers(docsData);
+      } catch (err) {
+        console.error("Error fetching users:", err);
+        setError("Failed to load users. Please try again.");
+      } finally {
+        setLoading(false);
+      }
     };
-    getAllUsers();
-  }, [userState55.uid]);
+
+    fetchUsers();
+  }, [userState55]);
 
   const handleUserData = (user) => {
     setUserName(user.name);
@@ -482,19 +666,44 @@ const AdminChat = () => {
   };
 
   return (
-    <div className="row mt-4">
-      <div className="col-md-3 sidebar w-20 ">
-        {alluser.map((user) => (
-          <div className="user-card" key={user.id} onClick={() => handleUserData(user)}>
-            <h2>{user.name}</h2>
-          </div>
-        ))}
-      </div>
-      {showChat ? (
-        <Chat userName={userName} uidChats={userUID} showChat={showChat} />
-      ) : (
-        <p>Please select a user to start chatting.</p>
-      )}
+    <div className="admin-chat-container">
+      <Row>
+        <Col md={3} className="chat-sidebar">
+          <h4 className="sidebar-title">Users</h4>
+          {loading ? (
+            <p className="text-muted">Loading users...</p>
+          ) : error ? (
+            <p className="text-danger">{error}</p>
+          ) : allUsers.length > 0 ? (
+            allUsers.map((user) => (
+              <div
+                key={user.id}
+                className={`user-card ${userUID === user.uid ? "active" : ""}`}
+                onClick={() => handleUserData(user)}
+              >
+                <span>{user.name}</span>
+              </div>
+            ))
+          ) : (
+            <p className="text-muted">No users found.</p>
+          )}
+        </Col>
+
+        <Col md={9} className="chat-content">
+          {showChat ? (
+            <>
+              <div className="chat-header">
+                <h5>Chatting with {userName}</h5>
+              </div>
+              <Chat userName={userName} uidChats={userUID} showChat={showChat} />
+            </>
+          ) : (
+            <div className="chat-placeholder">
+              <p>Select a user to start chatting.</p>
+            </div>
+          )}
+        </Col>
+      </Row>
     </div>
   );
 };

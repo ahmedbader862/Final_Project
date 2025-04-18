@@ -13,6 +13,7 @@ import Signin from './Pages/Sign in/signIn';
 import Cart from './Pages/Cart/Cart';
 import Shipping from './Pages/Shipping/Shipping';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import Dishes from './Pages/Dishes/dishes';
 import Wishlist from './Pages/Wishlist/wishlist';
@@ -24,6 +25,7 @@ import { useSelector } from 'react-redux';
 import ProtectedRoute from './Pages/ProtectedRoute/ProtectedRoute';
 import Banner from './Components/Banner/Banner';
 import AdminDashboard from './Pages/AdminDashBoard/AdminDashboard';
+import Orders from './Pages/Orders/Order';
 
 // Wrapper component to debug location and conditionally render Nav
 const DebugLocation = ({ children }) => {
@@ -67,6 +69,10 @@ function App() {
               <Route
                 path="/track-order"
                 element={<OrderTracking userId={userState !== "who know" ? userState.uid : null} />}
+              />
+              <Route
+                path="/orders"
+                element={<Orders userId={userState !== "who know" ? userState.uid : null} />}
               />
               <Route path="/admin/*" element={<AdminDashboard />} />
               <Route path="*" element={<Error />} />
