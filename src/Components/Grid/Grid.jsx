@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useContext } from "react";
 import "./Grid.css";
-import {motion} from "framer-motion";
-
+import { motion } from "framer-motion";
+import { ThemeContext } from "../../Context/ThemeContext"; // استيراد ال ThemeContext
 
 function Grid() {
+  const { theme } = useContext(ThemeContext); // الحصول على قيمة الثيم الحالي من Context
+
   const galleryData = [
     {
       id: 1,
@@ -49,6 +51,10 @@ function Grid() {
     },
   ];
 
+  // تحديد الألوان بناءً على الثيم
+  const textColor = theme === "dark" ? "white" : "black"; // لون النص
+  const overlayBackground = theme === "dark" ? "rgba(0, 0, 0, 0.6)" : "rgba(255, 255, 255, 0.6)"; // خلفية الـ overlay
+
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -64,8 +70,8 @@ function Grid() {
   };
 
   return (
-    <section className="gallery" id="gallery">
-      <div className="container text-white">
+    <section className={`gallery ${theme === "dark" ? "bg-custom-dark" : "bg-light"}`} id="gallery">
+      <div className="container text-dark">
         <motion.div
           className="g-head"
           initial={{ opacity: 0, y: -50 }}
@@ -73,8 +79,8 @@ function Grid() {
           transition={{ duration: 1 }}
           viewport={{ once: true }}
         >
-          <h2>GALLERY</h2>
-          <h3>
+          <h2 style={{ color: textColor }}>GALLERY</h2>
+          <h3 style={{ color: textColor }}>
             Check <span className="red">Our Gallery</span>
           </h3>
         </motion.div>
@@ -96,9 +102,9 @@ function Grid() {
                 variants={itemVariants}
               >
                 <img src={item.image} alt={item.title} />
-                <div className="overlay-cont">
-                  <h4>{item.title}</h4>
-                  <p>{item.description}</p>
+                <div className="overlay-cont" style={{ backgroundColor: overlayBackground }}>
+                  <h4 style={{ color: textColor }}>{item.title}</h4>
+                  <p style={{ color: textColor }}>{item.description}</p>
                 </div>
               </motion.div>
             ))}
@@ -113,9 +119,9 @@ function Grid() {
                 variants={itemVariants}
               >
                 <img src={item.image} alt={item.title} />
-                <div className="overlay-cont">
-                  <h4>{item.title}</h4>
-                  <p>{item.description}</p>
+                <div className="overlay-cont" style={{ backgroundColor: overlayBackground }}>
+                  <h4 style={{ color: textColor }}>{item.title}</h4>
+                  <p style={{ color: textColor }}>{item.description}</p>
                 </div>
               </motion.div>
             ))}
@@ -130,9 +136,9 @@ function Grid() {
                 variants={itemVariants}
               >
                 <img src={item.image} alt={item.title} />
-                <div className="overlay-cont">
-                  <h4>{item.title}</h4>
-                  <p>{item.description}</p>
+                <div className="overlay-cont" style={{ backgroundColor: overlayBackground }}>
+                  <h4 style={{ color: textColor }}>{item.title}</h4>
+                  <p style={{ color: textColor }}>{item.description}</p>
                 </div>
               </motion.div>
             ))}

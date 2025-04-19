@@ -25,3 +25,6 @@
 .table-img.selected img {
     filter: drop-shadow(0 0 10px #ff4d4d);
 }
+.tables{
+    box-shadow: #212126 0px 0px 20px;
+}

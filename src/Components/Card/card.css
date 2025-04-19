@@ -10,6 +10,10 @@
     transition: 0.3s ease-in-out;
     }
 
+    .card{
+        box-shadow: 10px 10px 15px rgb(0, 0, 0);
+        height: 313px;
+    }
     .card-container:hover {
         /* transform: scale(1.05); */
     }
@@ -53,6 +57,7 @@
     }
     .all-details{
         padding: 10px;
+        height: 183.55 px;
     }
     .card-details {
         margin-top: 10px;
@@ -84,14 +89,18 @@
     
     .add-btn {
         background-color: transparent;
-        color: white;
+        /* color: white; */
         border: white 2px solid;
         padding: 5px 10px;
         border-radius: 100%;
         cursor: pointer;
         font-size: 1rem;
     }
-    
+    .add-btn-dark {
+        /* background-color: black; */
+        /* color: white; */
+        border: black 2px solid ;
+      }
     .add-btn:hover {
         color: #ff3b3b;
         border-color: #ff3b3b;

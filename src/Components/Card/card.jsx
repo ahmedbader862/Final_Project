@@ -1,24 +1,22 @@
+import React, { useContext } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom"; // Note: This import wasn't being used, but I kept it as per your original
+import { Link } from "react-router-dom";
 import '../Card/card.css';
 import { removWishlist, setWishlist } from "../../redux/reduxtoolkit";
 import { db, getDoc, doc, setDoc } from '../../firebase/firebase';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { ThemeContext } from "../../Context/ThemeContext"; // 👈 استيراد الثيم
 
 function Carde(props) {
   const dispatch = useDispatch();
+  const { theme } = useContext(ThemeContext); // 👈 استخدام الثيم
 
   const wishlistRedux = useSelector((state) => state.wishlist?.wishlist || []);
   const userState55 = useSelector((state) => state.UserData?.['UserState'] || null);
   const findDishesInWishlist = wishlistRedux.some((dish) => dish.title === props.title);
 
-  // ((((((((((((((((((((((((((((((((  wishlistRedux  )))))))))))))))))))))))))))))))
-
   const handleAddWishlist = () => {
-    console.log("ssssssssssssssssssprops");
-    console.log(props);
-
     dispatch(
       setWishlist({
         title: props.title,
@@ -33,7 +31,6 @@ function Carde(props) {
 
   const handleRemoveWishlist = () => {
     dispatch(removWishlist(props.title));
-    console.log("rRRRRRRRRRRRRRRRRRRRRRRRRR");
     toast.info(`${props.title} removed from wishlist`, {
       position: "top-right",
       autoClose: 2000,
@@ -48,10 +45,6 @@ function Carde(props) {
     }
   };
 
-  // ((((((((((((((((((((((((((((((((  wishlistRedux  )))))))))))))))))))))))))))))))
-
-  // ((((((((((((((((((((((((((((((((  wishlistFirestore  ))))))))))))))))))))))))))))))))
-
   const toggleFirestore = async () => {
     if (!userState55?.uid) {
       toast.error("User not authenticated", {
@@ -65,45 +58,20 @@ function Carde(props) {
       const docRef = doc(db, "users2", userState55.uid);
       const docSnap = await getDoc(docRef);
 
-      if (docSnap.exists()) {
-        // بنجيب الداتا الموجودة في allDishes، لو مفيش بنعمل مصفوفة فاضية
-        const currentDishes = docSnap.data().allDishes || [];
-        // بنشوف هل الطبق موجود أصلاً بناءً على العنوان
-        const dishExists = currentDishes.some(dish => dish.title === props.title);
+      const currentDishes = docSnap.exists() ? docSnap.data().allDishes || [] : [];
+      const dishExists = currentDishes.some(dish => dish.title === props.title);
 
-        if (dishExists) {
-          // لو الطبق موجود، هنفلتره من المصفوفة (يعني هنعمل عملية حذف)
-          const updatedDishes = currentDishes.filter(dish => dish.title !== props.title);
-          await setDoc(docRef, { allDishes: updatedDishes }, { merge: true });
-          console.log("تم حذف الطبق من Firestore!");
-          toast.info(`${props.title} removed from wishlist`, {
-            position: "top-right",
-            autoClose: 2000,
-          });
-        } else {
-          // لو الطبق مش موجود، هنضيفه للمصفوفة
-          const updatedDishes = [
-            ...currentDishes,
-            { title: props.title, poster_path: props.poster_path }
-          ];
-          await setDoc(docRef, { allDishes: updatedDishes }, { merge: true });
-          console.log("تمت إضافة الطبق إلى Firestore!");
-          toast.success(`${props.title} added to wishlist!`, {
-            position: "top-right",
-            autoClose: 2000,
-          });
-        }
-      } else {
-        // لو المستند مش موجود، هنعمله إنشاء وهنضيف الطبق
-        await setDoc(docRef, { allDishes: [{ title: props.title, poster_path: props.poster_path }] });
-        console.log("المستند مش موجود، تم إنشاءه وإضافة الطبق!");
-        toast.success(`${props.title} added to wishlist!`, {
-          position: "top-right",
-          autoClose: 2000,
-        });
-      }
+      const updatedDishes = dishExists
+        ? currentDishes.filter(dish => dish.title !== props.title)
+        : [...currentDishes, { title: props.title, poster_path: props.poster_path }];
+
+      await setDoc(docRef, { allDishes: updatedDishes }, { merge: true });
+      toast[dishExists ? "info" : "success"](
+        `${props.title} ${dishExists ? "removed from" : "added to"} wishlist!`,
+        { position: "top-right", autoClose: 2000 }
+      );
     } catch (error) {
-      console.error("خطأ أثناء تحديث Firestore:", error);
+      console.error("Firestore error:", error);
       toast.error("Error updating wishlist", {
         position: "top-right",
         autoClose: 2000,
@@ -111,12 +79,8 @@ function Carde(props) {
     }
   };
 
-  // ((((((((((((((((((((((((((((((((  wishlistFirestore  ))))))))))))))))))))))))))))))))
-
-  // Add to Cart Function
   const addToCartFirestore = async () => {
     if (!userState55 || !userState55.uid) {
-      console.log("User not logged in");
       toast.error("Please login to add items to cart", {
         position: "top-right",
         autoClose: 2000,
@@ -128,59 +92,30 @@ function Carde(props) {
       const docRef = doc(db, "users2", userState55.uid);
       const docSnap = await getDoc(docRef);
 
-      // Ensure the price is a number (if it's "Price not available", set it to 0 or handle it differently)
       const itemPrice = props.price === "Price not available" ? 0 : parseFloat(props.price);
+      const currentCart = docSnap.exists() ? docSnap.data().cartItems || [] : [];
 
-      if (docSnap.exists()) {
-        const currentCart = docSnap.data().cartItems || [];
+      const itemIndex = currentCart.findIndex(item => item.title === props.title);
 
-        // Check if the item already exists in the cart
-        const itemIndex = currentCart.findIndex(item => item.title === props.title);
-
-        let updatedCart;
-        if (itemIndex >= 0) {
-          // Item already in cart, update quantity
-          updatedCart = currentCart.map((item, index) =>
+      const updatedCart = itemIndex >= 0
+        ? currentCart.map((item, index) =>
             index === itemIndex ? { ...item, quantity: item.quantity + 1 } : item
-          );
-        } else {
-          // Item not in cart, add new item
-          updatedCart = [
-            ...currentCart,
-            {
-              title: props.title,
-              poster_path: props.poster_path,
-              price: itemPrice, // Use the dynamic price from props
-              quantity: 1,
-              description: props.description // Include description
-            }
-          ];
-        }
-
-        await setDoc(docRef, { cartItems: updatedCart }, { merge: true });
-        console.log("Item successfully added to cart in Firestore!");
-        toast.success(`${props.title} added to cart!`, {
-          position: "top-right",
-          autoClose: 2000,
-        });
-      } else {
-        await setDoc(docRef, {
-          cartItems: [{
+          )
+        : [...currentCart, {
             title: props.title,
             poster_path: props.poster_path,
-            price: itemPrice, // Use the dynamic price from props
+            price: itemPrice,
             quantity: 1,
-            description: props.description // Include description
-          }]
-        });
-        console.log("Document created and item successfully added to cart!");
-        toast.success(`${props.title} added to cart!`, {
-          position: "top-right",
-          autoClose: 2000,
-        });
-      }
+            description: props.description
+          }];
+
+      await setDoc(docRef, { cartItems: updatedCart }, { merge: true });
+      toast.success(`${props.title} added to cart!`, {
+        position: "top-right",
+        autoClose: 2000,
+      });
     } catch (error) {
-      console.error("Error adding to cart in Firestore:", error);
+      console.error("Error adding to cart:", error);
       toast.error("Error adding to cart", {
         position: "top-right",
         autoClose: 2000,
@@ -188,46 +123,49 @@ function Carde(props) {
     }
   };
 
-  // Add default props to prevent undefined errors
   const safeTitle = props.title || "Unnamed Item";
   const safeDescription = props.description || "No description";
   const safePosterPath = props.poster_path || "default-image.jpg";
   const safePrice = props.price || "Price not available";
 
+  // 👇 نحدد لون النص بناءً على الثيم
+  const textColor = theme === "dark" ? "text-white" : "text-dark";
+  const iconColor = theme === "dark" ? "text-white" : "text-dark";
+
   return (
-    <div className="card-container">
+    <div className={`card card-container ${theme === "dark" ? "bg-dark" : "bg-light"}`}>
       <button
         className={`fav-icon ${findDishesInWishlist ? 'active' : ''}`}
         onClick={userState55 === "who know" ? handleToggleWishlist : toggleFirestore}
       >
-        <i className="fas fa-heart"></i>
+        <i className="fas fa-heart"></i> {/* 👈 متغيرش لونها */}
       </button>
 
       <div className="image-wrapper">
         <img src={safePosterPath} className="card-image" alt={safeTitle} />
       </div>
 
-      <div className="all-details">
+      <div className={`all-details ${textColor}`}>
         <div className="card-details mb-5">
-          <h5 className="food-title">
+          <h5 className={`food-title ${textColor}`}>
             {safeTitle.split(" ").length > 2
               ? safeTitle.split(" ").slice(0, 2).join(" ") + " ..."
               : safeTitle}
           </h5>
-          <p className="food-description">
-            {safeDescription.split(" ").length > 10
-              ? safeDescription.split(" ").slice(0, 10).join(" ") + " ..."
+          <p className={`food-description ${textColor}`}>
+            {safeDescription.split(" ").length > 8
+              ? safeDescription.split(" ").slice(0,8).join(" ") + " ..."
               : safeDescription}
           </p>
         </div>
 
-        <div className="price-container mt-5">
-          <span className="food-price">{safePrice} LE</span>
+        <div className="price-container mt-5 d-flex justify-content-between align-items-center">
+          <span className={`food-price ${textColor}`}>{safePrice} LE</span>
           <button
-            className="add-btn"
+            className={`add-btn ${theme === "dark" ? "add-btn" : "add-btn-dark"}`}
             onClick={addToCartFirestore}
           >
-            <i className="fas fa-plus"></i>
+            <i className={`fas fa-plus ${iconColor}`}></i>
           </button>
         </div>
       </div>

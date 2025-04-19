@@ -1,7 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import './Counter.css';
+import { ThemeContext } from "../../Context/ThemeContext"; // استيراد ThemeContext
 
 function Counter() {
+    const { theme } = useContext(ThemeContext); // الحصول على الـ theme الحالي
     const sectionRef = useRef(null); // Ref for the section
     const [counters, setCounters] = useState({
         clients: 0,
@@ -70,7 +72,11 @@ function Counter() {
     };
 
     return (
-        <div ref={sectionRef} className={`container count text-white py-5 ${isVisible ? 'animate-section' : ''}`}>
+        <div 
+            ref={sectionRef} 
+            className={`  count py-5 ${theme === "dark" ? "bg-custom-dark text-white" : "bg-light text-dark"} ${isVisible ? 'animate-section' : ''}`}
+        >
+            <div className="container">
             <h2 className='text-center mb-5'>
                 About<span className='text-danger'> Us</span>
             </h2>
@@ -78,35 +84,36 @@ function Counter() {
                 {/* Clients Counter */}
                 <div className={`col-6 col-md-3 mb-4 ${isVisible ? 'animate-icon' : ''}`}>
                     <div className="icon">
-                        <i className="fa-solid fa-users fs-1 mb-2"></i>
+                        <i className={`fa-solid fa-users fs-1 mb-2 ${theme === "dark" ? "text-white" : "text-dark"}`}></i>
                         <h3>{counters.clients}+</h3>
-                        <h3 className='text-danger'>Happy Clients</h3>
+                        <h3 className={`text-danger ${theme === "dark" ? "text-light" : ""}`}>Happy Clients</h3>
                     </div>
                 </div>
                 {/* Meals Counter */}
                 <div className={`col-6 col-md-3 mb-4 ${isVisible ? 'animate-icon' : ''}`}>
                     <div className="icon">
-                        <i className="fa-solid fa-truck-fast fs-1 mb-2"></i>
+                        <i className={`fa-solid fa-truck-fast fs-1 mb-2 ${theme === "dark" ? "text-white" : "text-dark"}`}></i>
                         <h3>{counters.meals}</h3>
-                        <h3 className='text-danger'>Meal Delivered</h3>
+                        <h3 className={`text-danger ${theme === "dark" ? "text-light" : ""}`}>Meal Delivered</h3>
                     </div>
                 </div>
                 {/* Dishes Counter */}
                 <div className={`col-6 col-md-3 mb-4 ${isVisible ? 'animate-icon' : ''}`}>
                     <div className="icon">
-                        <i className="fa-solid fa-utensils fs-1 mb-2"></i>
+                        <i className={`fa-solid fa-utensils fs-1 mb-2 ${theme === "dark" ? "text-white" : "text-dark"}`}></i>
                         <h3>{counters.dishes}+</h3>
-                        <h3 className='text-danger'>Different Dishes</h3>
+                        <h3 className={`text-danger ${theme === "dark" ? "text-light" : ""}`}>Different Dishes</h3>
                     </div>
                 </div>
                 {/* Rate Counter */}
                 <div className={`col-6 col-md-3 mb-4 ${isVisible ? 'animate-icon' : ''}`}>
                     <div className="icon">
-                        <i className="fa-solid fa-star fs-1 mb-2"></i>
+                        <i className={`fa-solid fa-star fs-1 mb-2 ${theme === "dark" ? "text-white" : "text-dark"}`}></i>
                         <h3>{counters.rate.toFixed(1)}</h3>
-                        <h3 className='text-danger'>Rate</h3>
+                        <h3 className={`text-danger ${theme === "dark" ? "text-light" : ""}`}>Rate</h3>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     );

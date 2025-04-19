@@ -24,6 +24,7 @@ import { useSelector } from 'react-redux';
 import ProtectedRoute from './Pages/ProtectedRoute/ProtectedRoute';
 import Banner from './Components/Banner/Banner';
 import AdminDashboard from './Pages/AdminDashBoard/AdminDashboard';
+import { ThemeProvider } from './Context/ThemeContext';
 
 // Wrapper component to debug location and conditionally render Nav
 const DebugLocation = ({ children }) => {
@@ -47,6 +48,7 @@ function App() {
   const userState = useSelector((state) => state.UserData['UserState']);
 
   return (
+    <ThemeProvider>
     <BrowserRouter>
       <DebugLocation>
         <div className="min-vh-100 d-flex flex-column">
@@ -88,6 +90,7 @@ function App() {
         </div>
       </DebugLocation>
     </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

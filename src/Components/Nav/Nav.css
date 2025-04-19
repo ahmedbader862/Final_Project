@@ -71,3 +71,9 @@
 }
 
 
+.form-check-input:checked {
+  background-color: #ff6b6b !important;
+  border: none !important;
+  box-shadow: #ff6b6b 0 0 0 0.2rem !important;
+  color:#ff6b6b ;
+}

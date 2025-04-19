@@ -10,7 +10,8 @@ function Home() {
   return(
   <>
   <Hero/>
-      
+      <Chefs/>
+      <Grid/>
       <Counter/>
       <Contact/>
     </>

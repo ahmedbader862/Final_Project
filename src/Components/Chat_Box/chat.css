@@ -15,7 +15,7 @@
   }
   
   .chat-box {
-    background-color: #fff;
+    /* background-color: #fff; */
     border-radius: 15px;
     height: 500px;
     display: flex;
@@ -23,6 +23,7 @@
     overflow: hidden;
     width: 100%; /* Ensure it doesn't exceed parent width */
     box-sizing: border-box; /* Include padding in width */
+    box-shadow: black 0px 0px 20px;
   }
   
   .cht{
@@ -31,9 +32,10 @@
   .messages {
     flex: 1;
     overflow-y: auto;
-    background-color: #f5f5f5;
+    /* background-color: #212126; */
     width: 100%;
     box-sizing: border-box;
+    box-shadow: rgb(0, 0, 0) 0px 0px 20px;
   }
   
   /* Scrollbar styling */
@@ -100,14 +102,16 @@
   
   /* Input area styling */
   .input-area {
-    background-color: #fff;
+    /* background-color: #212126; */
     width: 100%;
     box-sizing: border-box;
   }
   
   .input-area input {
     border-radius: 20px;
-    border: 1px solid #ddd;
+    /* border: 1px solid #ddd; */
+    /* background-color: #3a3a43; */
+    color: white !important;
     padding: 10px 15px;
     font-size: 1rem;
     width: 100%;

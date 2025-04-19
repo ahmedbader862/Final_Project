@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { db, getDocs, collection } from "../../firebase/firebase";
 import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -9,6 +9,7 @@ import { FreeMode } from "swiper/modules";
 import Card from "../../Components/Card/card";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { ThemeContext } from "../../Context/ThemeContext";
 
 function Menu() {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ function Menu() {
   const [beefSandwiches, setBeefSandwiches] = useState([]);
   const [hotDrinks, setHotDrinks] = useState([]);
   const [pizzas, setPizzas] = useState([]);
+  const { theme } = useContext(ThemeContext);
 
   useEffect(() => {
     const getCategoryData = async (category, setCategory) => {
@@ -67,6 +69,8 @@ function Menu() {
     });
   };
 
+  const textColor = theme === "dark" ? "text-white" : "text-dark";
+  const backgroundColor = theme === "dark" ? "bg-custom-dark" : "bg-light";
   const handleNavigate = (category) => {
     navigate(`/Dishes/${category}`);
   };
@@ -119,17 +123,19 @@ function Menu() {
   );
 
   return (
-    <div className="menu-container container mx-auto text-white mt-5">
-      <h1 className="text-center menu-title">
-        Our <span className="text-danger">Menu</span>
-      </h1>
-      {renderCategorySection("Chicken Sandwiches", chickenSandwiches, "chicken sandwich")}
-      {renderCategorySection("Beef Sandwiches", beefSandwiches, "beef sandwich")}
-      {renderCategorySection("Pizzas", pizzas, "pizaa")}
-      {renderCategorySection("Soft Drinks", softDrinks, "soft drinks")}
-      {renderCategorySection("Hot Drinks", hotDrinks, "hot drinks")}
+    <div className={`menu-container ${backgroundColor} ${textColor} mt-5`}>
+      <div className="container">
+        <h1 className="text-center menu-title">
+          Our <span className="text-danger">Menu</span>
+        </h1>
+        {renderCategorySection("Chicken Sandwiches", chickenSandwiches, "chicken sandwich")}
+        {renderCategorySection("Beef Sandwiches", beefSandwiches, "beef sandwich")}
+        {renderCategorySection("Pizzas", pizzas, "pizaa")}
+        {renderCategorySection("Soft Drinks", softDrinks, "soft drinks")}
+        {renderCategorySection("Hot Drinks", hotDrinks, "hot drinks")}
 
-      <ToastContainer />
+        <ToastContainer />
+      </div>
     </div>
   );
 }
