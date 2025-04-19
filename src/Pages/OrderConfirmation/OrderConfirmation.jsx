@@ -1,54 +1,70 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { db, doc, onSnapshot } from '../../firebase/firebase'; // Import Firebase utilities
-import './OrderConfirmation.css'; // Optional: Add custom styling
+import { db, doc, onSnapshot } from '../../firebase/firebase';
+import { toast } from 'react-toastify';
+import './OrderConfirmation.css';
 
 export default function OrderConfirmation() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get total and orderId from location state
-  const { total = '0.00', orderId } = location.state || {};
-  const [orderStatus, setOrderStatus] = useState('pending'); // Default to pending
-  const [loading, setLoading] = useState(true); // Track loading state
+  const { orderId } = location.state || {};
+  const [orderData, setOrderData] = useState({ total: '0.00', status: 'pending', paymentMethod: '' });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!orderId) {
       console.error("No order ID provided");
-      setLoading(false);
+      toast.error("No order found. Redirecting to homepage...");
+      navigate('/');
       return;
     }
 
-    // Listen to the order status in real-time
     const orderRef = doc(db, "orders", orderId);
     const unsubscribe = onSnapshot(orderRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
-        setOrderStatus(data.status);
+        setOrderData({
+          total: data.total.toFixed(2),
+          status: data.status,
+          paymentMethod: data.paymentMethod || '',
+        });
         setLoading(false);
       } else {
         console.error("Order not found");
-        setLoading(false);
+        toast.error("Order not found. Redirecting to homepage...");
+        navigate('/');
       }
     }, (error) => {
       console.error("Error fetching order status:", error);
+      toast.error("Error fetching order status. Please try again later.");
       setLoading(false);
     });
 
-    return () => unsubscribe(); // Cleanup subscription
-  }, [orderId]);
+    return () => unsubscribe();
+  }, [orderId, navigate]);
 
   const handleReturnHome = () => {
     navigate('/');
   };
 
-  // Render content based on order status
+  const handleTrackOrder = () => {
+    navigate('/track-order', { state: { total: orderData.total, orderId } });
+  };
+
   const renderContent = () => {
     if (loading) {
-      return <p className="lead mb-4">Loading order status...</p>;
+      return (
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="lead mb-4">Loading order status...</p>
+        </div>
+      );
     }
 
-    switch (orderStatus) {
+    switch (orderData.status) {
       case 'pending':
         return (
           <>
@@ -72,7 +88,10 @@ export default function OrderConfirmation() {
           <>
             <h2 className="fw-bold mb-4 text-danger">Order Rejected</h2>
             <p className="lead mb-4">
-              Unfortunately, your order has been rejected. Your money is being refunded as soon as possible.
+              Unfortunately, your order has been rejected.
+              {orderData.paymentMethod === 'paypal' && (
+                <> Your money will be refunded to your PayPal account as soon as possible.</>
+              )}
             </p>
           </>
         );
@@ -92,21 +111,31 @@ export default function OrderConfirmation() {
 
                 <div className="mb-4">
                   <h5>Order Summary</h5>
-                  <p className="mb-1">Total Paid: {total} LE</p>
+                  <p className="mb-1">
+                    {orderData.paymentMethod === 'cash_on_delivery' ? 'Total Due' : 'Total Paid'}: {orderData.total} LE
+                  </p>
                   <p className="text-muted">
-                    {orderStatus === 'accepted' 
-                      ? "You'll receive a confirmation email shortly." 
+                    {orderData.status === 'accepted'
+                      ? "You'll receive a confirmation email shortly."
                       : "Status updates will be reflected here."}
                   </p>
                 </div>
 
-                <div className="d-flex justify-content-center gap-3">
+                <div className="d-flex justify-content-center gap-3 flex-wrap">
                   <button
                     className="btn btn-primary btn-lg"
                     onClick={handleReturnHome}
                   >
                     Return to Home
                   </button>
+                  {orderData.status === 'accepted' && (
+                    <button
+                      className="btn btn-outline-secondary btn-lg"
+                      onClick={handleTrackOrder}
+                    >
+                      Track Order
+                    </button>
+                  )}
                   <button
                     className="btn btn-outline-secondary btn-lg"
                     onClick={() => navigate('/contactus')}

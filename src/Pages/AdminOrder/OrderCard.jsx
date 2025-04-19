@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, XCircle, Trash } from 'react-bootstrap-icons'; // Import icons
+import { CheckCircle, XCircle, Trash } from 'react-bootstrap-icons';
 
 const OrderCard = ({ order, updateStatus, updateTrackingStatus, deleteOrder }) => {
   const paymentStatus = order.paymentMethod === "cash_on_delivery" ? "Cash on Delivery" : "Paid (PayPal)";
@@ -12,7 +12,6 @@ const OrderCard = ({ order, updateStatus, updateTrackingStatus, deleteOrder }) =
 
   return (
     <div className="order-card mb-4">
-      {/* Header */}
       <div className="order-header">
         <h5>Order #{order.id}</h5>
         <p className="order-customer">{order.customer}</p>
@@ -29,19 +28,37 @@ const OrderCard = ({ order, updateStatus, updateTrackingStatus, deleteOrder }) =
         </span>
       </div>
 
-      {/* Body */}
       <div className="order-body">
         <div className="order-section">
           <span className="section-label">Items:</span>
-          <span>{order.items}</span>
+          <span>
+            {Array.isArray(order.items)
+              ? order.items.map((item, index) => (
+                  <span key={index}>
+                    {item.title} (x{item.quantity})
+                    {index < order.items.length - 1 ? ', ' : ''}
+                  </span>
+                ))
+              : order.items || 'No items'}
+          </span>
         </div>
         <div className="order-section">
           <span className="section-label">Total:</span>
-          <span className="order-total">{order.total}</span>
+          <span className="order-total">{parseFloat(order.total || 0).toFixed(2)} LE</span>
         </div>
         <div className="order-section">
           <span className="section-label">Placed:</span>
-          <span>{new Date(order.timestamp).toLocaleString()}</span>
+          <span>
+            {order.timestamp
+              ? new Date(order.timestamp.seconds ? order.timestamp.toDate() : order.timestamp).toLocaleString('en-US', {
+                  month: '2-digit',
+                  day: '2-digit',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })
+              : 'N/A'}
+          </span>
         </div>
         {order.shipping && (
           <div className="order-section">
@@ -77,7 +94,6 @@ const OrderCard = ({ order, updateStatus, updateTrackingStatus, deleteOrder }) =
         </div>
       </div>
 
-      {/* Footer */}
       <div className="order-footer">
         {order.status === "pending" && (
           <>

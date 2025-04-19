@@ -423,3 +423,128 @@ body {
     text-align: center;
   }
 }
+
+
+
+.admin-chat-container {
+  padding: 0;
+  height: 80vh; /* Adjust height to fit your layout */
+}
+
+.chat-sidebar {
+  background-color: #2A2E32; /* Slightly lighter than the main background */
+  border-right: 1px solid #3A3F44;
+  padding: 20px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.sidebar-title {
+  color: #FFFFFF;
+  font-size: 1.25rem;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #4A919E;
+  padding-bottom: 10px;
+}
+
+.user-card {
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  background-color: #343A40;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.user-card span {
+  color: #D1D4D6;
+  font-size: 1rem;
+}
+
+.user-card:hover {
+  background-color: #4A919E; /* Teal hover effect */
+}
+
+.user-card.active {
+  background-color: #4A919E;
+  color: #FFFFFF;
+}
+
+.user-card.active span {
+  color: #FFFFFF;
+}
+
+.chat-content {
+  background-color: #212529;
+  padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header {
+  background-color: #2A2E32;
+  padding: 15px;
+  border-bottom: 1px solid #3A3F44;
+  border-radius: 5px 5px 0 0;
+}
+
+.chat-header h5 {
+  color: #FFFFFF;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.chat-placeholder {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #6C757D; /* Muted gray for placeholder text */
+  font-size: 1.2rem;
+}
+
+
+/* AdminDashboard.css */
+
+/* Ensure input fields are visible */
+.form-control-dark {
+  background-color: #fff !important; /* White background for inputs */
+  color: #000 !important; /* Black text for inputs */
+  border: 1px solid #ced4da !important; /* Bootstrap default border */
+}
+
+/* Ensure textarea is visible */
+.form-control-dark textarea {
+  background-color: #fff !important;
+  color: #000 !important;
+}
+
+/* Ensure invalid feedback is styled */
+.invalid-feedback {
+  color: #dc3545 !important; /* Bootstrap danger color */
+  font-size: 0.875rem;
+}
+
+/* Modal background and text */
+.modal-content {
+  background-color: #fff !important; /* White modal background */
+  color: #000 !important; /* Black text */
+}
+
+/* Ensure labels are visible */
+.form-label {
+  color: #000 !important; /* Black label text */
+}
+
+/* Optional: Style for modal header */
+.modal-header {
+  background-color: #f8f9fa !important; /* Light gray header */
+  border-bottom: 1px solid #dee2e6 !important;
+}
+
+/* Optional: Style for modal footer */
+.modal-footer {
+  background-color: #f8f9fa !important;
+  border-top: 1px solid #dee2e6 !important;
+}

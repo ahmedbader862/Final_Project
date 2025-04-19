@@ -11,7 +11,7 @@ const ItemModal = ({ showModal, setShowModal, formData, setFormData, handleSubmi
     <Modal.Body>
       {(showModal === 'add' || showModal === 'edit') && (
         <Form onSubmit={handleSubmit}>
-          <Form.Group className="mb-3">
+          <Form.Group className="mb-3 ">
             <Form.Label>ID</Form.Label>
             <Form.Control 
               name="id" 

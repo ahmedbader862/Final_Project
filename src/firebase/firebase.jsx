@@ -82,6 +82,8 @@ export {
   actionCodeSettings,
   providerG,
   providerF,
+  GoogleAuthProvider, // Added for Signin component
+  FacebookAuthProvider, // Added for consistency
 
   // ((((((((((((((((((((((((((((( %%  Auth Functions %%)))))))))))))))))))))))))))))))
   createUserWithEmailAndPassword,

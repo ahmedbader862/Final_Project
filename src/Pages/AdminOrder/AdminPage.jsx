@@ -14,9 +14,13 @@ const AdminOrdersPage = () => {
   const [refundMessage, setRefundMessage] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "orders"), (snapshot) => {
-      setOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    }, (error) => console.error("Error fetching orders:", error));
+    const unsubscribe = onSnapshot(
+      collection(db, "orders"),
+      (snapshot) => {
+        setOrders(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+      },
+      (error) => console.error("Error fetching orders:", error)
+    );
     return () => unsubscribe();
   }, []);
 
@@ -28,62 +32,73 @@ const AdminOrdersPage = () => {
 
       if (newStatus === "accepted" && orderData.userId) {
         await updateDoc(doc(db, "users2", orderData.userId), {
-          acceptedOrders: arrayUnion({ orderId, ...orderData, trackingStatus: orderData.trackingStatus || "Order Placed" })
+          acceptedOrders: arrayUnion({
+            orderId,
+            ...orderData,
+            trackingStatus: orderData.trackingStatus || "Order Placed",
+          }),
         });
-        Swal.fire('Success!', `Order ${orderId} accepted`, 'success');
+        Swal.fire("Success!", `Order ${orderId} accepted`, "success");
       } else if (newStatus === "rejected") {
         setRefundMessage(`Order #${orderId}: Refunding soon (if PayPal).`);
         setTimeout(() => setRefundMessage(null), 5000);
       }
     } catch (error) {
-      Swal.fire('Error!', `Failed to update order: ${error.message}`, 'error');
+      Swal.fire("Error!", `Failed to update order: ${error.message}`, "error");
     }
   };
 
-  const updateTrackingStatus = (orderId, newTrackingStatus) => updateDoc(doc(db, "orders", orderId), { trackingStatus: newTrackingStatus });
+  const updateTrackingStatus = (orderId, newTrackingStatus) =>
+    updateDoc(doc(db, "orders", orderId), { trackingStatus: newTrackingStatus });
 
-  const deleteOrder = (orderId) => Swal.fire({
-    title: 'Are you sure?',
-    text: `Delete Order #${orderId}?`,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#d33',
-    confirmButtonText: 'Yes, delete!'
-  }).then(async (result) => {
-    if (result.isConfirmed) {
-      await deleteDoc(doc(db, "orders", orderId));
-      Swal.fire('Deleted!', `Order #${orderId} deleted`, 'success');
-    }
-  });
+  const deleteOrder = (orderId) =>
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Delete Order #${orderId}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "Yes, delete!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await deleteDoc(doc(db, "orders", orderId));
+        Swal.fire("Deleted!", `Order #${orderId} deleted`, "success");
+      }
+    });
 
-  const clearAllOrders = () => Swal.fire({
-    title: 'Delete all orders?',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#d33',
-    confirmButtonText: 'Yes, delete all!'
-  }).then(async (result) => {
-    if (result.isConfirmed) {
-      const snapshot = await getDocs(collection(db, "orders"));
-      await Promise.all(snapshot.docs.map(doc => deleteDoc(doc.ref)));
-      Swal.fire('Deleted!', 'All orders cleared', 'success');
-    }
-  });
+  const clearAllOrders = () =>
+    Swal.fire({
+      title: "Delete all orders?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "Yes, delete all!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const snapshot = await getDocs(collection(db, "orders"));
+        await Promise.all(snapshot.docs.map((doc) => deleteDoc(doc.ref)));
+        Swal.fire("Deleted!", "All orders cleared", "success");
+      }
+    });
 
   const getChartData = () => {
     const totalOrders = orders.length;
-    const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.total.replace(" LE", "")), 0).toFixed(2);
+    const totalRevenue = orders
+      .reduce((sum, order) => sum + parseFloat(order.total || 0), 0)
+      .toFixed(2);
     const statusBreakdown = {
-      pending: orders.filter(o => o.status === "pending").length,
-      accepted: orders.filter(o => o.status === "accepted").length,
-      rejected: orders.filter(o => o.status === "rejected").length,
+      pending: orders.filter((o) => o.status === "pending").length,
+      accepted: orders.filter((o) => o.status === "accepted").length,
+      rejected: orders.filter((o) => o.status === "rejected").length,
     };
     const paymentBreakdown = {
-      cod: orders.filter(o => o.paymentMethod === "cash_on_delivery").length,
-      paid: orders.filter(o => o.paymentMethod === "paypal").length,
+      cod: orders.filter((o) => o.paymentMethod === "cash_on_delivery").length,
+      paid: orders.filter((o) => o.paymentMethod === "paypal").length,
     };
     const ordersByDate = orders.reduce((acc, o) => {
-      const date = new Date(o.timestamp).toLocaleDateString();
+      const date = o.timestamp
+        ? new Date(o.timestamp.seconds ? o.timestamp.toDate() : o.timestamp).toLocaleDateString()
+        : "Unknown";
       acc[date] = (acc[date] || 0) + 1;
       return acc;
     }, {});
@@ -95,39 +110,45 @@ const AdminOrdersPage = () => {
       pendingOrders: statusBreakdown.pending,
       lineChartData: {
         labels: Object.keys(ordersByDate),
-        datasets: [{ label: "Orders Over Time", data: Object.values(ordersByDate), borderColor: "#4A919E", tension: 0.1 }]
+        datasets: [
+          { label: "Orders Over Time", data: Object.values(ordersByDate), borderColor: "#4A919E", tension: 0.1 },
+        ],
       },
       statusPieChartData: {
         labels: ["Pending", "Accepted", "Rejected"],
-        datasets: [{
-          data: [statusBreakdown.pending, statusBreakdown.accepted, statusBreakdown.rejected],
-          backgroundColor: ["#D4A017", "#4A919E", "#B73E3E"],
-          borderColor: ["#E0B02A", "#5AA5B2", "#C94E4E"],
-          borderWidth: 1
-        }]
+        datasets: [
+          {
+            data: [statusBreakdown.pending, statusBreakdown.accepted, statusBreakdown.rejected],
+            backgroundColor: ["#D4A017", "#4A919E", "#B73E3E"],
+            borderColor: ["#E0B02A", "#5AA5B2", "#C94E4E"],
+            borderWidth: 1,
+          },
+        ],
       },
       paymentPieChartData: {
         labels: ["Cash on Delivery", "Paid (PayPal)"],
-        datasets: [{
-          data: [paymentBreakdown.cod, paymentBreakdown.paid],
-          backgroundColor: ["#4A919E", "#3A6D8C"],
-          borderColor: ["#5AA5B2", "#4A7D9C"],
-          borderWidth: 1
-        }]
-      }
+        datasets: [
+          {
+            data: [paymentBreakdown.cod, paymentBreakdown.paid],
+            backgroundColor: ["#4A919E", "#3A6D8C"],
+            borderColor: ["#5AA5B2", "#4A7D9C"],
+            borderWidth: 1,
+          },
+        ],
+      },
     };
   };
 
   const { totalOrders, totalRevenue, avgOrderValue, pendingOrders, lineChartData, statusPieChartData, paymentPieChartData } = getChartData();
 
   return (
-    <div className="orders-management">
-      <div className="d-flex justify-content-between align-items-center mb-5">
-        <h2 className="section-title">Orders Management</h2>
+    <div className="container mt-5">
+      <div className="d-flex justify-content-between mb-4">
+        <h2 className="text-white">Orders Management</h2>
         {orders.length > 0 && (
-          <button className="btn btn-danger btn-sm clear-all-btn" onClick={clearAllOrders}>
+          <Button className="btn btn-danger btn-sm" onClick={clearAllOrders}>
             Clear All Orders
-          </button>
+          </Button>
         )}
       </div>
       <RefundMessage message={refundMessage} />
@@ -138,7 +159,7 @@ const AdminOrdersPage = () => {
           <OrdersList orders={orders} updateStatus={updateStatus} updateTrackingStatus={updateTrackingStatus} deleteOrder={deleteOrder} />
         </>
       )}
-      {orders.length === 0 && <p className="no-orders-text">No orders found.</p>}
+      {orders.length === 0 && <p>No orders found.</p>}
     </div>
   );
 };

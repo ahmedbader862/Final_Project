@@ -2,20 +2,25 @@ import React, { useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
-import { db, doc, setDoc, collection, addDoc } from '../../firebase/firebase';
+import { PayPalScriptProvider, PayPalButtons, FUNDING } from '@paypal/react-paypal-js';
+import { db, doc, setDoc } from '../../firebase/firebase';
+import { Timestamp } from 'firebase/firestore';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './Shipping.css';
 
 export default function Shipping() {
   const { state } = useLocation();
   const navigate = useNavigate();
   const [showPayment, setShowPayment] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState(null);
 
-  const { cartItems, total, discountApplied, userId, customer } = state || {};
+  const { cartItems, total, discountApplied, userId, customer, timestamp } = state || {};
 
   if (!cartItems || !total || !userId) {
+    toast.error('Invalid order. Please start from the cart.', {
+      position: 'top-right',
+      autoClose: 3000,
+    });
     navigate('/cart');
     return null;
   }
@@ -43,52 +48,68 @@ export default function Shipping() {
 
   const paypalClientId = "AcsvtygcLDvhx31he8A2uov0YggkozkSZ3TomOH8PRclYHtxLoVJkcV9yu8hvPTpQDSpeeUpKIsbH0Az";
 
-  const handleCashOnDelivery = async () => {
+  const saveOrder = async (paymentMethod) => {
     try {
       const orderDetails = {
+        id: `order_${Date.now().toString().slice(-6)}_${userId.slice(-6)}`, // Shorter ID
         customer,
-        items: cartItems.map(item => `${item.title} (${item.quantity})`).join(", "),
-        total: `${total} LE`,
-        status: "pending",
-        trackingStatus: "Order Placed",
-        timestamp: new Date().toISOString(),
+        items: cartItems.map(item => ({
+          title: item.title,
+          price: item.price,
+          quantity: item.quantity,
+          total: item.price * item.quantity,
+        })),
+        total: parseFloat(total), // Ensure number
+        status: 'pending',
+        trackingStatus: 'Order Placed',
+        timestamp: timestamp ? Timestamp.fromDate(new Date(timestamp)) : Timestamp.now(),
         userId,
         shipping: {
           city: formik.values.city,
           phone: formik.values.phone,
           details: formik.values.details,
         },
-        paymentMethod: "cash_on_delivery",
+        paymentMethod,
         discountApplied,
       };
-
-      const ordersCollection = collection(db, "orders");
-      const docRef = await addDoc(ordersCollection, orderDetails);
-      const orderId = docRef.id;
-
-      const cartDocRef = doc(db, "users2", userId);
+  
+      // Save to orders collection
+      await setDoc(doc(db, 'orders', orderDetails.id), orderDetails);
+  
+      // Clear cart
+      const cartDocRef = doc(db, 'users2', userId);
       await setDoc(cartDocRef, { cartItems: [] }, { merge: true });
+  
+      return orderDetails.id;
+    } catch (error) {
+      console.error('Order save error:', error);
+      throw error;
+    }
+  };
 
-      toast.success("Order placed successfully with Cash on Delivery!", {
-        position: "top-right",
+  const handleCashOnDelivery = async () => {
+    try {
+      const orderId = await saveOrder('cash_on_delivery');
+      toast.success('Order placed successfully with Cash on Delivery!', {
+        position: 'top-right',
         autoClose: 3000,
       });
-      navigate('/track-order', { state: { total, orderId } }); // Changed to /track-order
+      navigate('/order-confirmation', { state: { total: parseFloat(total).toFixed(2), orderId } });
     } catch (error) {
-      console.error("COD error:", error);
-      toast.error("An error occurred while processing your order. Please try again.", {
-        position: "top-right",
+      toast.error('An error occurred while processing your order. Please try again.', {
+        position: 'top-right',
         autoClose: 3000,
       });
     }
   };
 
   return (
-    <div className="container">
-      <div className="mt-5 mb-5">
+    <div className="shipping-wrapper">
+      <div className="shipping-container">
         {!showPayment ? (
-          <form className="max-w-md mx-auto" onSubmit={formik.handleSubmit}>
-            <div className="mb-4">
+          <form className="shipping-form" onSubmit={formik.handleSubmit}>
+            <h3 className="form-title">Shipping Information</h3>
+            <div className="form-group">
               <label htmlFor="city" className="form-label">
                 City
               </label>
@@ -99,17 +120,17 @@ export default function Shipping() {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.city}
-                className="form-control"
+                className="form-input"
                 placeholder="Enter your city"
               />
               {formik.errors.city && formik.touched.city && (
-                <div className="alert alert-danger mt-2" role="alert">
+                <div className="error-message" role="alert">
                   {formik.errors.city}
                 </div>
               )}
             </div>
 
-            <div className="mb-4">
+            <div className="form-group">
               <label htmlFor="details" className="form-label">
                 Details
               </label>
@@ -120,17 +141,17 @@ export default function Shipping() {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.details}
-                className="form-control"
+                className="form-input"
                 placeholder="e.g., Apartment number, street"
               />
               {formik.errors.details && formik.touched.details && (
-                <div className="alert alert-danger mt-2" role="alert">
+                <div className="error-message" role="alert">
                   {formik.errors.details}
                 </div>
               )}
             </div>
 
-            <div className="mb-4">
+            <div className="form-group">
               <label htmlFor="phone" className="form-label">
                 Phone
               </label>
@@ -141,88 +162,72 @@ export default function Shipping() {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.phone}
-                className="form-control"
+                className="form-input"
                 placeholder="Enter your phone number"
               />
               {formik.errors.phone && formik.touched.phone && (
-                <div className="alert alert-danger mt-2" role="alert">
+                <div className="error-message" role="alert">
                   {formik.errors.phone}
                 </div>
               )}
             </div>
 
-            <button type="submit" className="btn clr text-white w-100">
+            <button type="submit" className="submit-btn">
               Proceed to Payment
             </button>
           </form>
         ) : (
-          <div className="max-w-md mx-auto">
-            <h3 className="mb-3 text-white">Choose Payment Method</h3>
+          <div className="payment-section">
+            <h3 className="section-title">Choose Payment Method</h3>
             <div className="payment-options">
-              <div className="payment-button-container mb-3">
-                <button 
-                  className="btn btn-primary"
-                  onClick={handleCashOnDelivery}
-                >
-                  Cash on Delivery
-                </button>
-              </div>
-              
-              <div className="payment-button-container">
-                <PayPalScriptProvider options={{ "client-id": paypalClientId, currency: "USD" }}>
+              <button
+                className="payment-btn cod-btn"
+                onClick={handleCashOnDelivery}
+              >
+                Cash on Delivery
+              </button>
+
+              <div className="payment-btn paypal-btn">
+                <PayPalScriptProvider options={{ 'client-id': paypalClientId, currency: 'USD' }}>
                   <PayPalButtons
-                    style={{ layout: "vertical" }}
+                    fundingSource={FUNDING.PAYPAL}
+                    style={{ layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' }}
                     createOrder={(data, actions) => {
                       return actions.order.create({
                         purchase_units: [
                           {
                             amount: {
-                              value: total,
-                              currency_code: "USD",
+                              value: parseFloat(total).toFixed(2),
+                              currency_code: 'USD',
                             },
-                            description: "Restaurant Cart Purchase",
+                            description: 'Restaurant Cart Purchase',
                           },
                         ],
                       });
                     }}
                     onApprove={async (data, actions) => {
-                      const order = await actions.order.capture();
-                      console.log("Payment successful:", order);
+                      try {
+                        const order = await actions.order.capture();
+                        console.log('Payment successful:', order);
 
-                      const orderDetails = {
-                        customer,
-                        items: cartItems.map(item => `${item.title} (${item.quantity})`).join(", "),
-                        total: `${total} LE`,
-                        status: "pending",
-                        trackingStatus: "Order Placed",
-                        timestamp: new Date().toISOString(),
-                        userId,
-                        shipping: {
-                          city: formik.values.city,
-                          phone: formik.values.phone,
-                          details: formik.values.details,
-                        },
-                        paymentMethod: "paypal",
-                        discountApplied,
-                      };
-
-                      const ordersCollection = collection(db, "orders");
-                      const docRef = await addDoc(ordersCollection, orderDetails);
-                      const orderId = docRef.id;
-
-                      const cartDocRef = doc(db, "users2", userId);
-                      await setDoc(cartDocRef, { cartItems: [] }, { merge: true });
-
-                      toast.success("Order placed successfully!", {
-                        position: "top-right",
-                        autoClose: 3000,
-                      });
-                      navigate('/track-order', { state: { total, orderId } }); // Changed to /track-order
+                        const orderId = await saveOrder('paypal');
+                        toast.success('Order placed successfully with PayPal!', {
+                          position: 'top-right',
+                          autoClose: 3000,
+                        });
+                        navigate('/order-confirmation', { state: { total: parseFloat(total).toFixed(2), orderId } });
+                      } catch (error) {
+                        console.error('PayPal order error:', error);
+                        toast.error('An error occurred during payment. Please try again.', {
+                          position: 'top-right',
+                          autoClose: 3000,
+                        });
+                      }
                     }}
                     onError={(err) => {
-                      console.error("PayPal error:", err);
-                      toast.error("An error occurred during payment. Please try again.", {
-                        position: "top-right",
+                      console.error('PayPal error:', err);
+                      toast.error('An error occurred during payment. Please try again.', {
+                        position: 'top-right',
                         autoClose: 3000,
                       });
                     }}
@@ -233,30 +238,6 @@ export default function Shipping() {
           </div>
         )}
       </div>
-      
-      <style jsx>{`
-        .payment-button-container {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          width: 100%;
-          max-width: 300px;
-          margin-left: auto;
-          margin-right: auto;
-        }
-
-        .payment-button-container .btn {
-          width: 100%;
-          max-width: 300px;
-        }
-
-        .payment-options {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 1rem;
-        }
-      `}</style>
 
       <ToastContainer />
     </div>
