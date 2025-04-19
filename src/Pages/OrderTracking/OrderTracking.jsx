@@ -3,8 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import {
   db,
-  onSnapshot,
   doc,
+  onSnapshot,
   deleteDoc
 } from '../../firebase/firebase';
 import { ThemeContext } from '../../Context/ThemeContext';
@@ -17,13 +17,10 @@ const OrderTracking = () => {
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [orders] = useState([]);
 
   const { theme } = useContext(ThemeContext);
   const isDark = theme === "dark";
-  // const textColor = isDark ? "text-white" : "text-dark";
   const bgColor = isDark ? "bg-custom-dark" : "bg-light";
-  // const cardBg = isDark ? "bg-secondary text-white" : "bg-white text-dark";
 
   useEffect(() => {
     if (!orderId) {
@@ -49,6 +46,12 @@ const OrderTracking = () => {
           navigate('/order-confirmation', { state: { orderId, total } });
           return;
         }
+        
+        // Ensure order.items is always an array
+        if (!Array.isArray(data.items)) {
+          data.items = [];
+        }
+
         setOrder(data);
         setLoading(false);
       } else {
@@ -80,18 +83,12 @@ const OrderTracking = () => {
 
   const getProgressBarColor = (status) => {
     switch (status) {
-      case "Order Placed":
-        return "bg-info";
-      case "Processing":
-        return "bg-warning";
-      case "Shipped":
-        return "bg-primary";
-      case "Out for Delivery":
-        return "bg-secondary";
-      case "Delivered":
-        return "bg-success";
-      default:
-        return "bg-secondary";
+      case "Order Placed": return "bg-info";
+      case "Processing": return "bg-warning";
+      case "Shipped": return "bg-primary";
+      case "Out for Delivery": return "bg-secondary";
+      case "Delivered": return "bg-success";
+      default: return "bg-secondary";
     }
   };
 
@@ -119,33 +116,31 @@ const OrderTracking = () => {
     });
   };
 
-  // const handleClearAllOrders = async () => {
-  //   if (orders.length === 0) return;
-
-  //   Swal.fire({
-  //     title: 'Are you sure?',
-  //     text: "You are about to delete ALL your orders. This action cannot be undone!",
-  //     icon: 'warning',
-  //     showCancelButton: true,
-  //     confirmButtonColor: '#d33',
-  //     cancelButtonColor: '#3085d6',
-  //     confirmButtonText: 'Yes, delete all!'
-  //   }).then(async (result) => {
-  //     if (result.isConfirmed) {
-  //       try {
-  //         const deletePromises = orders.map(order => {
-  //           const orderRef = doc(db, "orders", order.id);
-  //           return deleteDoc(orderRef);
-  //         });
-  //         await Promise.all(deletePromises);
-  //         Swal.fire('Deleted!', 'All your orders have been deleted.', 'success');
-  //       } catch (error) {
-  //         console.error("Error clearing all orders:", error);
-  //         Swal.fire('Error!', 'There was an error deleting all orders.', 'error');
-  //       }
-  //     }
-  //   });
-  // };
+  const handleClearAllOrders = async () => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You are about to delete ALL your orders. This action cannot be undone!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete all!'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const deletePromises = orders.map(order => {
+            const orderRef = doc(db, "orders", order.id);
+            return deleteDoc(orderRef);
+          });
+          await Promise.all(deletePromises);
+          Swal.fire('Deleted!', 'All your orders have been deleted.', 'success');
+        } catch (error) {
+          console.error("Error clearing all orders:", error);
+          Swal.fire('Error!', 'There was an error deleting all orders.', 'error');
+        }
+      }
+    });
+  };
 
   if (loading) {
     return (
@@ -167,12 +162,18 @@ const OrderTracking = () => {
         <div className="order-card mb-5">
           <div className="card-body">
             <ul className="item-list">
-              {order.items.map((item, index) => (
-                <li key={index}>
-                  {item.title} (x{item.quantity}) - {item.total.toFixed(2)} LE
-                </li>
-              ))}
+              {/* Ensure we map over an array */}
+              {Array.isArray(order.items) && order.items.length > 0 ? (
+                order.items.map((item, index) => (
+                  <li key={index}>
+                    {item.title} (x{item.quantity}) - {item.total?.toFixed(2)} LE
+                  </li>
+                ))
+              ) : (
+                <li className="text-danger">No items found or invalid format.</li>
+              )}
             </ul>
+
             <p className="text-white">
               <strong>{order.paymentMethod === 'cash_on_delivery' ? 'Total Due' : 'Total Paid'}:</strong> {total || parseFloat(order.total).toFixed(2)} LE<br />
               <strong>Status:</strong> {order.status}<br />
@@ -182,6 +183,7 @@ const OrderTracking = () => {
                 : 'N/A'}<br />
               <strong>Tracking Status:</strong> {order.trackingStatus}
             </p>
+
             <div className="progress mb-3" style={{ height: '20px' }}>
               <div
                 className={`progress-bar ${getProgressBarColor(order.trackingStatus)}`}
@@ -191,6 +193,7 @@ const OrderTracking = () => {
                 {order.trackingStatus}
               </div>
             </div>
+
             {order.shipping && (
               <div className="text-white">
                 <strong>Shipping:</strong>
@@ -201,6 +204,7 @@ const OrderTracking = () => {
                 </p>
               </div>
             )}
+
             <button
               className="btn btn-danger mt-3"
               onClick={() => handleDeleteOrder(orderId)}
