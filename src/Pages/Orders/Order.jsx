@@ -89,7 +89,7 @@ const Orders = () => {
 
   const handleDeleteOrder = async (orderId) => {
     Swal.fire({
-      title: 'Are you sure?',
+      title: `Are you sure?`,
       text: `You are about to delete Order #${orderId}. This action cannot be undone.`,
       icon: 'warning',
       showCancelButton: true,
@@ -101,18 +101,10 @@ const Orders = () => {
         try {
           const orderRef = doc(db, "orders", orderId);
           await deleteDoc(orderRef);
-          Swal.fire(
-            'Deleted!',
-            `Order #${orderId} has been deleted.`,
-            'success'
-          );
+          Swal.fire('Deleted!', `Order #${orderId} has been deleted.`, 'success');
         } catch (error) {
           console.error("Error deleting order:", error);
-          Swal.fire(
-            'Error!',
-            'There was an error deleting the order.',
-            'error'
-          );
+          Swal.fire('Error!', 'There was an error deleting the order.', 'error');
         }
       }
     });
@@ -236,6 +228,7 @@ const Orders = () => {
             </ul>
           </div>
         </div>
+
         {filteredOrders.length === 0 ? (
           <p className="text-white text-center">No orders match the selected filters.</p>
         ) : (
@@ -248,7 +241,7 @@ const Orders = () => {
                     <div className="card-text">
                       <strong className="text-muted">Items:</strong>
                       <ul className="item-list">
-                        {order.items.map((item, index) => (
+                        {Array.isArray(order.items) && order.items.map((item, index) => (
                           <li key={index}>
                             {item.title} (x{item.quantity}) - {item.total.toFixed(2)} LE
                           </li>

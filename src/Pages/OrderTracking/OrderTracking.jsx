@@ -10,6 +10,7 @@ const OrderTracking = () => {
   const { orderId, total } = location.state || {};
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (!orderId) {
@@ -99,6 +100,7 @@ const OrderTracking = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
+          setIsDeleting(true);
           const orderRef = doc(db, "orders", orderId);
           await deleteDoc(orderRef);
           Swal.fire(
@@ -106,7 +108,7 @@ const OrderTracking = () => {
             `Order #${orderId} has been deleted.`,
             'success'
           );
-          navigate('/orders'); // Redirect to orders page after deletion
+          navigate('/orders');
         } catch (error) {
           console.error("Error deleting order:", error);
           Swal.fire(
@@ -114,6 +116,8 @@ const OrderTracking = () => {
             'There was an error deleting the order.',
             'error'
           );
+        } finally {
+          setIsDeleting(false);
         }
       }
     });
@@ -151,7 +155,8 @@ const OrderTracking = () => {
                   ))}
                 </ul>
                 <p className="text-white">
-                  <strong>{order.paymentMethod === 'cash_on_delivery' ? 'Total Due' : 'Total Paid'}:</strong> {total || parseFloat(order.total).toFixed(2)} LE<br />
+                  <strong>{order.paymentMethod === 'cash_on_delivery' ? 'Total Due' : 'Total Paid'}:</strong>{' '}
+                  {total || parseFloat(order.total).toFixed(2)} LE<br />
                   <strong>Status:</strong> {order.status}<br />
                   <strong>Placed:</strong>{' '}
                   {order.timestamp
@@ -165,7 +170,7 @@ const OrderTracking = () => {
                     : 'N/A'}<br />
                   <strong>Tracking Status:</strong> {order.trackingStatus}
                 </p>
-                <div className="progress mb-3" style={{ height: '20px' }}>
+                <div className="progress mb-3" style={{ height: '20px' }} aria-label="Order tracking progress">
                   <div
                     className={`progress-bar ${getProgressBarColor(order.trackingStatus)}`}
                     role="progressbar"
@@ -187,11 +192,12 @@ const OrderTracking = () => {
                     </p>
                   </div>
                 )}
-                <button 
+                <button
                   className="btn btn-danger-custom btn-sm mt-3"
                   onClick={handleDeleteOrder}
+                  disabled={isDeleting}
                 >
-                  <i className="bi bi-trash me-2"></i>Delete
+                  <i className="bi bi-trash me-2"></i>{isDeleting ? 'Deleting...' : 'Delete'}
                 </button>
               </div>
             </div>
