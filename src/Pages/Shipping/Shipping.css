@@ -44,7 +44,7 @@
   font-size: 1rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
-  color: white;
+  color: white !important;
 }
 
 .form-input {

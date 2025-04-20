@@ -110,7 +110,7 @@ export default function Shipping() {
           <form className="shipping-form" onSubmit={formik.handleSubmit}>
             <h3 className="form-title">Shipping Information</h3>
             <div className="form-group">
-              <label htmlFor="city" className="form-label">
+              <label htmlFor="city" className="form-label text-white">
                 City
               </label>
               <input
@@ -131,7 +131,7 @@ export default function Shipping() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="details" className="form-label">
+              <label htmlFor="details" className="form-label text-white">
                 Details
               </label>
               <input
@@ -152,7 +152,7 @@ export default function Shipping() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="phone" className="form-label">
+              <label htmlFor="phone" className="form-label text-white">
                 Phone
               </label>
               <input

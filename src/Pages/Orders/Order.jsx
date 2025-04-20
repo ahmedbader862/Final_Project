@@ -1,68 +1,71 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from 'react-router-dom';
 import { db, collection, query, where, onSnapshot, doc, deleteDoc } from '../../firebase/firebase';
 import { auth } from '../../firebase/firebase';
 import Swal from 'sweetalert2';
 import './Order.css';
+import { ThemeContext } from "../../Context/ThemeContext";
 
 const Orders = () => {
+  const { theme } = useContext(ThemeContext);
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
-  const [sortOrder, setSortOrder] = useState("newest"); // "newest" or "oldest"
-  const [statusFilter, setStatusFilter] = useState("all"); // "all", "pending", "accepted"
-  const [paymentFilter, setPaymentFilter] = useState("all"); // "all", "cash_on_delivery", "paypal"
+  const [sortOrder, setSortOrder] = useState("newest");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [paymentFilter, setPaymentFilter] = useState("all");
 
   useEffect(() => {
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Authentication Required',
-        text: 'Please sign in to view your orders.',
-      });
-      navigate('/signin');
-      return;
-    }
+    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+      if (!user) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Authentication Required',
+          text: 'Please sign in to view your orders.',
+        });
+        navigate('/signin');
+        return;
+      }
 
-    const userId = currentUser.uid;
-    const q = query(collection(db, "orders"), where("userId", "==", userId));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const userOrders = snapshot.docs
-        .map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }))
-        .filter(order => order.status !== "rejected");
+      const userId = user.uid;
+      const q = query(collection(db, "orders"), where("userId", "==", userId));
 
-      setOrders(userOrders);
-      applyFilters(userOrders, sortOrder, statusFilter, paymentFilter);
-    }, (error) => {
-      console.error("Error fetching orders:", error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to fetch orders. Please try again.',
+      const unsubscribeOrders = onSnapshot(q, (snapshot) => {
+        const userOrders = snapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }))
+          .filter(order => order.status !== "rejected");
+
+        setOrders(userOrders);
+        applyFilters(userOrders, sortOrder, statusFilter, paymentFilter);
+      }, (error) => {
+        console.error("Error fetching orders:", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to fetch orders. Please try again.',
+        });
       });
+
+      return () => unsubscribeOrders();
     });
 
-    return () => unsubscribe();
+    return () => unsubscribeAuth();
   }, [navigate]);
 
   const applyFilters = (ordersToFilter, sort, status, payment) => {
     let filtered = [...ordersToFilter];
 
-    // Filter by status
     if (status !== "all") {
       filtered = filtered.filter(order => order.status === status);
     }
 
-    // Filter by payment method
     if (payment !== "all") {
       filtered = filtered.filter(order => order.paymentMethod === payment);
     }
 
-    // Sort by date
     filtered.sort((a, b) => {
       const dateA = a.timestamp?.seconds ? a.timestamp.toDate() : new Date(a.timestamp);
       const dateB = b.timestamp?.seconds ? b.timestamp.toDate() : new Date(b.timestamp);
@@ -114,130 +117,60 @@ const Orders = () => {
     navigate('/track-order', { state: { orderId, total: parseFloat(total).toFixed(2) } });
   };
 
+  const bgClass = theme === "dark" ? "bg-custom-dark" : "bg-light";
+  const textClass = theme === "dark" ? "text-white" : "text-dark";
+
   return (
-    <div className="orders-container mt-5 mb-5">
-      <div className="container">
-        <h2 className="text-white mb-4 text-center">My Orders</h2>
+    <div className={`orders-container py-5 ${bgClass}`}>
+      <div className="container ">
+        <h2 className={`pt-5 pb-4 pt-5 text-center ${textClass}`}>My Orders</h2>
+
         <div className="d-flex flex-wrap gap-3 mb-4 justify-content-center">
           {/* Sort Dropdown */}
           <div className="dropdown">
-            <button
-              className="btn btn-outline-light dropdown-toggle"
-              type="button"
-              id="sortDropdown"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
+            <button className={`btn dropdown-toggle ${theme === "dark" ? "btn-outline-light" : "btn-outline-dark"}`} type="button" data-bs-toggle="dropdown">
               Sort: {sortOrder === "newest" ? "Newest First" : "Oldest First"}
             </button>
-            <ul className="dropdown-menu dropdown-menu-dark" aria-labelledby="sortDropdown">
-              <li>
-                <button
-                  className="dropdown-item"
-                  onClick={() => handleSortChange("newest")}
-                >
-                  Newest First
-                </button>
-              </li>
-              <li>
-                <button
-                  className="dropdown-item"
-                  onClick={() => handleSortChange("oldest")}
-                >
-                  Oldest First
-                </button>
-              </li>
+            <ul className={`dropdown-menu ${theme === "dark" ? "dropdown-menu-dark" : ""}`}>
+              <li><button className="dropdown-item" onClick={() => handleSortChange("newest")}>Newest First</button></li>
+              <li><button className="dropdown-item" onClick={() => handleSortChange("oldest")}>Oldest First</button></li>
             </ul>
           </div>
 
           {/* Status Filter Dropdown */}
           <div className="dropdown">
-            <button
-              className="btn btn-outline-light dropdown-toggle"
-              type="button"
-              id="statusDropdown"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
+            <button className={`btn dropdown-toggle ${theme === "dark" ? "btn-outline-light" : "btn-outline-dark"}`} type="button" data-bs-toggle="dropdown">
               Status: {statusFilter === "all" ? "All" : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
             </button>
-            <ul className="dropdown-menu dropdown-menu-dark" aria-labelledby="statusDropdown">
-              <li>
-                <button
-                  className="dropdown-item"
-                  onClick={() => handleStatusFilterChange("all")}
-                >
-                  All
-                </button>
-              </li>
-              <li>
-                <button
-                  className="dropdown-item"
-                  onClick={() => handleStatusFilterChange("pending")}
-                >
-                  Pending
-                </button>
-              </li>
-              <li>
-                <button
-                  className="dropdown-item"
-                  onClick={() => handleStatusFilterChange("accepted")}
-                >
-                  Accepted
-                </button>
-              </li>
+            <ul className={`dropdown-menu ${theme === "dark" ? "dropdown-menu-dark" : ""}`}>
+              <li><button className="dropdown-item" onClick={() => handleStatusFilterChange("all")}>All</button></li>
+              <li><button className="dropdown-item" onClick={() => handleStatusFilterChange("pending")}>Pending</button></li>
+              <li><button className="dropdown-item" onClick={() => handleStatusFilterChange("accepted")}>Accepted</button></li>
             </ul>
           </div>
 
-          {/* Payment Method Filter Dropdown */}
+          {/* Payment Filter Dropdown */}
           <div className="dropdown">
-            <button
-              className="btn btn-outline-light dropdown-toggle"
-              type="button"
-              id="paymentDropdown"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
+            <button className={`btn dropdown-toggle ${theme === "dark" ? "btn-outline-light" : "btn-outline-dark"}`} type="button" data-bs-toggle="dropdown">
               Payment: {paymentFilter === "all" ? "All" : paymentFilter === "cash_on_delivery" ? "Cash on Delivery" : "PayPal"}
             </button>
-            <ul className="dropdown-menu dropdown-menu-dark" aria-labelledby="paymentDropdown">
-              <li>
-                <button
-                  className="dropdown-item"
-                  onClick={() => handlePaymentFilterChange("all")}
-                >
-                  All
-                </button>
-              </li>
-              <li>
-                <button
-                  className="dropdown-item"
-                  onClick={() => handlePaymentFilterChange("cash_on_delivery")}
-                >
-                  Cash on Delivery
-                </button>
-              </li>
-              <li>
-                <button
-                  className="dropdown-item"
-                  onClick={() => handlePaymentFilterChange("paypal")}
-                >
-                  PayPal
-                </button>
-              </li>
+            <ul className={`dropdown-menu ${theme === "dark" ? "dropdown-menu-dark" : ""}`}>
+              <li><button className="dropdown-item" onClick={() => handlePaymentFilterChange("all")}>All</button></li>
+              <li><button className="dropdown-item" onClick={() => handlePaymentFilterChange("cash_on_delivery")}>Cash on Delivery</button></li>
+              <li><button className="dropdown-item" onClick={() => handlePaymentFilterChange("paypal")}>PayPal</button></li>
             </ul>
           </div>
         </div>
 
         {filteredOrders.length === 0 ? (
-          <p className="text-white text-center">No orders match the selected filters.</p>
+          <p className={`${textClass} text-center`}>No orders match the selected filters.</p>
         ) : (
           <div className="row justify-content-center g-4">
             {filteredOrders.map(order => (
               <div className="col-12 col-md-6 col-lg-4" key={order.id}>
-                <div className="order-card h-100">
+                <div className={`order-card h-100 ${theme === "dark" ? "bg-custom-dark text-white" : "bg-white text-dark"}`}>
                   <div className="card-body">
-                    <h5 className="card-title-order text-white">Order #{order.id}</h5>
+                    <h5 className={`card-title-order ${textClass}`}>Order #{order.id}</h5>
                     <div className="card-text">
                       <strong className="text-muted">Items:</strong>
                       <ul className="item-list">
@@ -247,25 +180,26 @@ const Orders = () => {
                           </li>
                         ))}
                       </ul>
-                      <p className="text-white text-break">
+                      <p className={`text-break ${textClass}`}>
                         <strong>{order.paymentMethod === 'cash_on_delivery' ? 'Total Due' : 'Total Paid'}:</strong> {parseFloat(order.total).toFixed(2)} LE<br />
                         <strong>Status:</strong> {order.status}<br />
-                        <strong>Placed:</strong>{' '}
-                        {order.timestamp
-                          ? new Date(order.timestamp.seconds ? order.timestamp.toDate() : order.timestamp).toLocaleString('en-US', {
-                              month: '2-digit',
-                              day: '2-digit',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })
-                          : 'N/A'}<br />
+                        <strong>Placed:</strong> {
+                          order.timestamp
+                            ? new Date(order.timestamp.seconds ? order.timestamp.toDate() : order.timestamp).toLocaleString('en-US', {
+                                month: '2-digit',
+                                day: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })
+                            : 'N/A'
+                        }<br />
                         <strong>Tracking Status:</strong> {order.trackingStatus}
                       </p>
                       {order.shipping && (
                         <div>
                           <strong className="text-muted">Shipping Details:</strong>
-                          <p className="ms-3 text-white text-break">
+                          <p className={`ms-3 text-break ${textClass}`}>
                             City: {order.shipping.city}<br />
                             Phone: {order.shipping.phone}<br />
                             Details: {order.shipping.details}

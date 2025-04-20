@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
-import { db, doc, onSnapshot, deleteDoc } from '../../firebase/firebase';
+import { db, doc, onSnapshot, deleteDoc, auth } from '../../firebase/firebase';
+import { onAuthStateChanged } from "firebase/auth";
 import Swal from 'sweetalert2';
 import './OrderTracking.css';
 
@@ -10,87 +11,88 @@ const OrderTracking = () => {
   const { orderId, total } = location.state || {};
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    if (!orderId) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'No order specified to track.',
-      });
-      navigate('/orders');
-      return;
-    }
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Unauthorized',
+          text: 'You must be logged in to track your order.',
+        });
+        navigate('/login');
+        return;
+      }
 
-    const orderRef = doc(db, "orders", orderId);
-    const unsubscribe = onSnapshot(orderRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data.status === "rejected") {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'This order has been rejected and cannot be tracked.',
-          });
-          navigate('/order-confirmation', { state: { orderId, total } });
-          return;
-        }
-        setOrder(data);
-        setLoading(false);
-      } else {
+      if (!orderId) {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'Order not found.',
+          text: 'No order specified to track.',
         });
         navigate('/orders');
+        return;
       }
-    }, (error) => {
-      console.error("Error fetching order:", error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to fetch order. Please try again.',
+
+      const orderRef = doc(db, "orders", orderId);
+      const unsubscribeOrder = onSnapshot(orderRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.status === "rejected") {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'This order has been rejected and cannot be tracked.',
+            });
+            navigate('/order-confirmation', { state: { orderId, total } });
+            return;
+          }
+          setOrder(data);
+          setLoading(false);
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Order not found.',
+          });
+          navigate('/orders');
+        }
+      }, (error) => {
+        console.error("Error fetching order:", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to fetch order. Please try again.',
+        });
+        setLoading(false);
       });
-      setLoading(false);
+
+      return () => unsubscribeOrder();
     });
 
-    return () => unsubscribe();
+    return () => unsubscribeAuth();
   }, [orderId, navigate, total]);
 
   const getTrackingProgress = (status) => {
-    const statuses = [
-      "Order Placed",
-      "Processing",
-      "Shipped",
-      "Out for Delivery",
-      "Delivered"
-    ];
+    const statuses = ["Order Placed", "Processing", "Shipped", "Out for Delivery", "Delivered"];
     const index = statuses.indexOf(status);
     return ((index + 1) / statuses.length) * 100;
   };
 
   const getProgressBarColor = (status) => {
     switch (status) {
-      case "Order Placed":
-        return "bg-order-placed";
-      case "Processing":
-        return "bg-processing";
-      case "Shipped":
-        return "bg-shipped";
-      case "Out for Delivery":
-        return "bg-out-for-delivery";
-      case "Delivered":
-        return "bg-delivered";
-      default:
-        return "bg-default";
+      case "Order Placed": return "bg-order-placed";
+      case "Processing": return "bg-processing";
+      case "Shipped": return "bg-shipped";
+      case "Out for Delivery": return "bg-out-for-delivery";
+      case "Delivered": return "bg-delivered";
+      default: return "bg-default";
     }
   };
 
   const handleDeleteOrder = async () => {
     Swal.fire({
-      title: `Are you sure?`,
+      title: 'Are you sure?',
       text: `You are about to delete Order #${orderId}. This action cannot be undone.`,
       icon: 'warning',
       showCancelButton: true,
@@ -100,7 +102,6 @@ const OrderTracking = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          setIsDeleting(true);
           const orderRef = doc(db, "orders", orderId);
           await deleteDoc(orderRef);
           Swal.fire(
@@ -116,8 +117,6 @@ const OrderTracking = () => {
             'There was an error deleting the order.',
             'error'
           );
-        } finally {
-          setIsDeleting(false);
         }
       }
     });
@@ -135,7 +134,7 @@ const OrderTracking = () => {
   }
 
   if (!order) {
-    return null; // Redirect handled in useEffect
+    return null;
   }
 
   return (
@@ -148,15 +147,14 @@ const OrderTracking = () => {
               <div className="card-text">
                 <strong className="text-muted">Items:</strong>
                 <ul className="item-list">
-                  {order.items.map((item, index) => (
+                  {order.items?.map((item, index) => (
                     <li key={index}>
-                      {item.title} (x{item.quantity}) - {item.total.toFixed(2)} LE
+                      {item.title} (x{item.quantity}) - {item.total?.toFixed(2)} LE
                     </li>
                   ))}
                 </ul>
                 <p className="text-white">
-                  <strong>{order.paymentMethod === 'cash_on_delivery' ? 'Total Due' : 'Total Paid'}:</strong>{' '}
-                  {total || parseFloat(order.total).toFixed(2)} LE<br />
+                  <strong>{order.paymentMethod === 'cash_on_delivery' ? 'Total Due' : 'Total Paid'}:</strong> {total || parseFloat(order.total).toFixed(2)} LE<br />
                   <strong>Status:</strong> {order.status}<br />
                   <strong>Placed:</strong>{' '}
                   {order.timestamp
@@ -170,7 +168,7 @@ const OrderTracking = () => {
                     : 'N/A'}<br />
                   <strong>Tracking Status:</strong> {order.trackingStatus}
                 </p>
-                <div className="progress mb-3" style={{ height: '20px' }} aria-label="Order tracking progress">
+                <div className="progress mb-3" style={{ height: '20px' }}>
                   <div
                     className={`progress-bar ${getProgressBarColor(order.trackingStatus)}`}
                     role="progressbar"
@@ -195,9 +193,8 @@ const OrderTracking = () => {
                 <button
                   className="btn btn-danger-custom btn-sm mt-3"
                   onClick={handleDeleteOrder}
-                  disabled={isDeleting}
                 >
-                  <i className="bi bi-trash me-2"></i>{isDeleting ? 'Deleting...' : 'Delete'}
+                  <i className="bi bi-trash me-2"></i>Delete
                 </button>
               </div>
             </div>
