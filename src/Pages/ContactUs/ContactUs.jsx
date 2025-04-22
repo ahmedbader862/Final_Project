@@ -20,7 +20,10 @@ console.log(userState55.uid);
         />
        </div>
         
+        <Chat_AI/>
         
+        <FirestoreData/>
+        </>
     );
 
 }                
