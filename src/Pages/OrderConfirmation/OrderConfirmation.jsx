@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { db, doc, onSnapshot } from '../../firebase/firebase';
 import { toast } from 'react-toastify';
 import './OrderConfirmation.css';
+import { ThemeContext } from '../../Context/ThemeContext';
 
 export default function OrderConfirmation() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme } = useContext(ThemeContext);
 
   const { orderId } = location.state || {};
   const [orderData, setOrderData] = useState({ total: '0.00', status: 'pending', paymentMethod: '' });
@@ -69,7 +71,7 @@ export default function OrderConfirmation() {
         return (
           <>
             <h2 className="fw-bold mb-4 text-warning">Order Pending</h2>
-            <p className="lead mb-4">
+            <p className="lead mb-4 text-muted ">
               Your order has been received and is awaiting approval. Please check back later.
             </p>
           </>
@@ -78,7 +80,7 @@ export default function OrderConfirmation() {
         return (
           <>
             <h2 className="fw-bold mb-4 text-success">Order Confirmed!</h2>
-            <p className="lead mb-4">
+            <p className="lead mb-4 text-muted">
               Thank you for your purchase! Your payment has been successfully processed.
             </p>
           </>
@@ -87,7 +89,7 @@ export default function OrderConfirmation() {
         return (
           <>
             <h2 className="fw-bold mb-4 text-danger">Order Rejected</h2>
-            <p className="lead mb-4">
+            <p className="lead mb-4 text-muted">
               Unfortunately, your order has been rejected.
               {orderData.paymentMethod === 'paypal' && (
                 <> Your money will be refunded to your PayPal account as soon as possible.</>
@@ -96,12 +98,12 @@ export default function OrderConfirmation() {
           </>
         );
       default:
-        return <p className="lead mb-4">Unknown order status. Please contact support.</p>;
+        return <p className="lead mb- text-muted">Unknown order status. Please contact support.</p>;
     }
   };
 
   return (
-    <section className="h-100 mt-5">
+    <section className={`h-100 mt-5 order-confirmation ${theme}`}>
       <div className="container h-100 py-5">
         <div className="row d-flex justify-content-center align-items-center h-100">
           <div className="col-10">
@@ -110,8 +112,8 @@ export default function OrderConfirmation() {
                 {renderContent()}
 
                 <div className="mb-4">
-                  <h5>Order Summary</h5>
-                  <p className="mb-1">
+                  <h5 className='text-muted'>Order Summary</h5>
+                  <p className='text-muted' >
                     {orderData.paymentMethod === 'cash_on_delivery' ? 'Total Due' : 'Total Paid'}: {orderData.total} LE
                   </p>
                   <p className="text-muted">

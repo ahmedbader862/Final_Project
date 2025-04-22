@@ -8,3 +8,114 @@
   .btn-primary:hover {
     background-color: #0056b3;
   }
+
+  /* OrderConfirmation.css */
+
+/* Default styles (shared across themes) */
+.card {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Theme */
+.order-confirmation.dark {
+  background: #121212;
+  color: white;
+}
+
+.order-confirmation.dark .card {
+  background: #1a1a1a;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.order-confirmation.dark .text-muted {
+  color: #bbb !important;
+}
+
+.order-confirmation.dark .btn-primary {
+  background-color: #4a90e2;
+  border: none;
+}
+
+.order-confirmation.dark .btn-primary:hover {
+  background-color: #357abd;
+}
+
+.order-confirmation.dark .btn-outline-secondary {
+  border-color: #bbb;
+  color: #bbb;
+}
+
+.order-confirmation.dark .btn-outline-secondary:hover {
+  background-color: #2a2a2a;
+  border-color: #bbb;
+  color: white;
+}
+
+.order-confirmation.dark .spinner-border.text-primary {
+  border-color: #4a90e2;
+  border-right-color: transparent;
+}
+
+.order-confirmation.dark .text-warning {
+  color: #f1c40f !important;
+}
+
+.order-confirmation.dark .text-success {
+  color: #2ecc71 !important;
+}
+
+.order-confirmation.dark .text-danger {
+  color: #e74c3c !important;
+}
+
+/* Light Theme (original design) */
+.order-confirmation.light {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.order-confirmation.light .card {
+  background: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.order-confirmation.light .text-muted {
+  color: #666 !important;
+}
+
+.order-confirmation.light .btn-primary {
+  background-color: #007bff;
+  border: none;
+}
+
+.order-confirmation.light .btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.order-confirmation.light .btn-outline-secondary {
+  border-color: #666;
+  color: #666;
+}
+
+.order-confirmation.light .btn-outline-secondary:hover {
+  background-color: #e0e0e0;
+  border-color: #666;
+  color: #333;
+}
+
+.order-confirmation.light .spinner-border.text-primary {
+  border-color: #007bff;
+  border-right-color: transparent;
+}
+
+.order-confirmation.light .text-warning {
+  color: #e67e22 !important;
+}
+
+.order-confirmation.light .text-success {
+  color: #27ae60 !important;
+}
+
+.order-confirmation.light .text-danger {
+  color: #c0392b !important;
+}

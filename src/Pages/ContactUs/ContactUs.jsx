@@ -6,17 +6,17 @@ function ContactUs() {
 console.log(userState55.uid);
 
     return (
-        <>
-   <br />
-   <br />
-   <br />
-        <Chat
+       
+ 
+       <div className="mt-5">
+         <Chat
         userName = {"admin"}
         uidChats = {userState55.uid}
         showChat = {true}
         />
+       </div>
         
-        </>
+        
     );
 
 }                

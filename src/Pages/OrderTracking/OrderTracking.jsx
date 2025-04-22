@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { db, doc, onSnapshot, deleteDoc, auth } from '../../firebase/firebase';
 import { onAuthStateChanged } from "firebase/auth";
 import Swal from 'sweetalert2';
 import './OrderTracking.css';
+import { ThemeContext } from '../../Context/ThemeContext';
 
 const OrderTracking = () => {
   const location = useLocation();
@@ -11,6 +12,7 @@ const OrderTracking = () => {
   const { orderId, total } = location.state || {};
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { theme } = useContext(ThemeContext);
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
@@ -124,11 +126,11 @@ const OrderTracking = () => {
 
   if (loading) {
     return (
-      <div className="order-tracking-container mt-5 mb-5 text-center">
+      <div className={`order-tracking-container mt-5 mb-5 text-center ${theme}`}>
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Loading...</span>
         </div>
-        <p className="text-white mt-3">Loading order details...</p>
+        <p className="mt-3">Loading order details...</p>
       </div>
     );
   }
@@ -138,11 +140,11 @@ const OrderTracking = () => {
   }
 
   return (
-    <div className="order-tracking-container mt-5 mb-5">
-      <h2 className="text-white mb-4 text-center">Track Order #{orderId}</h2>
+    <div className={`order-tracking-container mt-5  ${theme}`}>
+      <h2 className="mt-5 mb-5 text-center">Track Order #{orderId}</h2>
       <div className="row justify-content-center">
-        <div className="col-12 col-md-8 col-lg-6">
-          <div className="order-card">
+        <div className="col-12 col-md-8 col-lg-6 ">
+          <div className="tracking-card ">
             <div className="card-body">
               <div className="card-text">
                 <strong className="text-muted">Items:</strong>
@@ -153,7 +155,7 @@ const OrderTracking = () => {
                     </li>
                   ))}
                 </ul>
-                <p className="text-white">
+                <p>
                   <strong>{order.paymentMethod === 'cash_on_delivery' ? 'Total Due' : 'Total Paid'}:</strong> {total || parseFloat(order.total).toFixed(2)} LE<br />
                   <strong>Status:</strong> {order.status}<br />
                   <strong>Placed:</strong>{' '}
@@ -183,7 +185,7 @@ const OrderTracking = () => {
                 {order.shipping && (
                   <div>
                     <strong className="text-muted">Shipping Details:</strong>
-                    <p className="ms-3 text-white">
+                    <p className="ms-3">
                       City: {order.shipping.city}<br />
                       Phone: {order.shipping.phone}<br />
                       Details: {order.shipping.details}

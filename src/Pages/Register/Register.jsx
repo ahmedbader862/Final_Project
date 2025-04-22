@@ -250,7 +250,7 @@ function Register() {
     <>
       <div className="container mt-5">
         <div className="row justify-content-center my-5">
-          <div className="col-12 col-sm-8 col-md-6 col-lg-5">
+          <div className="col-12 col-sm-8 col-md-6 col-lg-5 mt-5">
             <div className="p-4 p-md-5 shadow-lg rounded-3 bg-white form-container">
               <h2 className="mb-4 text-center text-dark fw-bold">Create Account</h2>
 
