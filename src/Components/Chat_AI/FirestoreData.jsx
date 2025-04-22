@@ -9,23 +9,23 @@ function FirestoreData() {
 
 
   const [menu, setMenu] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const [reservations, setReservations] = useState([]);
+  // const [users, setUsers] = useState([]);
+  // const [orders, setOrders] = useState([]);
+  // const [reservations, setReservations] = useState([]);
   const [dishesByCategory, setDishesByCategory] = useState({});
   const [allData, setAllData] = useState({});
   
   useEffect(() => {
     setAllData({
-      menu,
-      users,
-      orders,
-      reservations,
+      // menu,
+      // users,
+      // orders,
+      // reservations,
       dishesByCategory
     });
  
     
-  }, [menu, users, orders, reservations, dishesByCategory]);
+  }, [dishesByCategory]);
 
   useEffect(() => {
     console.log("Updated All Data:", allData.orders);
@@ -60,70 +60,70 @@ function FirestoreData() {
   // Fetch users2
 
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "users2"));
-        const categories = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setUsers(categories);
-       console.log(categories);
+  // useEffect(() => {
+  //   const fetchUsers = async () => {
+  //     try {
+  //       const querySnapshot = await getDocs(collection(db, "users2"));
+  //       const categories = querySnapshot.docs.map(doc => ({
+  //         id: doc.id,
+  //         ...doc.data()
+  //       }));
+  //       setUsers(categories);
+  //      console.log(categories);
        
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
+  //     } catch (error) {
+  //       console.error("Error fetching categories:", error);
+  //     }
+  //   };
 
-    fetchUsers();
-  }, []);
+  //   fetchUsers();
+  // }, []);
 
   // (((((((((((((((((((((((((((((((((((   )))))))))))))))))))))))))))))))))))
 
   // Fetch orders
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "orders"));
-        const categories = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setOrders(categories);
-       console.log(categories);
+  // useEffect(() => {
+  //   const fetchOrders = async () => {
+  //     try {
+  //       const querySnapshot = await getDocs(collection(db, "orders"));
+  //       const categories = querySnapshot.docs.map(doc => ({
+  //         id: doc.id,
+  //         ...doc.data()
+  //       }));
+  //       setOrders(categories);
+  //      console.log(categories);
        
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
+  //     } catch (error) {
+  //       console.error("Error fetching categories:", error);
+  //     }
+  //   };
 
-    fetchOrders();
-  }, []);
+  //   fetchOrders();
+  // }, []);
 
 
 
    // (((((((((((((((((((((((((((((((((((   )))))))))))))))))))))))))))))))))))
 
   // Fetch reservations
-  useEffect(() => {
-    const fetchReservations= async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "reservations"));
-        const categories = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setReservations(categories);
-       console.log(categories);
+  // useEffect(() => {
+  //   const fetchReservations= async () => {
+  //     try {
+  //       const querySnapshot = await getDocs(collection(db, "reservations"));
+  //       const categories = querySnapshot.docs.map(doc => ({
+  //         id: doc.id,
+  //         ...doc.data()
+  //       }));
+  //       setReservations(categories);
+  //      console.log(categories);
        
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
+  //     } catch (error) {
+  //       console.error("Error fetching categories:", error);
+  //     }
+  //   };
 
-    fetchReservations();
-  }, []);
+  //   fetchReservations();
+  // }, []);
 
 
 
