@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -8,11 +8,13 @@ import { Timestamp } from 'firebase/firestore';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './Shipping.css';
+import { ThemeContext } from '../../Context/ThemeContext';
 
 export default function Shipping() {
   const { state } = useLocation();
   const navigate = useNavigate();
   const [showPayment, setShowPayment] = useState(false);
+  const { theme } = useContext(ThemeContext);
 
   const { cartItems, total, discountApplied, userId, customer, timestamp } = state || {};
 
@@ -51,7 +53,7 @@ export default function Shipping() {
   const saveOrder = async (paymentMethod) => {
     try {
       const orderDetails = {
-        id: `order_${Date.now().toString().slice(-6)}_${userId.slice(-6)}`, // Shorter ID
+        id: `order_${Date.now().toString().slice(-6)}_${userId.slice(-6)}`,
         customer,
         items: cartItems.map(item => ({
           title: item.title,
@@ -59,7 +61,7 @@ export default function Shipping() {
           quantity: item.quantity,
           total: item.price * item.quantity,
         })),
-        total: parseFloat(total), // Ensure number
+        total: parseFloat(total),
         status: 'pending',
         trackingStatus: 'Order Placed',
         timestamp: timestamp ? Timestamp.fromDate(new Date(timestamp)) : Timestamp.now(),
@@ -72,14 +74,12 @@ export default function Shipping() {
         paymentMethod,
         discountApplied,
       };
-  
-      // Save to orders collection
+
       await setDoc(doc(db, 'orders', orderDetails.id), orderDetails);
-  
-      // Clear cart
+
       const cartDocRef = doc(db, 'users2', userId);
       await setDoc(cartDocRef, { cartItems: [] }, { merge: true });
-  
+
       return orderDetails.id;
     } catch (error) {
       console.error('Order save error:', error);
@@ -103,14 +103,15 @@ export default function Shipping() {
     }
   };
 
+  // Use the theme value directly as a class to match CSS selectors
   return (
-    <div className="shipping-wrapper">
+    <div className={`shipping-wrapper ${theme}`}>
       <div className="shipping-container">
         {!showPayment ? (
           <form className="shipping-form" onSubmit={formik.handleSubmit}>
             <h3 className="form-title">Shipping Information</h3>
             <div className="form-group">
-              <label htmlFor="city" className="form-label text-white">
+              <label htmlFor="city" className="form-label">
                 City
               </label>
               <input
@@ -131,7 +132,7 @@ export default function Shipping() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="details" className="form-label text-white">
+              <label htmlFor="details" className="form-label">
                 Details
               </label>
               <input
@@ -152,7 +153,7 @@ export default function Shipping() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="phone" className="form-label text-white">
+              <label htmlFor="phone" className="form-label">
                 Phone
               </label>
               <input
@@ -178,7 +179,7 @@ export default function Shipping() {
           </form>
         ) : (
           <div className="payment-section">
-            <h3 className="section-title">Choose Payment Method</h3>
+            <h3 className="section-title mb-5">Choose Payment Method</h3>
             <div className="payment-options">
               <button
                 className="payment-btn cod-btn"

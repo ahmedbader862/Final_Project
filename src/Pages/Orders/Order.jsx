@@ -168,7 +168,7 @@ const Orders = () => {
           <div className="row justify-content-center g-4">
             {filteredOrders.map(order => (
               <div className="col-12 col-md-6 col-lg-4" key={order.id}>
-                <div className={`order-card h-100 ${theme === "dark" ? "bg-custom-dark text-white" : "bg-white text-dark"}`}>
+                <div className={`tracking-card h-100 ${theme === "dark" ? "bg-custom-dark text-white" : "bg-white text-dark"}`}>
                   <div className="card-body">
                     <h5 className={`card-title-order ${textClass}`}>Order #{order.id}</h5>
                     <div className="card-text">

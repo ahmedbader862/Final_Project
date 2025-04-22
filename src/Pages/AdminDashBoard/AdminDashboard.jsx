@@ -447,7 +447,6 @@ const AdminOrdersPage = () => {
   );
 };
 
-// AdminPanel and AdminChat remain unchanged
 const AdminPanel = () => {
   const [user, setUser] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -455,7 +454,7 @@ const AdminPanel = () => {
   const [menuItems, setMenuItems] = useState([]);
   const [showModal, setShowModal] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [formData, setFormData] = useState({ id: "", title: "", description: "", price: "", image: "", imageFile: null });
+  const [formData, setFormData] = useState({ title: "", description: "", price: "", image: "", imageFile: null });
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => setUser(user));
@@ -506,16 +505,14 @@ const AdminPanel = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (values) => {
     let imageUrl = formData.image;
     try {
-      if (formData.imageFile) imageUrl = await uploadImageToStorage(formData.imageFile);
+      if (values.imageFile) imageUrl = await uploadImageToStorage(values.imageFile);
       const itemData = {
-        id: formData.id,
-        title: formData.title,
-        description: formData.description,
-        price: parseFloat(formData.price),
+        title: values.title,
+        description: values.description,
+        price: parseFloat(values.price),
         image: imageUrl || "",
       };
       if (showModal === "add") {
@@ -527,7 +524,7 @@ const AdminPanel = () => {
         toast.success("Item updated!");
       }
       setShowModal(null);
-      setFormData({ id: "", title: "", description: "", price: "", image: "", imageFile: null });
+      setFormData({ title: "", description: "", price: "", image: "", imageFile: null });
     } catch (error) {
       console.error("Error saving item:", error);
       toast.error(`Error saving item: ${error.message}`);
@@ -553,7 +550,7 @@ const AdminPanel = () => {
       await setDoc(doc(db, "menu", newCategory), { name: newCategory });
       toast.success("Category added!");
       setShowModal(null);
-      setFormData({ id: "", title: "", description: "", price: "", image: "", imageFile: null });
+      setFormData({ title: "", description: "", price: "", image: "", imageFile: null });
     } catch (error) {
       console.error("Error adding category:", error);
       toast.error("Error adding category");
@@ -563,7 +560,6 @@ const AdminPanel = () => {
   const openEditModal = (item) => {
     setSelectedItem(item);
     setFormData({
-      id: item.id || "",
       title: item.title || "",
       description: item.description || "",
       price: item.price || "",
@@ -582,7 +578,7 @@ const AdminPanel = () => {
           <CategorySelector categories={categories} selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
           <Button
             onClick={() => {
-              setFormData({ id: "", title: "", description: "", price: "", image: "", imageFile: null });
+              setFormData({ title: "", description: "", price: "", image: "", imageFile: null });
               setShowModal("add");
             }}
             className="mb-4"
