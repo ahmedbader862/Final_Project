@@ -1,76 +1,106 @@
+// Chat_AI.js
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
 
 function Chat_AI() {
-  const fireData = useSelector((state) => state.fireData.FireData[3]);
+  // لو بياناتك في Redux (من Firebase مثلاً) موجودة هنا
+  const fireData = useSelector((state) => state.fireData?.FireData?.[3]);
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
+  const [answer, setAnswer] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
+  // عند تحميل المكون، بنبعت البيانات للباك عشان تخزنها في الـ vector store
   useEffect(() => {
-    const processAndSendData = async () => {
+    const processData = async () => {
       if (!fireData) return;
 
       try {
-        // Convert fireData into an array of documents with metadata
-        const documents = Object.entries(fireData).flatMap(([key, value]) =>
-          Array.isArray(value)
-            ? value.map((item, index) => ({
-                pageContent: `Key: ${key}, Data: ${JSON.stringify(item)}`,
-                metadata: { id: `${key}-${index}` },
-              }))
-            : [{
-                pageContent: `Key: ${key}, Data: ${JSON.stringify(value)}`,
-                metadata: { id: key },
-              }]
-        );
+        const documents = Object.entries(fireData).flatMap(([key, value]) => {
+          const content = `Key: ${key}, Data: ${JSON.stringify(value)}`;
+          return [
+            {
+              pageContent: content.substring(0, 1000),
+              metadata: { id: key, source: "firebase" },
+            },
+          ];
+        });
 
-        // Send documents to backend to generate embeddings
-        await axios.post("http://localhost:3000/generate-embeddings", { documents });
-        console.log("✅ Data uploaded successfully");
+        await axios.post("http://localhost:3000/generate-embeddings", {
+          documents: documents.slice(0, 50),
+        });
+        console.log("✅ تم تحميل البيانات بنجاح");
+        console.log(fireData);
       } catch (error) {
-        console.error("❌ Error sending data:", error);
+        console.error("❌ فشل تحميل البيانات:", error);
       }
     };
 
-    processAndSendData();
+    processData();
   }, [fireData]);
 
+  // دالة لمعالجة البحث
   const handleSearch = async () => {
-    if (!query) return;
+    if (!query.trim()) return;
 
+    setIsLoading(true);
     try {
-      // Send query to backend and get search results
-      const response = await axios.post("http://localhost:3000/search", { query });
-      setResults(response.data.results || [{ content: "❌ No results available" }]);
+      const response = await axios.post("http://localhost:3000/search", {
+        query: query.substring(0, 200),
+        conversation_history: "" // ممكن تضيف سجل المحادثة لو حبيت
+      });
+      setAnswer(response.data.answer);
     } catch (error) {
-      console.error("❌ Search error:", error);
-      setResults([{ content: "❌ An error occurred during the search" }]);
+      console.error("❌ خطأ البحث:", error);
+      setAnswer("عذرًا، حدث خطأ أثناء معالجة طلبك");
     }
+    setIsLoading(false);
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Chat AI </h1>
-      <input
-        type="text"
-        placeholder="Type your question here..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        style={{ padding: 10, width: "80%", marginBottom: 10 }}
-      />
-      <button onClick={handleSearch} style={{ padding: 10 }}>Search</button>
-      
-      {results.length > 0 && (
-        <div style={{ marginTop: 20, color: "blue" }}>
-          <h3>📌 Results:</h3>
-          <ul>
-            {results.map((res, index) => (
-              <li key={index}>
-                {res.content} {res.similarity && `(Similarity: ${res.similarity.toFixed(2)})`}
-              </li>
-            ))}
-          </ul>
+    <div style={{ padding: 20, maxWidth: 800, margin: "auto" }}>
+      <h1 style={{ color: "#2c3e50" }}>مساعد المطعم الذكي</h1>
+      <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
+        <input
+          type="text"
+          placeholder="اسأل عن القائمة، المواعيد، أو الخدمات..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          style={{
+            flex: 1,
+            padding: 12,
+            borderRadius: 8,
+            border: "1px solid #3498db",
+            fontSize: 16,
+          }}
+        />
+        <button
+          onClick={handleSearch}
+          style={{
+            padding: "12px 24px",
+            background: "#3498db",
+            color: "white",
+            border: "none",
+            borderRadius: 8,
+            cursor: "pointer",
+            fontSize: 16,
+          }}
+          disabled={isLoading}
+        >
+          {isLoading ? "جاري البحث..." : "ابحث"}
+        </button>
+      </div>
+      {answer && (
+        <div
+          style={{
+            background: "#f8f9fa",
+            padding: 20,
+            borderRadius: 8,
+            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+          }}
+        >
+          <h3 style={{ color: "#2ecc71", marginTop: 0 }}>الإجابة:</h3>
+          <p style={{ lineHeight: 1.6, fontSize: 16 }}>{answer}</p>
         </div>
       )}
     </div>
@@ -78,53 +108,3 @@ function Chat_AI() {
 }
 
 export default Chat_AI;
-
-// import React, { useEffect, useState } from "react";
-// import { useSelector } from "react-redux";
-// import { OpenAIEmbeddings } from "@langchain/openai";
-// import { MemoryVectorStore } from "langchain/vectorstores/memory"; // Vector DB بسيط في الذاكرة
-
-// function Chat_AI() {
-//   const fireData = useSelector((state) => state.fireData.FireData[3]);
-//   const [vectorStore, setVectorStore] = useState(null);
-
-//   useEffect(() => {
-//     const processEmbeddings = async () => {
-//       try {
-//         if (!fireData || !fireData.reservations) return;
-
-//         // تحويل البيانات إلى نصوص يمكن معالجتها
-//         const documents = fireData.reservations.map((item, index) => ({
-//           pageContent: JSON.stringify(item),
-//           metadata: { id: index },
-//         }));
-
-//         // استخدام OpenAI لتحويل البيانات إلى Embeddings
-//         const embeddings = new OpenAIEmbeddings({
-//           // apiKey: "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", // استخدم API Key الصحيح
-//           apiKey: "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", // استخدم API Key الصحيح
-//           model: "text-embedding-3-small", 
-//           batchSize: 512, 
-//         });
-
-//         // تخزين البيانات في Vector Store (مؤقتًا في الذاكرة)
-//         const vectorDB = await MemoryVectorStore.fromDocuments(
-//           documents,
-//           embeddings
-//         );
-
-//         setVectorStore(vectorDB);
-//         console.log("✅ Data converted to vectors successfully!");
-
-//       } catch (error) {
-//         console.error("Error processing embeddings:", error);
-//       }
-//     };
-
-//     processEmbeddings();
-//   }, [fireData]);
-
-//   return <h1>Chat AI Ready ✅</h1>;
-// }
-
-// export default Chat_AI;
