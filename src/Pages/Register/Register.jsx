@@ -110,6 +110,9 @@ function Register() {
     }
 
     console.log("Proceeding with registration");
+
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     createUserWithEmailAndPassword(auth, userUpData.email, userUpData.password)
       .then((userCredential) => {
         const user = userCredential.user;
@@ -131,7 +134,7 @@ function Register() {
         }));
       });
   };
-
+// ((((((((((((((((((((((((((((()))))))))))))))))))))))))))))
   const createUser = (uid) => {
     const userDetails = {
       name: userUpData.name || "",
@@ -149,6 +152,8 @@ function Register() {
         console.error("Error saving user data:", error);
       });
   };
+
+  // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&7
 
   const logInGoogle = () => {
     console.log("Attempting Google Sign-Up");
@@ -178,6 +183,8 @@ function Register() {
         }));
       });
   };
+
+  // ##################################################3
 
   const createUserGoogle = (user, token) => {
     const userData = {

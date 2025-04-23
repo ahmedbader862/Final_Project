@@ -1,16 +1,15 @@
-// Chat_AI.js
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import './Chat_AI.css';
 
 function Chat_AI() {
-  // لو بياناتك في Redux (من Firebase مثلاً) موجودة هنا
   const fireData = useSelector((state) => state.fireData?.FireData?.[3]);
   const [query, setQuery] = useState("");
-  const [answer, setAnswer] = useState("");
+  const [conversation, setConversation] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
-  // عند تحميل المكون، بنبعت البيانات للباك عشان تخزنها في الـ vector store
   useEffect(() => {
     const processData = async () => {
       if (!fireData) return;
@@ -30,7 +29,6 @@ function Chat_AI() {
           documents: documents.slice(0, 50),
         });
         console.log("✅ تم تحميل البيانات بنجاح");
-        console.log(fireData);
       } catch (error) {
         console.error("❌ فشل تحميل البيانات:", error);
       }
@@ -39,68 +37,78 @@ function Chat_AI() {
     processData();
   }, [fireData]);
 
-  // دالة لمعالجة البحث
   const handleSearch = async () => {
     if (!query.trim()) return;
 
     setIsLoading(true);
     try {
+      const newConversation = [...conversation, `User: ${query}`];
+      setConversation(newConversation);
+
       const response = await axios.post("http://localhost:3000/search", {
         query: query.substring(0, 200),
-        conversation_history: "" // ممكن تضيف سجل المحادثة لو حبيت
+        conversation_history: newConversation.join("\n"),
       });
-      setAnswer(response.data.answer);
+
+      setConversation([...newConversation, `Assistant: ${response.data.answer}`]);
     } catch (error) {
       console.error("❌ خطأ البحث:", error);
-      setAnswer("عذرًا، حدث خطأ أثناء معالجة طلبك");
+      setConversation([...conversation, "Assistant: عذرًا، حدث خطأ أثناء معالجة طلبك"]);
     }
     setIsLoading(false);
+    setQuery("");
+  };
+
+  const toggleChat = () => {
+    setIsChatOpen(!isChatOpen);
   };
 
   return (
-    <div style={{ padding: 20, maxWidth: 800, margin: "auto" }}>
-      <h1 style={{ color: "#2c3e50" }}>مساعد المطعم الذكي</h1>
-      <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-        <input
-          type="text"
-          placeholder="اسأل عن القائمة، المواعيد، أو الخدمات..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          style={{
-            flex: 1,
-            padding: 12,
-            borderRadius: 8,
-            border: "1px solid #3498db",
-            fontSize: 16,
-          }}
-        />
-        <button
-          onClick={handleSearch}
-          style={{
-            padding: "12px 24px",
-            background: "#3498db",
-            color: "white",
-            border: "none",
-            borderRadius: 8,
-            cursor: "pointer",
-            fontSize: 16,
-          }}
-          disabled={isLoading}
-        >
-          {isLoading ? "جاري البحث..." : "ابحث"}
-        </button>
-      </div>
-      {answer && (
-        <div
-          style={{
-            background: "#f8f9fa",
-            padding: 20,
-            borderRadius: 8,
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-          }}
-        >
-          <h3 style={{ color: "#2ecc71", marginTop: 0 }}>الإجابة:</h3>
-          <p style={{ lineHeight: 1.6, fontSize: 16 }}>{answer}</p>
+    <div className="chat-container">
+      <button
+        onClick={toggleChat}
+        className="chat-button"
+      >
+        {isChatOpen ? "×" : "💬"}
+      </button>
+
+      {isChatOpen && (
+        <div className="chat-panel">
+          <div className="chat-header">
+            Chat with AI
+          </div>
+
+          <div className="chat-conversation">
+            {conversation.map((message, index) => {
+              const isUser = message.startsWith("User:");
+              const messageText = message.replace("User: ", "").replace("Assistant: ", "");
+              return (
+                <div
+                  key={index}
+                  className={`message ${isUser ? "user-message" : "assistant-message"}`}
+                >
+                  {messageText}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="chat-input">
+            <input
+              type="text"
+              placeholder="اسألني أي سؤال!"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="input-field"
+            />
+            <button
+              onClick={handleSearch}
+              className="send-button"
+              disabled={isLoading}
+            >
+              {isLoading ? "..." : "➤"}
+            </button>
+          </div>
         </div>
       )}
     </div>

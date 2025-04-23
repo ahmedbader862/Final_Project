@@ -17,7 +17,7 @@ function Menu() {
   const [softDrinks, setSoftDrinks] = useState([]);
   const [chickenSandwiches, setChickenSandwiches] = useState([]);
   const [beefSandwiches, setBeefSandwiches] = useState([]);
-  const [hotDrinks, setHotDrinks] = useState([]);
+  const [drinks, setdrinks] = useState([]);
   const [pizzas, setPizzas] = useState([]);
   const { theme } = useContext(ThemeContext);
 
@@ -44,7 +44,7 @@ function Menu() {
     getCategoryData("beef sandwich", setBeefSandwiches);
     getCategoryData("pizaa", setPizzas);
     getCategoryData("soft drinks", setSoftDrinks);
-    getCategoryData("drinks", setHotDrinks);
+    getCategoryData("drinks", setdrinks);
   }, []);
 
   const handleAddToCart = (item) => {
@@ -132,7 +132,7 @@ function Menu() {
         {renderCategorySection("Beef Sandwiches", beefSandwiches, "beef sandwich")}
         {renderCategorySection("Pizzas", pizzas, "pizaa")}
         {renderCategorySection("Soft Drinks", softDrinks, "soft drinks")}
-        {renderCategorySection("Hot Drinks", hotDrinks, "hot drinks")}
+        {renderCategorySection("Drinks", drinks, "drinks")}
 
         <ToastContainer />
       </div>

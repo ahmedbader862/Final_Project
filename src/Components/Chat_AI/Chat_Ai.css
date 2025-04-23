@@ -1,0 +1,104 @@
+.chat-container {
+  position: relative;
+}
+
+.chat-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #008040;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-panel {
+  position: fixed;
+  top: 90px; /* تبدأ من تحت الناف بار بتاع المتصفح */
+  right: 0;
+  width: 33%;
+  height: calc(100vh - 140px); /* الارتفاع الكلي ناقص المسافة من أعلى */
+  background: white;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+}
+
+.chat-header {
+  background: #bd2f2f;
+  color: white;
+  padding: 10px 20px;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.chat-conversation {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background: #fff;
+}
+
+.message {
+  padding: 10px 15px;
+  border-radius: 15px;
+  max-width: 70%;
+  word-wrap: break-word;
+  margin-bottom: 10px;
+}
+
+.user-message {
+  background: #3498db;
+  color: white;
+  align-self: flex-end;
+}
+
+.assistant-message {
+  background: #ecf0f1;
+  color: #2c3e50;
+  align-self: flex-start;
+}
+
+.chat-input {
+  padding: 20px;
+  border-top: 1px solid #ddd;
+  display: flex;
+  gap: 10px;
+}
+
+.input-field {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.send-button {
+  background: #008040;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

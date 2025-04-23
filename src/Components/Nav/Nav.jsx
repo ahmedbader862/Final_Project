@@ -12,7 +12,7 @@
     where,
     getDocs,
     } from "../../firebase/firebase";
-    import { setUserState } from "../../redux/reduxtoolkit";
+    import { setUserState , setLange } from "../../redux/reduxtoolkit";
     import { ThemeContext } from "../../Context/ThemeContext";
 
     function Nav() {
@@ -22,6 +22,21 @@
     const dispatch = useDispatch();
     const userState55 = useSelector((state) => state.UserData["UserState"]);
     const navigate = useNavigate();
+
+    const currentLange = useSelector((state) => state.lange.langue);
+
+    const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
+
+
+    const changeLang = () => {
+        
+       dispatch(setLange(currentLange === "En" ? "Ar" : "En"));
+       console.log(text.home);
+       
+       console.log(currentLange);
+
+    }
+
 
     const logout = () => {
         signOut(auth)
@@ -141,6 +156,16 @@
                     {theme === "dark" ? "Dark" : "Light"}
                 </label>
                 </div>
+
+{/* ########################################### */}
+{/* ########################################### */}
+{/* ########################################### */}
+                <button
+                onClick={changeLang}
+                className="text-white bg-black hover:bg-black focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center"
+              >
+                ar
+              </button>
 
                 {/* Auth Buttons */}
                 <div className="buttons d-flex gap-2">
