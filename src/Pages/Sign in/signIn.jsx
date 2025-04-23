@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { auth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, providerG, db, setDoc, doc, getDoc } from "../../firebase/firebase";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,8 @@ import './Signin.css';
 
 function Signin() {
   const allDishes = useSelector((state) => state.wishlist);
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
   const [userUpData, setUserUpData] = useState({
     email: "",
     password: ""
@@ -134,11 +136,11 @@ function Signin() {
         <div className="row justify-content-center my-5">
           <div className="col-12 col-sm-8 col-md-6 col-lg-5 mt-5">
             <div className="p-4 p-md-5 shadow-lg rounded-3 bg-white form-container">
-              <h2 className="mb-4 text-center text-dark fw-bold">Sign In</h2>
+              <h2 className="mb-4 text-center text-dark fw-bold">{text.signIn}</h2>
 
               {/* Email Field */}
               <div className="mb-3">
-                <label className="form-label text-dark">Email</label>
+                <label className="form-label text-dark">{text.email}</label>
                 <div className="input-group">
                   <span className="input-group-text bg-light">
                     <FontAwesomeIcon icon={faEnvelope} />
@@ -159,7 +161,7 @@ function Signin() {
 
               {/* Password Field */}
               <div className="mb-4">
-                <label className="form-label text-dark">Password</label>
+                <label className="form-label text-dark">{text.password}</label>
                 <div className="input-group">
                   <span className="input-group-text bg-light">
                     <FontAwesomeIcon icon={faLock} />
@@ -184,13 +186,13 @@ function Signin() {
                 onClick={handleSignin}
                 className="btn btn-primary w-100 mb-3 fw-semibold"
               >
-                Sign In
+                {text.signInButton}
               </button>
 
               {/* Divider */}
               <div className="d-flex align-items-center my-4">
                 <hr className="flex-grow-1" />
-                <span className="px-2 text-muted">or</span>
+                <span className="px-2 text-muted">{text.or}</span>
                 <hr className="flex-grow-1" />
               </div>
 
@@ -200,13 +202,13 @@ function Signin() {
                   onClick={logInGoogle}
                   className="btn btn-outline-danger w-50 d-flex align-items-center justify-content-center gap-2"
                 >
-                  <FontAwesomeIcon icon={faGoogleBrand} /> Google
+                  <FontAwesomeIcon icon={faGoogleBrand} /> {text.google}
                 </button>
                 <button
                   disabled
                   className="btn btn-outline-primary w-50 d-flex align-items-center justify-content-center gap-2"
                 >
-                  <FontAwesomeIcon icon={faFacebookBrand} /> Facebook
+                  <FontAwesomeIcon icon={faFacebookBrand} /> {text.facebook}
                 </button>
               </div>
             </div>

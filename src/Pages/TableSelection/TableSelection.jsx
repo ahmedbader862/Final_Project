@@ -1,10 +1,13 @@
 import React, { useState, useContext } from "react";
+import { useSelector } from "react-redux";
 import { ThemeContext } from "../../Context/ThemeContext"; // تأكد من المسار
 import "./TableSelection.css";
 
 const TableSelection = ({ selectedTable, setSelectedTable }) => {
   const [hoveredTable, setHoveredTable] = useState(null);
   const { theme } = useContext(ThemeContext);
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
 
   const tables = [
     { id: 1, seats: 4, image: "https://i.postimg.cc/fR12ckGT/table-4-removebg-preview.png" },
@@ -21,7 +24,7 @@ const TableSelection = ({ selectedTable, setSelectedTable }) => {
 
   return (
     <div className="my-5 reservation">
-      <h2 className={`text-center my-4 ${h2Color}`}>Select a Table</h2>
+      <h2 className={`text-center my-4 ${h2Color}`}>{text.selectTableTitle}</h2>
       <div className="row tables d-flex justify-content-center">
         {tables.map((table) => (
           <div
@@ -31,11 +34,13 @@ const TableSelection = ({ selectedTable, setSelectedTable }) => {
           >
             <img
               src={table.image}
-              alt={`Table for ${table.seats} persons`}
+              alt={`${text.tableFor} ${table.seats} ${text.persons}`}
               onMouseEnter={() => setHoveredTable(table.id)}
               onMouseLeave={() => setHoveredTable(null)}
             />
-            <p className="text-white">Table {table.id}</p>
+            <p className={h2Color}>
+              {text.tableFor} {table.seats} {text.persons}
+            </p>
           </div>
         ))}
       </div>
