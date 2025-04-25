@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import { db } from "../../firebase/firebase";
 import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
-import { ThemeContext } from "../../Context/ThemeContext";
+import { ThemeContext } from "../../Context/ThemeContext"; // تأكد من المسار
 import "./ReservationForm.css";
 
 const ReservationForm = ({ selectedTable, setSelectedTable }) => {
@@ -13,6 +13,9 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
   const [error, setError] = useState("");
 
   const { theme } = useContext(ThemeContext);
+
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
 
   const textColor = theme === "dark" ? "text-white" : "text-dark";
   const inputBg = theme === "dark" ? "bg-dark text-white" : "bg-light text-dark";
@@ -46,7 +49,7 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
       timeLeaving,
     });
 
-    alert("Reservation successful!");
+    alert(text.reservationSuccess);
     setName("");
     setDate("");
     setNumPersons(4);
@@ -58,50 +61,19 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
 
   return (
     <div className="my-5">
-      <h2 className={`text-center mb-3 ${textColor}`}>Reservation Form</h2>
-      {selectedTable && <p className={textColor}>Selected Table: {selectedTable}</p>}
+      <h2 className={`text-center mb-3 ${textColor}`}>{text.reservationFormTitle}</h2>
+      {selectedTable && <p className={textColor}>{text.selectedTable}: {selectedTable}</p>}
       <form className="d-flex flex-column gap-2" onSubmit={handleSubmit}>
-        <input
-          className={`form-control ${inputBg}`}
-          type="text"
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <input
-          className={`form-control ${inputBg}`}
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          required
-        />
-        <select
-          className={`form-control ${inputBg}`}
-          value={numPersons}
-          onChange={(e) => setNumPersons(Number(e.target.value))}
-        >
+        <input className={`form-control name ${inputBg}`} type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} required />
+        <input className={`form-control ${inputBg}`} type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+        <select className={`form-control ${inputBg}`} value={numPersons} onChange={(e) => setNumPersons(Number(e.target.value))}>
           <option value={4}>4 Persons</option>
           <option value={6}>6 Persons</option>
         </select>
-        <input
-          className={`form-control ${inputBg}`}
-          type="time"
-          value={timeArriving}
-          onChange={(e) => setTimeArriving(e.target.value)}
-          required
-        />
-        <input
-          className={`form-control ${inputBg}`}
-          type="time"
-          value={timeLeaving}
-          onChange={(e) => setTimeLeaving(e.target.value)}
-          required
-        />
+        <input className={`form-control ${inputBg}`} type="time" value={timeArriving} onChange={(e) => setTimeArriving(e.target.value)} required />
+        <input className={`form-control ${inputBg}`} type="time" value={timeLeaving} onChange={(e) => setTimeLeaving(e.target.value)} required />
         {error && <p style={{ color: "red" }}>{error}</p>}
-        <button className={`btn mt-4 ${btnClass}`} type="submit">
-          Reserve
-        </button>
+        <button className={`btn mt-4 ${btnClass}`} type="submit">Reserve</button>
       </form>
     </div>
   );

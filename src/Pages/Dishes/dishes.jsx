@@ -3,6 +3,7 @@ import { db, collection, getDocs } from '../../firebase/firebase';
 import { useParams } from 'react-router-dom';
 import Card from '../../Components/Card/card';
 import '../Dishes/dishes.css';
+import { useSelector } from "react-redux";
 import { ThemeContext } from '../../Context/ThemeContext';
 
 function Dishes() {
@@ -12,7 +13,9 @@ function Dishes() {
   const [titleKey, setTitleKey] = useState('title');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
+
   const { theme } = useContext(ThemeContext);
+  const currentLange = useSelector((state) => state.lange.langue);
 
   useEffect(() => {
     if (id === 'sandwiches') {
@@ -40,7 +43,7 @@ function Dishes() {
     };
 
     getDishes();
-  }, [id]);
+  }, [id, currentLange]);
 
   // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -67,14 +70,22 @@ function Dishes() {
           {currentDishes.map((dish) => (
             <div className="col-12 col-md-6 col-lg-4" key={dish.id}>
               <Card
-                title={dish[titleKey]}
+                title={
+                  currentLange === "Ar"
+                    ? dish.title_ar || dish.name_ar || "عنوان غير متوفر"
+                    : dish[titleKey] || "Title not available"
+                }
                 poster_path={
                   Array.isArray(dish[imageKey])
                     ? dish[imageKey][1]?.lg || ''
                     : dish[imageKey]
                 }
                 price={dish.price}
-                description={dish.description}
+                description={
+                  currentLange === "Ar"
+                    ? dish.desc_ar || "لا يوجد وصف"
+                    : dish.description || "No description"
+                }
               />
             </div>
           ))}

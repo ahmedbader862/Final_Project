@@ -1,7 +1,7 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { removWishlist, setWishlist } from "../../redux/reduxtoolkit";
-import { db, getDoc, doc, setDoc } from '../../firebase/firebase';
+import { db, getDoc, doc, setDoc, onSnapshot } from '../../firebase/firebase';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ThemeContext } from "../../Context/ThemeContext";
@@ -22,15 +22,71 @@ function Carde({ title, poster_path, description, price }) {
   const safePosterPath = poster_path || "default-image.jpg";
   const safePrice = price || "Price not available";
 
+  
   const handleToggleWishlist = () => {
-    if (isInWishlist) {
-      dispatch(removWishlist(safeTitle));
-      toast.info(`${safeTitle} removed from wishlist`, { position: "top-right", autoClose: 2000 });
+    if (userState55 && userState55.uid) {
+      // المستخدم مسجل الدخول: يتعامل مع Firestore فقط
+      toggleFirestore();
     } else {
-      dispatch(setWishlist({ title: safeTitle, poster_path: safePosterPath }));
-      toast.success(`${safeTitle} added to wishlist`, { position: "top-right", autoClose: 2000 });
+      // المستخدم مش مسجل الدخول: يتعامل مع Redux فقط
+      if (findDishesInWishlist) {
+        handleRemoveWishlist();
+      } else {
+        handleAddWishlist();
+      }
     }
   };
+  const wishlistRedux = useSelector((state) => state.wishlist?.wishlist || []);
+  const userState55 = useSelector((state) => state.UserData?.['UserState'] || null);
+  const findDishesInWishlist = wishlistRedux.some((dish) => dish.title === props.title);
+  const [isInWishlistFirestore, setIsInWishlistFirestore] = useState(false); // حالة جديدة لـ Firestore
+
+  // جلب حالة العنصر من Firestore لما المستخدم مسجل دخول
+  useEffect(() => {
+    if (userState55 && userState55.uid && userState55 !== "who know") {
+      const unsub = onSnapshot(
+        doc(db, "users2", userState55.uid),
+        (docSnap) => {
+          if (docSnap.exists()) {
+            const allDishes = docSnap.data().allDishes || [];
+            const exists = allDishes.some(dish => dish.title === props.title);
+            setIsInWishlistFirestore(exists);
+          } else {
+            setIsInWishlistFirestore(false);
+          }
+        },
+        (error) => console.error("Firestore listener error:", error)
+      );
+      return () => unsub();
+    }
+  }, [userState55, props.title]);
+
+  const handleAddWishlist = () => {
+    dispatch(
+      setWishlist({
+        title: props.title, // العنوان بالإنجليزية
+        title_ar: props.title_ar || "عنوان غير متوفر", // العنوان بالعربية
+        poster_path: props.poster_path,
+        description: props.description, // الوصف بالإنجليزية
+        description_ar: props.description_ar || "الوصف غير متوفر", // الوصف بالعربية
+        price: props.price,
+      })
+    );
+    toast.success(`${props.title} added to wishlist!`, {
+      position: "top-right",
+      autoClose: 2000,
+    });
+  };
+
+  const handleRemoveWishlist = () => {
+    dispatch(removWishlist(props.title));
+    toast.info(`${props.title} removed from wishlist`, {
+      position: "top-right",
+      autoClose: 2000,
+    });
+  };
+
+  
 
   const toggleFirestore = async () => {
     if (!user?.uid) return toast.error("User not authenticated", { position: "top-right", autoClose: 2000 });
@@ -42,19 +98,36 @@ function Carde({ title, poster_path, description, price }) {
       const dishExists = dishes.some((dish) => dish.title === safeTitle);
 
       const updatedDishes = dishExists
-        ? dishes.filter((dish) => dish.title !== safeTitle)
-        : [...dishes, { title: safeTitle, poster_path: safePosterPath }];
+        ? currentDishes.filter(dish => dish.title !== props.title)
+        : [
+            ...currentDishes,
+            {
+              title: props.title, // العنوان بالإنجليزية
+              title_ar: props.title_ar || "عنوان غير متوفر", // العنوان بالعربية
+              poster_path: props.poster_path,
+              description: props.description, // الوصف بالإنجليزية
+              description_ar: props.description_ar || "الوصف غير متوفر", // الوصف بالعربية
+              price: props.price,
+            },
+          ];
 
+      // تحديث Firestore فقط
       await setDoc(docRef, { allDishes: updatedDishes }, { merge: true });
-      toast[dishExists ? "info" : "success"](`${safeTitle} ${dishExists ? "removed from" : "added to"} wishlist!`, {
+
+      toast[dishExists ? "info" : "success"](
+        `${props.title} ${dishExists ? "removed from" : "added to"} wishlist!`,
+        { position: "top-right", autoClose: 2000 }
+      );
+    } catch (error) {
+      console.error("Firestore error:", error);
+      toast.error("Error updating wishlist", {
         position: "top-right",
         autoClose: 2000,
       });
-    } catch (error) {
-      console.error("Firestore error:", error);
-      toast.error("Error updating wishlist", { position: "top-right", autoClose: 2000 });
-    }
+    
   };
+
+  
 
   const addToCartFirestore = async () => {
     if (!user?.uid) return toast.error("Please login to add items to cart", { position: "top-right", autoClose: 2000 });
@@ -78,6 +151,7 @@ function Carde({ title, poster_path, description, price }) {
     }
   };
 
+  
   const textColor = theme === "dark" ? "text-white" : "text-dark";
   const bgColor = theme === "dark" ? "bg-dark" : "bg-light";
   const iconColor = theme === "dark" ? "text-white" : "text-dark";

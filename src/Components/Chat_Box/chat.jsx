@@ -1,7 +1,7 @@
 import { dbR, ref, push, onValue } from '../../firebase/firebase';
 import { useEffect, useState, useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { useSelector } from 'react-redux';
+import { useSelector } from "react-redux";
 import './Chat.css';
 import { ThemeContext } from '../../Context/ThemeContext';
 
@@ -17,6 +17,8 @@ function Chat(props) {
   const msgReceived = isDark ? "bg-secondary text-white" : "bg-light text-dark";
 
   const userState55 = useSelector((state) => state.UserData['UserState']);
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
   const [inputChat, setInputChat] = useState('');
   const [chatTexts, setChatTexts] = useState([]);
 
@@ -61,7 +63,7 @@ function Chat(props) {
           <div className="col-md-9 chat-container">
             {props.showChat && (
               <>
-                <h1 className={`mb-4 ${textColor}`}>Chat with {props.userName}</h1>
+                <h1 className={`mb-4 ${textColor}`}>{text.chatWith}</h1>
                 <div className={`chat-box shadow-lg rounded ${bgChatColor}`}>
                   <div className={`messages p-3`} style={{ maxHeight: '400px', overflowY: 'auto' }}>
                     {chatTexts.length > 0 ? (
@@ -77,7 +79,7 @@ function Chat(props) {
                         </div>
                       ))
                     ) : (
-                      <p className="text-center text-muted">No messages yet. Start the conversation!</p>
+                      <p className="text-center text-muted">{text.noMessages}</p>
                     )}
                   </div>
 
@@ -86,13 +88,13 @@ function Chat(props) {
                       <input
                         type="text"
                         className={`form-control  ${inputBg}`}
-                        placeholder="Type your message..."
+                        placeholder={text.typeMessage}
                         onChange={handleInputChat}
                         value={inputChat}
                         onKeyPress={(e) => e.key === 'Enter' && writeUserMSG()}
                       />
                       <button className={`${btnStyle} px-3`} onClick={writeUserMSG}>
-                        Send
+                        {text.sendButton}
                       </button>
                     </div>
                   </div>

@@ -10,6 +10,7 @@ import Card from "../../Components/Card/card";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ThemeContext } from "../../Context/ThemeContext";
+import { useSelector } from "react-redux";
 
 function Menu() {
   const navigate = useNavigate();
@@ -19,8 +20,10 @@ function Menu() {
   const [beefSandwiches, setBeefSandwiches] = useState([]);
   // const [hotDrinks, setHotDrinks] = useState([]);
   const [pizzas, setPizzas] = useState([]);
-  const [drinks, setDrinks] = useState([]);
+  const [hotDrinks, setHotDrinks] = useState([]);
   const { theme } = useContext(ThemeContext);
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
 
   useEffect(() => {
     const getCategoryData = async (category, setCategory) => {
@@ -31,8 +34,8 @@ function Menu() {
         const itemData = doc.data();
         return {
           id: doc.id,
-          title: itemData.title || "Unnamed Item",
-          description: itemData.description || "No description available",
+          title: currentLange === "Ar" ? itemData.title_ar || "عنوان غير متوفر" : itemData.title || "Title not available",
+          description: currentLange === "Ar" ? itemData.desc_ar || "الوصف غير متوفر" : itemData.description || "Description not available",
           image: itemData.image || "default-image.jpg",
           price: itemData.price || "Price not available",
         };
@@ -45,8 +48,8 @@ function Menu() {
     getCategoryData("beef sandwich", setBeefSandwiches);
     getCategoryData("pizaa", setPizzas);
     getCategoryData("soft drinks", setSoftDrinks);
-    getCategoryData("drinks", setDrinks);
-  }, []);
+    getCategoryData("hotDrinks", setHotDrinks);
+  }, [currentLange]);
 
   const handleAddToCart = (item) => {
     toast.success(`${item.title} added to cart!`, {
@@ -84,7 +87,7 @@ function Menu() {
           onClick={() => handleNavigate(categoryKey)}
           className="see-all-btn text-decoration-none"
         >
-          See All <span><i className="fa-solid fa-greater-than"></i></span>
+          {text.seeAll} <span><i className="fa-solid fa-greater-than"></i></span>
         </a>
       </div>
 
@@ -118,7 +121,7 @@ function Menu() {
           ))}
         </Swiper>
       ) : (
-        <p>No {title} Available</p>
+        <p>{text.noItems}</p>
       )}
     </div>
   );
@@ -127,13 +130,13 @@ function Menu() {
     <div className={`menu-container ${backgroundColor} ${textColor} mt-5`}>
       <div className="container">
         <h1 className="text-center menu-title">
-          Our <span className="text-danger">Menu</span>
+          {text.menuTitle}
         </h1>
-        {renderCategorySection("Chicken Sandwiches", chickenSandwiches, "chicken sandwich")}
-        {renderCategorySection("Beef Sandwiches", beefSandwiches, "beef sandwich")}
-        {renderCategorySection("Pizzas", pizzas, "pizaa")}
-        {renderCategorySection("Soft Drinks", softDrinks, "soft drinks")}
-        {renderCategorySection("Drinks", drinks, "drinks")}
+        {renderCategorySection(text.chickenSandwiches, chickenSandwiches, "chicken sandwich")}
+        {renderCategorySection(text.beefSandwiches, beefSandwiches, "beef sandwich")}
+        {renderCategorySection(text.pizzas, pizzas, "pizaa")}
+        {renderCategorySection(text.softDrinks, softDrinks, "soft drinks")}
+        {renderCategorySection(text.Drinks, hotDrinks, "drinks")}
 
         <ToastContainer />
       </div>

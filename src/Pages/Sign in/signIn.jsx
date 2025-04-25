@@ -22,8 +22,11 @@ import { ThemeContext } from "../../Context/ThemeContext";
 import "./Signin.css";
 
 function Signin() {
-  const allDishes = useSelector((state) => state.wishlist);
   const { theme } = useContext(ThemeContext);
+  const navigate = useNavigate();
+  const allDishes = useSelector((state) => state.wishlist);
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
 
   const [userUpData, setUserUpData] = useState({
     email: "",
@@ -34,8 +37,6 @@ function Signin() {
     emailError: null,
     passwordError: null,
   });
-
-  const navigate = useNavigate();
 
   const handleData = (e) => {
     const { name, value } = e.target;
@@ -53,18 +54,29 @@ function Signin() {
     switch (name) {
       case "email":
         return !value
-          ? "This Field Is Required"
+          ? text.requiredField || "This Field Is Required"
           : !value.match(/^[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+$/)
-          ? "Invalid Email Address"
+          ? text.invalidEmail || "Invalid Email Address"
           : null;
       case "password":
-        return !value ? "This Field Is Required" : null;
+        return !value ? text.requiredField || "This Field Is Required" : null;
       default:
         return null;
     }
   };
 
   const handleSignin = () => {
+    const updatedErrors = {
+      emailError: validateField("email", userUpData.email),
+      passwordError: validateField("password", userUpData.password),
+    };
+
+    setErrorsMsgUp(updatedErrors);
+
+    if (Object.values(updatedErrors).some((error) => error !== null)) {
+      return;
+    }
+
     signInWithEmailAndPassword(auth, userUpData.email, userUpData.password)
       .then((userCredential) => {
         const user = userCredential.user;
@@ -82,9 +94,9 @@ function Signin() {
           ...prev,
           emailError:
             error.code === "auth/user-not-found"
-              ? "User not found"
+              ? text.userNotFound || "User not found"
               : error.code === "auth/wrong-password"
-              ? "Incorrect password"
+              ? text.incorrectPassword || "Incorrect password"
               : error.message,
         }));
       });
@@ -135,98 +147,103 @@ function Signin() {
   };
 
   const bgColor = theme === "dark" ? "bg-custom-dark" : "bg-custom-light";
-  const Color = theme === "dark" ? "color-light" : "color-dark";
   const textColor = theme === "dark" ? "text-white" : "text-dark";
   const bgForm = theme === "dark" ? "bg-dark" : "bg-light";
   const btnColor = theme === "dark" ? "btn-outline-light" : "btn-outline-dark";
-
-
-  const placeholderClass =
-    theme === "dark" ? "placeholder-dark" : "placeholder-light";
+  const placeholderClass = theme === "dark" ? "placeholder-dark" : "placeholder-light";
+  const iconColorClass = theme === "dark" ? "text-light" : "text-dark";
 
   return (
-    <div className={` py-5 ${bgColor} sign-in min-vh-100`}>
+    <div className={`py-5 ${bgColor} sign-in min-vh-100`}>
       <div className="container">
-      <div className="row justify-content-center align-items-center">
-        <div className="col-12 col-md-6 col-lg-5">
-          <div className={`p-4 rounded shadow-lg ${bgForm}`}>
-            <h2 className={`mb-4 text-center fw-bold ${textColor}`}>Sign In</h2>
+        <div className="row justify-content-center align-items-center">
+          <div className="col-12 col-md-6 col-lg-5">
+            <div className={`p-4 rounded shadow-lg ${bgForm}`}>
+              <h2 className={`mb-4 text-center fw-bold ${textColor}`}>
+                {text.signIn || "Sign In"}
+              </h2>
 
-            {/* Email */}
-            <div className="mb-3">
-              <label className={` ${textColor}`}>Email</label>
-              <div className="input-group">
-                <span className={`input-group-text bg-secondary bg-opacity-25 ${textColor}`}>
-                  <FontAwesomeIcon icon={faEnvelope} />
-                </span>
-                <input
-                  type="email"
-                  name="email"
-                  value={userUpData.email}
-                  onChange={handleData}
-                  placeholder="Enter your email"
-                  className={`form-control ${errorsMsgUp.emailError ? "is-invalid" : ""}  ${textColor} ${placeholderClass}`}
-                />
-                {errorsMsgUp.emailError && (
-                  <div className="invalid-feedback">{errorsMsgUp.emailError}</div>
-                )}
+              {/* Email */}
+              <div className="mb-3">
+                <label className={`form-label ${textColor}`}>
+                  {text.email || "Email"}
+                </label>
+                <div className="input-group">
+                  <span className={`input-group-text ${bgColor} ${textColor}`}>
+                    <FontAwesomeIcon icon={faEnvelope} className={iconColorClass} />
+                  </span>
+                  <input
+                    type="email"
+                    name="email"
+                    value={userUpData.email}
+                    onChange={handleData}
+                    placeholder={text.enterEmail || "Enter your email"}
+                    className={`form-control ${errorsMsgUp.emailError ? "is-invalid" : ""} ${textColor} ${placeholderClass}`}
+                  />
+                  {errorsMsgUp.emailError && (
+                    <div className="invalid-feedback">{errorsMsgUp.emailError}</div>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Password */}
-            <div className="mb-3">
-              <label className={` ${textColor}`}>Password</label>
-              <div className="input-group">
-                <span className={`input-group-text bg-secondary bg-opacity-25 ${textColor}`}>
-                  <FontAwesomeIcon icon={faLock} />
-                </span>
-                <input
-                  type="password"
-                  name="password"
-                  value={userUpData.password}
-                  onChange={handleData}
-                  placeholder="Enter your password"
-                  className={`form-control ${errorsMsgUp.passwordError ? "is-invalid" : ""}  ${placeholderClass}`}
-                />
-                {errorsMsgUp.passwordError && (
-                  <div className="invalid-feedback">{errorsMsgUp.passwordError}</div>
-                )}
+              {/* Password */}
+              <div className="mb-3">
+                <label className={`form-label ${textColor}`}>
+                  {text.password || "Password"}
+                </label>
+                <div className="input-group">
+                  <span className={`input-group-text ${bgColor} ${textColor}`}>
+                    <FontAwesomeIcon icon={faLock} className={iconColorClass} />
+                  </span>
+                  <input
+                    type="password"
+                    name="password"
+                    value={userUpData.password}
+                    onChange={handleData}
+                    placeholder={text.enterPassword || "Enter your password"}
+                    className={`form-control ${errorsMsgUp.passwordError ? "is-invalid" : ""} ${textColor} ${placeholderClass}`}
+                  />
+                  {errorsMsgUp.passwordError && (
+                    <div className="invalid-feedback">{errorsMsgUp.passwordError}</div>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Sign In Button */}
-            <button
-              onClick={handleSignin}
-              className={`btn ${btnColor} w-100 fw-semibold mb-3`}
-            >
-              Sign In
-            </button>
-
-            {/* Divider */}
-            <div className="d-flex align-items-center my-4">
-              <hr className={`flex-grow-1 ${Color}`} />
-              <span className={`px-2 ${textColor}`}>or</span>
-              <hr className="flex-grow-1" />
-            </div>
-
-            {/* Social Login */}
-            <div className="d-flex gap-2">
+              {/* Sign In Button */}
               <button
-                onClick={logInGoogle}
-                className="btn btn-outline-danger w-50 d-flex align-items-center justify-content-center gap-2"
+                onClick={handleSignin}
+                className={`btn ${btnColor} w-100 fw-semibold mb-3`}
               >
-                <FontAwesomeIcon icon={faGoogleBrand} /> Google
+                {text.signInButton || "Sign In"}
               </button>
-              <button
-                disabled
-                className="btn btn-outline-primary w-50 d-flex align-items-center justify-content-center gap-2"
-              >
-                <FontAwesomeIcon icon={faFacebookBrand} /> Facebook
-              </button>
+
+              {/* Divider */}
+              <div className="d-flex align-items-center my-4">
+                <hr className={`flex-grow-1 ${theme === "dark" ? "border-light" : "border-dark"}`} />
+                <span className={`px-2 ${textColor}`}>{text.or || "or"}</span>
+                <hr className={`flex-grow-1 ${theme === "dark" ? "border-light" : "border-dark"}`} />
+              </div>
+
+              {/* Social Login */}
+              <div className="d-flex gap-2">
+                <button
+                  onClick={logInGoogle}
+                  className="btn btn-outline-danger w-50 d-flex align-items-center justify-content-center gap-2"
+                >
+                  <FontAwesomeIcon icon={faGoogleBrand} className={iconColorClass} />
+                  {text.google || "Google"}
+                </button>
+                <button
+                  disabled
+                  className="btn btn-outline-primary w-50 d-flex align-items-center justify-content-center gap-2"
+                >
+                  <FontAwesomeIcon icon={faFacebookBrand} className={iconColorClass} />
+                  {text.facebook || "Facebook"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
       </div>
     </div>
   );
