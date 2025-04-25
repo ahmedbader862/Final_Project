@@ -77,3 +77,37 @@
   box-shadow: #ff6b6b 0 0 0 0.2rem !important;
   color:#ff6b6b ;
 }
+
+/* search */
+/* Existing styles remain unchanged, updating styles for smoother search animation */
+.search-container {
+  display: inline-block;
+  transform: scaleX(0);
+  transform-origin: left;
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-in-out;
+  width: 200px; /* Adjust width as needed */
+}
+
+.search-container {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+.search-input {
+  border: none;
+  border-radius: 20px;
+  padding: 8px 12px;
+  width: 100%;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-input:focus {
+  outline: none;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+}
+
+.navbar .btn {
+  transition: color 2s ease;
+}

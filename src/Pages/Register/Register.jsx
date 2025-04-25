@@ -1,16 +1,18 @@
-import { useState, useEffect } from "react";
-import { auth, providerG, providerF, signInWithPopup, createUserWithEmailAndPassword, signOut, db, setDoc, doc } from "../../firebase/firebase";
+import { useState, useEffect, useContext } from "react";
+import { auth, providerG, providerF, createUserWithEmailAndPassword, signOut, db, setDoc, doc } from "../../firebase/firebase";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { GoogleAuthProvider, FacebookAuthProvider } from "firebase/auth";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faEnvelope, faAt, faLock } from '@fortawesome/free-solid-svg-icons';
 import { faGoogle as faGoogleBrand, faFacebook as faFacebookBrand } from '@fortawesome/free-brands-svg-icons';
+import { ThemeContext } from "../../Context/ThemeContext";
 import './Register.css';
 
 function Register() {
+  const { theme } = useContext(ThemeContext);
   const allDishes = useSelector((state) => state.wishlist);
-  console.log("Redux wishlist:", allDishes); // Debug log for wishlist
+  const navigate = useNavigate();
 
   const [userUpData, setUserUpData] = useState({
     name: "",
@@ -28,10 +30,7 @@ function Register() {
     confPasswordError: null
   });
 
-  const navigate = useNavigate();
-
   useEffect(() => {
-    // Validate password matching only if both fields are filled
     if (userUpData.password || userUpData.confPassword) {
       setErrorsMsgUp(prev => ({
         ...prev,
@@ -81,10 +80,6 @@ function Register() {
   };
 
   const submitForm = () => {
-    console.log("submitForm called with data:", userUpData);
-    console.log("Current errors:", errorsMsgUp);
-
-    // Revalidate all fields
     const updatedErrors = {
       nameError: validateField('name', userUpData.name),
       emailError: validateField('email', userUpData.email),
@@ -93,37 +88,27 @@ function Register() {
       confPasswordError: validateField('confPassword', userUpData.confPassword)
     };
 
-    // Check password match
     if (userUpData.password !== userUpData.confPassword) {
       updatedErrors.passwordError = "Passwords Do Not Match";
       updatedErrors.confPasswordError = "Passwords Do Not Match";
     }
 
     setErrorsMsgUp(updatedErrors);
-    console.log("Updated errors:", updatedErrors);
 
-    // Check for any errors
-    const hasErrors = Object.values(updatedErrors).some(error => error !== null);
-    if (hasErrors) {
-      console.log("Form submission blocked due to validation errors");
+    if (Object.values(updatedErrors).some(error => error !== null)) {
       return;
     }
 
-    console.log("Proceeding with registration");
     createUserWithEmailAndPassword(auth, userUpData.email, userUpData.password)
       .then((userCredential) => {
         const user = userCredential.user;
-        console.log("User created:", user);
         createUser(user.uid);
-        // Sign out to prevent auto-login
         return signOut(auth);
       })
       .then(() => {
-        console.log("Signed out after registration");
         navigate("/signin");
       })
       .catch((error) => {
-        console.error("Registration error:", error);
         setErrorsMsgUp(prev => ({
           ...prev,
           emailError: error.code === "auth/email-already-in-use" ? "Email already in use" :
@@ -140,38 +125,24 @@ function Register() {
       allDishes: allDishes.wishlist || [],
       uid: uid
     };
-    console.log("Saving user data:", userDetails);
-    setDoc(doc(db, "users2", uid), userDetails)
-      .then(() => {
-        console.log("User data saved to Firestore");
-      })
-      .catch((error) => {
-        console.error("Error saving user data:", error);
-      });
+    setDoc(doc(db, "users2", uid), userDetails).catch((error) => {
+      console.error("Error saving user data:", error);
+    });
   };
 
   const logInGoogle = () => {
-    console.log("Attempting Google Sign-Up");
     signInWithPopup(auth, providerG)
       .then((result) => {
         const credential = GoogleAuthProvider.credentialFromResult(result);
         const token = credential.accessToken;
         const user = result.user;
-        console.log("Google user:", user);
         createUserGoogle(user, token);
-        // Sign out to prevent auto-login
         return signOut(auth);
       })
       .then(() => {
-        console.log("Signed out after Google sign-up");
         navigate("/signin");
       })
       .catch((error) => {
-        console.log("Google Sign-Up Error:", {
-          code: error.code,
-          message: error.message,
-          email: error.customData?.email
-        });
         setErrorsMsgUp(prev => ({
           ...prev,
           emailError: error.message
@@ -188,38 +159,24 @@ function Register() {
       uid: user.uid,
       token: token
     };
-    console.log("Saving Google user data:", userData);
-    setDoc(doc(db, "users2", user.uid), userData)
-      .then(() => {
-        console.log("Google user data saved to Firestore");
-      })
-      .catch((error) => {
-        console.error("Error saving Google user data:", error);
-      });
+    setDoc(doc(db, "users2", user.uid), userData).catch((error) => {
+      console.error("Error saving Google user data:", error);
+    });
   };
 
   const logInFacebook = () => {
-    console.log("Attempting Facebook Sign-Up");
     signInWithPopup(auth, providerF)
       .then((result) => {
         const user = result.user;
         const credential = FacebookAuthProvider.credentialFromResult(result);
         const token = credential.accessToken;
-        console.log("Facebook user:", user);
         createUserFacebook(user, token);
-        // Sign out to prevent auto-login
         return signOut(auth);
       })
       .then(() => {
-        console.log("Signed out after Facebook sign-up");
         navigate("/signin");
       })
       .catch((error) => {
-        console.log("Facebook Sign-Up Error:", {
-          code: error.code,
-          message: error.message,
-          email: error.customData?.email
-        });
         setErrorsMsgUp(prev => ({
           ...prev,
           emailError: error.message
@@ -236,165 +193,167 @@ function Register() {
       uid: user.uid,
       token: token
     };
-    console.log("Saving Facebook user data:", userData);
-    setDoc(doc(db, "users2", user.uid), userData)
-      .then(() => {
-        console.log("Facebook user data saved to Firestore");
-      })
-      .catch((error) => {
-        console.error("Error saving Facebook user data:", error);
-      });
+    setDoc(doc(db, "users2", user.uid), userData).catch((error) => {
+      console.error("Error saving Facebook user data:", error);
+    });
   };
 
+  const bgColor = theme === "dark" ? "bg-custom-dark" : "bg-custom-light";
+  const bgForm = theme === "dark" ? "bg-dark" : "bg-light";
+  const textColor = theme === "dark" ? "text-white" : "text-dark";
+  const placeholderClass = theme === "dark" ? "placeholder-dark" : "placeholder-light";
+  const iconColorClass = theme === "dark" ? "text-light" : "text-dark";
+  const btnColor = theme === "dark" ? "btn-outline-light" : "btn-outline-dark";
+
   return (
-    <>
-      <div className="container mt-5">
-        <div className="row justify-content-center my-5">
-          <div className="col-12 col-sm-8 col-md-6 col-lg-5 mt-5">
-            <div className="p-4 p-md-5 shadow-lg rounded-3 bg-white form-container">
-              <h2 className="mb-4 text-center text-dark fw-bold">Create Account</h2>
+    <div className={` mt-5 ${bgColor} min-vh-100`}>
+      <div className="container">
+      <div className="row justify-content-center my-5">
+        <div className="col-12 col-sm-8 col-md-6 col-lg-5 mt-5">
+          <div className={`p-4 p-md-5 shadow-lg rounded-3 ${bgForm}`}>
+            <h2 className={`mb-4 text-center fw-bold ${textColor}`}>Create Account</h2>
 
-              {/* Name Field */}
-              <div className="mb-3">
-                <label className="form-label text-dark">Name</label>
-                <div className="input-group">
-                  <span className="input-group-text bg-light">
-                    <FontAwesomeIcon icon={faUser} />
-                  </span>
-                  <input
-                    type="text"
-                    className={`form-control rounded-end ${errorsMsgUp.nameError ? "is-invalid" : ""}`}
-                    name="name"
-                    value={userUpData.name}
-                    onChange={handleData}
-                    placeholder="Enter your name"
-                  />
-                  {errorsMsgUp.nameError && (
-                    <div className="invalid-feedback">{errorsMsgUp.nameError}</div>
-                  )}
-                </div>
+            {/* Name Field */}
+            <div className="mb-3">
+              <label className={` ${textColor}`}>Name</label>
+              <div className="input-group">
+                <span className={`input-group-text ${bgColor} ${textColor}`}>
+                  <FontAwesomeIcon icon={faUser} className={iconColorClass} />
+                </span>
+                <input
+                  type="text"
+                  className={`form-control rounded-end ${errorsMsgUp.nameError ? "is-invalid" : ""} ${textColor} ${placeholderClass}`}
+                  name="name"
+                  value={userUpData.name}
+                  onChange={handleData}
+                  placeholder="Enter your name"
+                />
+                {errorsMsgUp.nameError && (
+                  <div className="invalid-feedback">{errorsMsgUp.nameError}</div>
+                )}
               </div>
+            </div>
 
-              {/* Email Field */}
-              <div className="mb-3">
-                <label className="form-label text-dark">Email</label>
-                <div className="input-group">
-                  <span className="input-group-text bg-light">
-                    <FontAwesomeIcon icon={faEnvelope} />
-                  </span>
-                  <input
-                    type="email"
-                    className={`form-control rounded-end ${errorsMsgUp.emailError ? "is-invalid" : ""}`}
-                    name="email"
-                    value={userUpData.email}
-                    onChange={handleData}
-                    placeholder="Enter your email"
-                  />
-                  {errorsMsgUp.emailError && (
-                    <div className="invalid-feedback">{errorsMsgUp.emailError}</div>
-                  )}
-                </div>
+            {/* Email Field */}
+            <div className="mb-3">
+              <label className={` ${textColor}`}>Email</label>
+              <div className="input-group">
+                <span className={`input-group-text ${bgColor} ${textColor}`}>
+                  <FontAwesomeIcon icon={faEnvelope} className={iconColorClass} />
+                </span>
+                <input
+                  type="email"
+                  className={`form-control rounded-end ${errorsMsgUp.emailError ? "is-invalid" : ""} ${textColor} ${placeholderClass}`}
+                  name="email"
+                  value={userUpData.email}
+                  onChange={handleData}
+                  placeholder="Enter your email"
+                />
+                {errorsMsgUp.emailError && (
+                  <div className="invalid-feedback">{errorsMsgUp.emailError}</div>
+                )}
               </div>
+            </div>
 
-              {/* Username Field */}
-              <div className="mb-3">
-                <label className="form-label text-dark">Username</label>
-                <div className="input-group">
-                  <span className="input-group-text bg-light">
-                    <FontAwesomeIcon icon={faAt} />
-                  </span>
-                  <input
-                    type="text"
-                    className={`form-control rounded-end ${errorsMsgUp.usrNameError ? "is-invalid" : ""}`}
-                    name="usrName"
-                    value={userUpData.usrName}
-                    onChange={handleData}
-                    placeholder="Choose a username"
-                  />
-                  {errorsMsgUp.usrNameError && (
-                    <div className="invalid-feedback">{errorsMsgUp.usrNameError}</div>
-                  )}
-                </div>
+            {/* Username Field */}
+            <div className="mb-3">
+              <label className={` ${textColor}`}>Username</label>
+              <div className="input-group">
+                <span className={`input-group-text ${bgColor} ${textColor}`}>
+                  <FontAwesomeIcon icon={faAt} className={iconColorClass} />
+                </span>
+                <input
+                  type="text"
+                  className={`form-control rounded-end ${errorsMsgUp.usrNameError ? "is-invalid" : ""} ${textColor} ${placeholderClass}`}
+                  name="usrName"
+                  value={userUpData.usrName}
+                  onChange={handleData}
+                  placeholder="Choose a username"
+                />
+                {errorsMsgUp.usrNameError && (
+                  <div className="invalid-feedback">{errorsMsgUp.usrNameError}</div>
+                )}
               </div>
+            </div>
 
-              {/* Password Field */}
-              <div className="mb-3">
-                <label className="form-label text-dark">Password</label>
-                <div className="input-group">
-                  <span className="input-group-text bg-light">
-                    <FontAwesomeIcon icon={faLock} />
-                  </span>
-                  <input
-                    type="password"
-                    className={`form-control rounded-end ${errorsMsgUp.passwordError ? "is-invalid" : ""}`}
-                    name="password"
-                    value={userUpData.password}
-                    onChange={handleData}
-                    placeholder="Enter your password"
-                  />
-                  {errorsMsgUp.passwordError && (
-                    <div className="invalid-feedback">{errorsMsgUp.passwordError}</div>
-                  )}
-                </div>
+            {/* Password Field */}
+            <div className="mb-3">
+              <label className={` ${textColor}`}>Password</label>
+              <div className="input-group">
+                <span className={`input-group-text ${bgColor} ${textColor}`}>
+                  <FontAwesomeIcon icon={faLock} className={iconColorClass} />
+                </span>
+                <input
+                  type="password"
+                  className={`form-control rounded-end ${errorsMsgUp.passwordError ? "is-invalid" : ""} ${textColor} ${placeholderClass}`}
+                  name="password"
+                  value={userUpData.password}
+                  onChange={handleData}
+                  placeholder="Enter your password"
+                />
+                {errorsMsgUp.passwordError && (
+                  <div className="invalid-feedback">{errorsMsgUp.passwordError}</div>
+                )}
               </div>
+            </div>
 
-              {/* Confirm Password Field */}
-              <div className="mb-4">
-                <label className="form-label text-dark">Confirm Password</label>
-                <div className="input-group">
-                  <span className="input-group-text bg-light">
-                    <FontAwesomeIcon icon={faLock} />
-                  </span>
-                  <input
-                    type="password"
-                    className={`form-control rounded-end ${errorsMsgUp.confPasswordError ? "is-invalid" : ""}`}
-                    name="confPassword"
-                    value={userUpData.confPassword}
-                    onChange={handleData}
-                    placeholder="Confirm your password"
-                  />
-                  {errorsMsgUp.confPasswordError && (
-                    <div className="invalid-feedback">{errorsMsgUp.confPasswordError}</div>
-                  )}
-                </div>
+            {/* Confirm Password Field */}
+            <div className="mb-4">
+              <label className={` ${textColor}`}>Confirm Password</label>
+              <div className="input-group">
+                <span className={`input-group-text ${bgColor} ${textColor}`}>
+                  <FontAwesomeIcon icon={faLock} className={iconColorClass} />
+                </span>
+                <input
+                  type="password"
+                  className={`form-control rounded-end ${errorsMsgUp.confPasswordError ? "is-invalid" : ""} ${textColor} ${placeholderClass}`}
+                  name="confPassword"
+                  value={userUpData.confPassword}
+                  onChange={handleData}
+                  placeholder="Confirm your password"
+                />
+                {errorsMsgUp.confPasswordError && (
+                  <div className="invalid-feedback">{errorsMsgUp.confPasswordError}</div>
+                )}
               </div>
+            </div>
 
-              {/* Register Button */}
+            {/* Register Button */}
+            <button
+              type="submit"
+              onClick={submitForm}
+              className={`btn ${btnColor} w-100 mb-3 fw-semibold`}
+            >
+              Register
+            </button>
+
+            {/* Divider */}
+            <div className="d-flex align-items-center my-4">
+              <hr className="flex-grow-1" />
+              <span className={`px-2 ${textColor}`}>or</span>
+              <hr className="flex-grow-1" />
+            </div>
+
+            {/* Social Login Buttons */}
+            <div className="d-flex gap-2">
               <button
-                type="submit"
-                onClick={submitForm}
-                className="btn btn-primary w-100 mb-3 fw-semibold"
+                onClick={logInGoogle}
+                className="btn btn-outline-danger w-50 d-flex align-items-center justify-content-center gap-2"
               >
-                Register
+                <FontAwesomeIcon icon={faGoogleBrand} className={iconColorClass} /> Google
               </button>
-
-              {/* Divider */}
-              <div className="d-flex align-items-center my-4">
-                <hr className="flex-grow-1" />
-                <span className="px-2 text-muted">or</span>
-                <hr className="flex-grow-1" />
-              </div>
-
-              {/* Social Login Buttons */}
-              <div className="d-flex gap-2">
-                <button
-                  onClick={logInGoogle}
-                  className="btn btn-outline-danger w-50 d-flex align-items-center justify-content-center gap-2"
-                >
-                  <FontAwesomeIcon icon={faGoogleBrand} /> Google
-                </button>
-                <button
-                  onClick={logInFacebook}
-                  className="btn btn-outline-primary w-50 d-flex align-items-center justify-content-center gap-2"
-                >
-                  <FontAwesomeIcon icon={faFacebookBrand} /> Facebook
-                </button>
-              </div>
+              <button
+                onClick={logInFacebook}
+                className="btn btn-outline-primary w-50 d-flex align-items-center justify-content-center gap-2"
+              >
+                <FontAwesomeIcon icon={faFacebookBrand} className={iconColorClass} /> Facebook
+              </button>
             </div>
           </div>
         </div>
       </div>
-    </>
+      </div>
+    </div>
   );
 }
 

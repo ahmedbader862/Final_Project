@@ -86,6 +86,15 @@
     .add-btn {
         background-color: transparent;
         color: white;
+        border: black 2px solid;
+        padding: 5px 10px;
+        border-radius: 100%;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+    .add-btn-dark {
+        background-color: transparent;
+        color: black;
         border: white 2px solid;
         padding: 5px 10px;
         border-radius: 100%;
@@ -133,3 +142,46 @@
     .food-description{
         color: rgb(180, 176, 176);
     }
+
+    /* modal */
+    /* .modal-dark {
+  background-color: #1e1e1e !important;
+  color: #ffffff !important;
+}
+
+.modal-light {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+.modal-dark-header, .modal-dark-footer {
+  background-color: #212529 !important;
+  border-color: #444 !important;
+  color: #ffffff !important;
+}
+
+.modal-light-header, .modal-light-footer {
+  background-color: #f8f9fa !important;
+  border-color: #ddd !important;
+  color: #000000 !important;
+}
+.modal-header{
+    background-color: #212529 !important;
+    color: #ffffff !important;
+}
+.modal-footer{
+    background-color: #212529 !important;
+    color: #ffffff !important;
+}
+.custom-modal .modal-header,
+.custom-modal .modal-footer {
+  border-width: 1px !important;
+}
+.modal-header{
+    background-color: #212529 !important;
+    color: #ffffff !important;
+} */
+.modal-footer{
+    background-color: #212529 !important;
+    color: #ffffff !important;
+}

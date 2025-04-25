@@ -109,7 +109,7 @@ export default function Shipping() {
       <div className="shipping-container">
         {!showPayment ? (
           <form className="shipping-form" onSubmit={formik.handleSubmit}>
-            <h3 className="form-title">Shipping Information</h3>
+            <h3 className="form-title" >Shipping Information</h3>
             <div className="form-group">
               <label htmlFor="city" className="form-label">
                 City

@@ -30,6 +30,7 @@
   font-weight: 600;
   text-align: center;
   margin-bottom: 1.5rem;
+  color: #ff6b6b !important;
 }
 
 .form-group {
@@ -53,7 +54,7 @@
 }
 
 .form-input:focus {
-  border-color: #4a90e2;
+  border-color: #ff6b6b;
   box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
   outline: none;
 }
@@ -183,12 +184,12 @@
 }
 
 .shipping-wrapper.dark .submit-btn {
-  background: #4a90e2;
+  background: #ff6b6b;
   color: white;
 }
 
 .shipping-wrapper.dark .submit-btn:hover {
-  background: #357abd;
+  background: #ff6b6b;
 }
 
 .shipping-wrapper.dark .payment-section {
@@ -196,16 +197,16 @@
 }
 
 .shipping-wrapper.dark .section-title {
-  color: #4a90e2;
+  color: #ff6b6b;
 }
 
 .shipping-wrapper.dark .cod-btn {
-  background: #4a90e2;
+  background: #ff6b6b;
   color: white;
 }
 
 .shipping-wrapper.dark .cod-btn:hover {
-  background: #357abd;
+  background: #ff6b6b;
 }
 
 /* Light Theme */
@@ -219,7 +220,7 @@
 }
 
 .shipping-wrapper.light .form-title {
-  color: #2a6dc9; /* Slightly darker blue for light theme */
+  color: #ff6b6b; /* Slightly darker blue for light theme */
 }
 
 .shipping-wrapper.light .form-label {
@@ -237,12 +238,12 @@
 }
 
 .shipping-wrapper.light .submit-btn {
-  background: #2a6dc9;
+  background: #ff6b6b;
   color: white;
 }
 
 .shipping-wrapper.light .submit-btn:hover {
-  background: #1e5ba8;
+  background: #ff6b6b;
 }
 
 .shipping-wrapper.light .payment-section {
@@ -250,14 +251,14 @@
 }
 
 .shipping-wrapper.light .section-title {
-  color: #2a6dc9;
+  color: #ff6b6b;
 }
 
 .shipping-wrapper.light .cod-btn {
-  background: #2a6dc9;
+  background: #ff6b6b;
   color: white;
 }
 
 .shipping-wrapper.light .cod-btn:hover {
-  background: #1e5ba8;
+  background: #ff6b6b;
 }

@@ -27,6 +27,7 @@ import Banner from './Components/Banner/Banner';
 import AdminDashboard from './Pages/AdminDashBoard/AdminDashboard';
 import { ThemeProvider } from './Context/ThemeContext';
 import Orders from './Pages/Orders/Order';
+import SearchResults from './Pages/SearchResults';
 
 // Wrapper component to debug location and conditionally render Nav
 const DebugLocation = ({ children }) => {
@@ -68,6 +69,8 @@ function App() {
               <Route path="/cart" element={<ProtectedRoute element={Cart} />} />
               <Route path="/shippingadress" element={<Shipping />} />
               <Route path="/order-confirmation" element={<OrderConfirmation />} />
+              <Route path="/search/:term" element={<SearchResults />} />
+
               <Route
                 path="/track-order"
                 element={<OrderTracking userId={userState !== "who know" ? userState.uid : null} />}

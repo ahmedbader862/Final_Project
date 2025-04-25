@@ -17,8 +17,9 @@ function Menu() {
   const [softDrinks, setSoftDrinks] = useState([]);
   const [chickenSandwiches, setChickenSandwiches] = useState([]);
   const [beefSandwiches, setBeefSandwiches] = useState([]);
-  const [hotDrinks, setHotDrinks] = useState([]);
+  // const [hotDrinks, setHotDrinks] = useState([]);
   const [pizzas, setPizzas] = useState([]);
+  const [drinks, setDrinks] = useState([]);
   const { theme } = useContext(ThemeContext);
 
   useEffect(() => {
@@ -44,7 +45,7 @@ function Menu() {
     getCategoryData("beef sandwich", setBeefSandwiches);
     getCategoryData("pizaa", setPizzas);
     getCategoryData("soft drinks", setSoftDrinks);
-    getCategoryData("drinks", setHotDrinks);
+    getCategoryData("drinks", setDrinks);
   }, []);
 
   const handleAddToCart = (item) => {
@@ -70,10 +71,10 @@ function Menu() {
   };
 
   const textColor = theme === "dark" ? "text-white" : "text-dark";
-  const backgroundColor = theme === "dark" ? "bg-custom-dark" : "bg-light";
+  const backgroundColor = theme === "dark" ? "bg-custom-dark" : "bg-custom-light";
   const handleNavigate = (category) => {
     navigate(`/Dishes/${category}`);
-  };
+  };  
 
   const renderCategorySection = (title, items, categoryKey) => (
     <div className="category-section mt-5">
@@ -132,7 +133,7 @@ function Menu() {
         {renderCategorySection("Beef Sandwiches", beefSandwiches, "beef sandwich")}
         {renderCategorySection("Pizzas", pizzas, "pizaa")}
         {renderCategorySection("Soft Drinks", softDrinks, "soft drinks")}
-        {renderCategorySection("Hot Drinks", hotDrinks, "hot drinks")}
+        {renderCategorySection("Drinks", drinks, "drinks")}
 
         <ToastContainer />
       </div>

@@ -18,3 +18,51 @@ input{
     border: none !important;
     box-shadow: #21212624 0px 0px 20px !important;
 }
+
+/* Styles for ReservationForm inputs and placeholders */
+.form-control.bg-dark {
+    background-color: #1e1e1e !important;
+    color: #ffffff !important;
+    border: 1px solid #444;
+  }
+  
+  .form-control.bg-light {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #ddd;
+  }
+  
+  /* Placeholder styles for dark mode */
+  .bg-dark::placeholder {
+    color: #bbbbbb !important; /* Light gray for visibility in dark mode */
+    opacity: 1; /* Ensure full opacity for consistency */
+  }
+  
+  /* Placeholder styles for light mode */
+  .bg-light::placeholder {
+    color: #666666 !important; /* Dark gray for visibility in light mode */
+    opacity: 1;
+  }
+  
+  /* Ensure select options match the theme */
+  .bg-dark option {
+    background-color: #1e1e1e;
+    color: #ffffff;
+  }
+  
+  .bg-light option {
+    background-color: #ffffff;
+    color: #000000;
+  }
+  
+  /* Smooth transitions for theme changes */
+  .form-control {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+  
+  /* Optional: Add focus styles for better UX */
+  .form-control:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    border-color: #666;
+  }
