@@ -70,7 +70,7 @@ export default function OrderConfirmation() {
       case 'pending':
         return (
           <>
-            <h2 className="fw-bold mb-4 text-warning">Order Pending</h2>
+            <h2 className="fw-bold mb-4 ">Order Pending</h2>
             <p className="lead mb-4 text-muted ">
               Your order has been received and is awaiting approval. Please check back later.
             </p>

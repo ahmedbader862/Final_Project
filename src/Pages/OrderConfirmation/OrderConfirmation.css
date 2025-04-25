@@ -15,7 +15,9 @@
 .card {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
-
+h2{
+  color: #ff6b6b;
+}
 /* Dark Theme */
 .order-confirmation.dark {
   background: #121212;

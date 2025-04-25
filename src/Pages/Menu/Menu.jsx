@@ -18,8 +18,9 @@ function Menu() {
   const [softDrinks, setSoftDrinks] = useState([]);
   const [chickenSandwiches, setChickenSandwiches] = useState([]);
   const [beefSandwiches, setBeefSandwiches] = useState([]);
-  const [hotDrinks, setHotDrinks] = useState([]);
+  // const [hotDrinks, setHotDrinks] = useState([]);
   const [pizzas, setPizzas] = useState([]);
+  const [hotDrinks, setHotDrinks] = useState([]);
   const { theme } = useContext(ThemeContext);
   const currentLange = useSelector((state) => state.lange.langue);
   const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
@@ -47,7 +48,7 @@ function Menu() {
     getCategoryData("beef sandwich", setBeefSandwiches);
     getCategoryData("pizaa", setPizzas);
     getCategoryData("soft drinks", setSoftDrinks);
-    getCategoryData("drinks", setHotDrinks);
+    getCategoryData("hotDrinks", setHotDrinks);
   }, [currentLange]);
 
   const handleAddToCart = (item) => {
@@ -73,10 +74,10 @@ function Menu() {
   };
 
   const textColor = theme === "dark" ? "text-white" : "text-dark";
-  const backgroundColor = theme === "dark" ? "bg-custom-dark" : "bg-light";
+  const backgroundColor = theme === "dark" ? "bg-custom-dark" : "bg-custom-light";
   const handleNavigate = (category) => {
     navigate(`/Dishes/${category}`);
-  };
+  };  
 
   const renderCategorySection = (title, items, categoryKey) => (
     <div className="category-section mt-5">

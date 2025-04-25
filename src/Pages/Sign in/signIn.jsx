@@ -1,58 +1,85 @@
-import { useState } from "react";
-import { auth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, providerG, db, setDoc, doc, getDoc } from "../../firebase/firebase";
+import { useState, useContext } from "react";
+import {
+  auth,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  providerG,
+  db,
+  setDoc,
+  doc,
+  getDoc,
+} from "../../firebase/firebase";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
-import { faGoogle as faGoogleBrand, faFacebook as faFacebookBrand } from '@fortawesome/free-brands-svg-icons';
-import './Signin.css';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEnvelope, faLock } from "@fortawesome/free-solid-svg-icons";
+import {
+  faGoogle as faGoogleBrand,
+  faFacebook as faFacebookBrand,
+} from "@fortawesome/free-brands-svg-icons";
+import { ThemeContext } from "../../Context/ThemeContext";
+import "./Signin.css";
 
 function Signin() {
+  const { theme } = useContext(ThemeContext);
+  const navigate = useNavigate();
   const allDishes = useSelector((state) => state.wishlist);
   const currentLange = useSelector((state) => state.lange.langue);
   const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
+
   const [userUpData, setUserUpData] = useState({
     email: "",
-    password: ""
+    password: "",
   });
 
   const [errorsMsgUp, setErrorsMsgUp] = useState({
     emailError: null,
-    passwordError: null
+    passwordError: null,
   });
 
-  // Validate fields on change
   const handleData = (e) => {
     const { name, value } = e.target;
-    setUserUpData(prev => ({
+    setUserUpData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    setErrorsMsgUp(prev => ({
+    setErrorsMsgUp((prev) => ({
       ...prev,
-      [`${name}Error`]: validateField(name, value)
+      [`${name}Error`]: validateField(name, value),
     }));
   };
 
   const validateField = (name, value) => {
     switch (name) {
-      case 'email':
-        return !value ? "This Field Is Required" :
-          !value.match(/^[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+$/) && "Invalid Email Address";
-      case 'password':
-        return !value ? "This Field Is Required" : null;
+      case "email":
+        return !value
+          ? text.requiredField || "This Field Is Required"
+          : !value.match(/^[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+$/)
+          ? text.invalidEmail || "Invalid Email Address"
+          : null;
+      case "password":
+        return !value ? text.requiredField || "This Field Is Required" : null;
       default:
         return null;
     }
   };
 
-  const navigate = useNavigate();
-
   const handleSignin = () => {
+    const updatedErrors = {
+      emailError: validateField("email", userUpData.email),
+      passwordError: validateField("password", userUpData.password),
+    };
+
+    setErrorsMsgUp(updatedErrors);
+
+    if (Object.values(updatedErrors).some((error) => error !== null)) {
+      return;
+    }
+
     signInWithEmailAndPassword(auth, userUpData.email, userUpData.password)
       .then((userCredential) => {
         const user = userCredential.user;
-        console.log(user);
         if (
           userUpData.email === "admin@gmail.com" &&
           userUpData.password === "aaaAAA111!!!"
@@ -63,37 +90,30 @@ function Signin() {
         }
       })
       .catch((error) => {
-        console.log(error);
-        setErrorsMsgUp(prev => ({
+        setErrorsMsgUp((prev) => ({
           ...prev,
-          emailError: error.code === "auth/user-not-found" ? "User not found" :
-                      error.code === "auth/wrong-password" ? "Incorrect password" : error.message
+          emailError:
+            error.code === "auth/user-not-found"
+              ? text.userNotFound || "User not found"
+              : error.code === "auth/wrong-password"
+              ? text.incorrectPassword || "Incorrect password"
+              : error.message,
         }));
       });
   };
 
   const logInGoogle = () => {
-    console.log("Attempting Google Sign-In");
     signInWithPopup(auth, providerG)
       .then((result) => {
         const credential = GoogleAuthProvider.credentialFromResult(result);
         const token = credential.accessToken;
-        console.log("Google Token:", token);
         const user = result.user;
         createUserGoogle(user, token);
       })
       .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log("Error Message:", errorMessage);
-        console.log("Error Code:", errorCode);
-        const email = error.customData?.email;
-        console.log("Error Email:", email);
-        const credential = GoogleAuthProvider.credentialFromError(error);
-        console.log("Error Credential:", credential);
-        setErrorsMsgUp(prev => ({
+        setErrorsMsgUp((prev) => ({
           ...prev,
-          emailError: error.message
+          emailError: error.message,
         }));
       });
   };
@@ -103,18 +123,15 @@ function Signin() {
       name: user.displayName,
       email: user.email,
       photoURL: user.photoURL,
-      allDishes: allDishes.wishlist || [], // Fallback to empty array if undefined
+      allDishes: allDishes.wishlist || [],
       uid: user.uid,
-      token: token
+      token: token,
     };
     try {
       const userRef = doc(db, "users2", user.uid);
       const userDoc = await getDoc(userRef);
       if (!userDoc.exists()) {
         await setDoc(userRef, userData);
-        console.log("Google user created successfully!");
-      } else {
-        console.log("Google user already exists, skipping creation");
       }
       if (user.email === "admin@gmail.com") {
         navigate("/admin/");
@@ -122,36 +139,46 @@ function Signin() {
         navigate("/");
       }
     } catch (error) {
-      console.error("Error creating Google user:", error);
-      setErrorsMsgUp(prev => ({
+      setErrorsMsgUp((prev) => ({
         ...prev,
-        emailError: error.message
+        emailError: error.message,
       }));
     }
   };
 
-  return (
-    <>
-      <div className="container mt-5">
-        <div className="row justify-content-center my-5">
-          <div className="col-12 col-sm-8 col-md-6 col-lg-5 mt-5">
-            <div className="p-4 p-md-5 shadow-lg rounded-3 bg-white form-container">
-              <h2 className="mb-4 text-center text-dark fw-bold">{text.signIn}</h2>
+  const bgColor = theme === "dark" ? "bg-custom-dark" : "bg-custom-light";
+  const textColor = theme === "dark" ? "text-white" : "text-dark";
+  const bgForm = theme === "dark" ? "bg-dark" : "bg-light";
+  const btnColor = theme === "dark" ? "btn-outline-light" : "btn-outline-dark";
+  const placeholderClass = theme === "dark" ? "placeholder-dark" : "placeholder-light";
+  const iconColorClass = theme === "dark" ? "text-light" : "text-dark";
 
-              {/* Email Field */}
+  return (
+    <div className={`py-5 ${bgColor} sign-in min-vh-100`}>
+      <div className="container">
+        <div className="row justify-content-center align-items-center">
+          <div className="col-12 col-md-6 col-lg-5">
+            <div className={`p-4 rounded shadow-lg ${bgForm}`}>
+              <h2 className={`mb-4 text-center fw-bold ${textColor}`}>
+                {text.signIn || "Sign In"}
+              </h2>
+
+              {/* Email */}
               <div className="mb-3">
-                <label className="form-label text-dark">{text.email}</label>
+                <label className={`form-label ${textColor}`}>
+                  {text.email || "Email"}
+                </label>
                 <div className="input-group">
-                  <span className="input-group-text bg-light">
-                    <FontAwesomeIcon icon={faEnvelope} />
+                  <span className={`input-group-text ${bgColor} ${textColor}`}>
+                    <FontAwesomeIcon icon={faEnvelope} className={iconColorClass} />
                   </span>
                   <input
                     type="email"
-                    className={`form-control rounded-end ${errorsMsgUp.emailError ? "is-invalid" : ""}`}
                     name="email"
                     value={userUpData.email}
                     onChange={handleData}
-                    placeholder="Enter your email"
+                    placeholder={text.enterEmail || "Enter your email"}
+                    className={`form-control ${errorsMsgUp.emailError ? "is-invalid" : ""} ${textColor} ${placeholderClass}`}
                   />
                   {errorsMsgUp.emailError && (
                     <div className="invalid-feedback">{errorsMsgUp.emailError}</div>
@@ -159,20 +186,22 @@ function Signin() {
                 </div>
               </div>
 
-              {/* Password Field */}
-              <div className="mb-4">
-                <label className="form-label text-dark">{text.password}</label>
+              {/* Password */}
+              <div className="mb-3">
+                <label className={`form-label ${textColor}`}>
+                  {text.password || "Password"}
+                </label>
                 <div className="input-group">
-                  <span className="input-group-text bg-light">
-                    <FontAwesomeIcon icon={faLock} />
+                  <span className={`input-group-text ${bgColor} ${textColor}`}>
+                    <FontAwesomeIcon icon={faLock} className={iconColorClass} />
                   </span>
                   <input
                     type="password"
-                    className={`form-control rounded-end ${errorsMsgUp.passwordError ? "is-invalid" : ""}`}
                     name="password"
                     value={userUpData.password}
                     onChange={handleData}
-                    placeholder="Enter your password"
+                    placeholder={text.enterPassword || "Enter your password"}
+                    className={`form-control ${errorsMsgUp.passwordError ? "is-invalid" : ""} ${textColor} ${placeholderClass}`}
                   />
                   {errorsMsgUp.passwordError && (
                     <div className="invalid-feedback">{errorsMsgUp.passwordError}</div>
@@ -182,40 +211,41 @@ function Signin() {
 
               {/* Sign In Button */}
               <button
-                type="submit"
                 onClick={handleSignin}
-                className="btn btn-primary w-100 mb-3 fw-semibold"
+                className={`btn ${btnColor} w-100 fw-semibold mb-3`}
               >
-                {text.signInButton}
+                {text.signInButton || "Sign In"}
               </button>
 
               {/* Divider */}
               <div className="d-flex align-items-center my-4">
-                <hr className="flex-grow-1" />
-                <span className="px-2 text-muted">{text.or}</span>
-                <hr className="flex-grow-1" />
+                <hr className={`flex-grow-1 ${theme === "dark" ? "border-light" : "border-dark"}`} />
+                <span className={`px-2 ${textColor}`}>{text.or || "or"}</span>
+                <hr className={`flex-grow-1 ${theme === "dark" ? "border-light" : "border-dark"}`} />
               </div>
 
-              {/* Social Login Buttons */}
+              {/* Social Login */}
               <div className="d-flex gap-2">
                 <button
                   onClick={logInGoogle}
                   className="btn btn-outline-danger w-50 d-flex align-items-center justify-content-center gap-2"
                 >
-                  <FontAwesomeIcon icon={faGoogleBrand} /> {text.google}
+                  <FontAwesomeIcon icon={faGoogleBrand} className={iconColorClass} />
+                  {text.google || "Google"}
                 </button>
                 <button
                   disabled
                   className="btn btn-outline-primary w-50 d-flex align-items-center justify-content-center gap-2"
                 >
-                  <FontAwesomeIcon icon={faFacebookBrand} /> {text.facebook}
+                  <FontAwesomeIcon icon={faFacebookBrand} className={iconColorClass} />
+                  {text.facebook || "Facebook"}
                 </button>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

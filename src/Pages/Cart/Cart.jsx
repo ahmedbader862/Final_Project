@@ -122,7 +122,7 @@ export default function Cart() {
     });
   };
 
-  const bgClass = theme === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark';
+  const bgClass = theme === 'dark' ? 'bg-custom-dark text-white' : 'bg-custom-light text-dark';
 
   return (
     <section className={`min-vh-100 pt-5 ${bgClass}`}>
