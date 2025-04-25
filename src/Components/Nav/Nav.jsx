@@ -11,8 +11,10 @@ query,
 db,
 where,
 getDocs,
+onSnapshot,
+doc,
 } from "../../firebase/firebase";
-import { setUserState , setLange } from "../../redux/reduxtoolkit";
+import { setUserState , setLange  } from "../../redux/reduxtoolkit";
 import { ThemeContext } from "../../Context/ThemeContext";
 
 function Nav() {
@@ -25,6 +27,11 @@ const navigate = useNavigate();
 
 const currentLange = useSelector((state) => state.lange.langue);
 const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
+
+const wishlistRedux = useSelector((state) => state.wishlist.wishlist); 
+const wishlistCount = wishlistRedux.length; 
+
+const [WishlistCountFirestore, setWishlistCountFirestore] = useState([]);
 
 const changeLang = () => {
    dispatch(setLange(currentLange === "En" ? "Ar" : "En"));
@@ -83,6 +90,26 @@ useEffect(() => {
 
     return () => authState();
 }, [dispatch]);
+
+useEffect(() => {
+    if (userState55 && userState55.uid && userState55 !== "who know") {
+      const docRef = doc(db, "users2", userState55.uid);
+
+      // الاشتراك في التغييرات باستخدام onSnapshot
+      const unsubscribe = onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const allDishes = docSnap.data().allDishes || [];
+          setWishlistCountFirestore(allDishes.length);
+        } else {
+          setWishlistCountFirestore(0);
+        }
+      }, (error) => {
+        console.error("Error fetching wishlist count from Firestore:", error);
+      });
+
+      return () => unsubscribe();
+    }
+  }, [userState55, setWishlistCountFirestore ]);
 
 return (
     <nav
@@ -184,12 +211,26 @@ return (
             {text.lang}
             </button>
 
+            
+
             {/* Auth Buttons */}
-            <div className="buttons d-flex gap-2">
+            <div className="buttons d-flex gap-2 ">
             {userState55 === "who know" ? (
                 <>
-                <Link to="/Wishlist" className={`fs-5 ${iconColorClass}`}>
-                    <i className="fas fa-heart"></i>
+                <Link
+                  to="/Wishlist"
+                  className={`fs-5 position-relative ${
+                    (userState55 !== "who know" ? WishlistCountFirestore : wishlistCount) > 0
+                      ? "text-danger"
+                      : iconColorClass
+                  }`}
+                >
+                  <i className="fas fa-heart"></i>
+                  {(userState55 !== "who know" ? WishlistCountFirestore : wishlistCount) > 0 && (
+                    <span className="wishlist-count">
+                      {userState55 !== "who know" ? WishlistCountFirestore : wishlistCount}
+                    </span>
+                  )}
                 </Link>
                 <Link to="/Signin">
                     <button
@@ -210,9 +251,21 @@ return (
                 </>
             ) : (
                 <>
-                <div className="icons d-flex gap-3">
-                    <Link to="/Wishlist" className={`fs-5 ${iconColorClass}`}>
+                <div className="icons d-flex gap-3 mt-3">
+                    <Link
+                    to="/Wishlist"
+                    className={`fs-5 position-relative ${
+                        (userState55 !== "who know" ? WishlistCountFirestore : wishlistCount) > 0
+                        ? "text-danger"
+                        : iconColorClass
+                    }`}
+                    >
                     <i className="fas fa-heart"></i>
+                    {(userState55 !== "who know" ? WishlistCountFirestore : wishlistCount) > 0 && (
+                        <span className="wishlist-count">
+                        {userState55 !== "who know" ? WishlistCountFirestore : wishlistCount}
+                        </span>
+                    )}
                     </Link>
                     <Link to="/cart" className={`fs-5 ${iconColorClass}`}>
                     <i className="fas fa-shopping-cart"></i>

@@ -1,26 +1,51 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import '../Card/card.css';
 import { removWishlist, setWishlist } from "../../redux/reduxtoolkit";
-import { db, getDoc, doc, setDoc } from '../../firebase/firebase';
+import { db, getDoc, doc, setDoc, onSnapshot } from '../../firebase/firebase';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ThemeContext } from "../../Context/ThemeContext"; // 👈 استيراد الثيم
+import { ThemeContext } from "../../Context/ThemeContext";
 
 function Carde(props) {
   const dispatch = useDispatch();
-  const { theme } = useContext(ThemeContext); // 👈 استخدام الثيم
+  const { theme } = useContext(ThemeContext);
 
   const wishlistRedux = useSelector((state) => state.wishlist?.wishlist || []);
   const userState55 = useSelector((state) => state.UserData?.['UserState'] || null);
   const findDishesInWishlist = wishlistRedux.some((dish) => dish.title === props.title);
+  const [isInWishlistFirestore, setIsInWishlistFirestore] = useState(false); // حالة جديدة لـ Firestore
+
+  // جلب حالة العنصر من Firestore لما المستخدم مسجل دخول
+  useEffect(() => {
+    if (userState55 && userState55.uid && userState55 !== "who know") {
+      const unsub = onSnapshot(
+        doc(db, "users2", userState55.uid),
+        (docSnap) => {
+          if (docSnap.exists()) {
+            const allDishes = docSnap.data().allDishes || [];
+            const exists = allDishes.some(dish => dish.title === props.title);
+            setIsInWishlistFirestore(exists);
+          } else {
+            setIsInWishlistFirestore(false);
+          }
+        },
+        (error) => console.error("Firestore listener error:", error)
+      );
+      return () => unsub();
+    }
+  }, [userState55, props.title]);
 
   const handleAddWishlist = () => {
     dispatch(
       setWishlist({
-        title: props.title,
+        title: props.title, // العنوان بالإنجليزية
+        title_ar: props.title_ar || "عنوان غير متوفر", // العنوان بالعربية
         poster_path: props.poster_path,
+        description: props.description, // الوصف بالإنجليزية
+        description_ar: props.description_ar || "الوصف غير متوفر", // الوصف بالعربية
+        price: props.price,
       })
     );
     toast.success(`${props.title} added to wishlist!`, {
@@ -35,14 +60,6 @@ function Carde(props) {
       position: "top-right",
       autoClose: 2000,
     });
-  };
-
-  const handleToggleWishlist = () => {
-    if (findDishesInWishlist) {
-      handleRemoveWishlist();
-    } else {
-      handleAddWishlist();
-    }
   };
 
   const toggleFirestore = async () => {
@@ -63,9 +80,21 @@ function Carde(props) {
 
       const updatedDishes = dishExists
         ? currentDishes.filter(dish => dish.title !== props.title)
-        : [...currentDishes, { title: props.title, poster_path: props.poster_path }];
+        : [
+            ...currentDishes,
+            {
+              title: props.title, // العنوان بالإنجليزية
+              title_ar: props.title_ar || "عنوان غير متوفر", // العنوان بالعربية
+              poster_path: props.poster_path,
+              description: props.description, // الوصف بالإنجليزية
+              description_ar: props.description_ar || "الوصف غير متوفر", // الوصف بالعربية
+              price: props.price,
+            },
+          ];
 
+      // تحديث Firestore فقط
       await setDoc(docRef, { allDishes: updatedDishes }, { merge: true });
+
       toast[dishExists ? "info" : "success"](
         `${props.title} ${dishExists ? "removed from" : "added to"} wishlist!`,
         { position: "top-right", autoClose: 2000 }
@@ -76,6 +105,20 @@ function Carde(props) {
         position: "top-right",
         autoClose: 2000,
       });
+    }
+  };
+
+  const handleToggleWishlist = () => {
+    if (userState55 && userState55.uid) {
+      // المستخدم مسجل الدخول: يتعامل مع Firestore فقط
+      toggleFirestore();
+    } else {
+      // المستخدم مش مسجل الدخول: يتعامل مع Redux فقط
+      if (findDishesInWishlist) {
+        handleRemoveWishlist();
+      } else {
+        handleAddWishlist();
+      }
     }
   };
 
@@ -128,17 +171,16 @@ function Carde(props) {
   const safePosterPath = props.poster_path || "default-image.jpg";
   const safePrice = props.price || "Price not available";
 
-  // 👇 نحدد لون النص بناءً على الثيم
   const textColor = theme === "dark" ? "text-white" : "text-dark";
   const iconColor = theme === "dark" ? "text-white" : "text-dark";
 
   return (
     <div className={`card card-container ${theme === "dark" ? "bg-dark" : "bg-light"}`}>
       <button
-        className={`fav-icon ${findDishesInWishlist ? 'active' : ''}`}
-        onClick={userState55 === "who know" ? handleToggleWishlist : toggleFirestore}
+        className={`fav-icon ${(userState55 && userState55.uid) ? (isInWishlistFirestore ? 'active' : '') : (findDishesInWishlist ? 'active' : '')}`}
+        onClick={handleToggleWishlist} // الكود الأصلي محافظ عليه
       >
-        <i className="fas fa-heart"></i> {/* 👈 متغيرش لونها */}
+        <i className="fas fa-heart"></i>
       </button>
 
       <div className="image-wrapper">
@@ -154,7 +196,7 @@ function Carde(props) {
           </h5>
           <p className={`food-description ${textColor}`}>
             {safeDescription.split(" ").length > 8
-              ? safeDescription.split(" ").slice(0,8).join(" ") + " ..."
+              ? safeDescription.split(" ").slice(0, 8).join(" ") + " ..."
               : safeDescription}
           </p>
         </div>

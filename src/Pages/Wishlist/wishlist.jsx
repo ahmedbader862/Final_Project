@@ -1,72 +1,64 @@
 import { useSelector } from "react-redux";
 import Card from '../../Components/Card/card';
-import { db,  getDoc, doc, } from '../../firebase/firebase';
-import {  useEffect, useState } from "react";
+import { db, doc } from '../../firebase/firebase';
+import { onSnapshot } from 'firebase/firestore';
+import { useEffect, useState } from "react";
+
 function Wishlist() {
-
-
-
-  const [realData , setRealData] = useState([]);
+  const [realData, setRealData] = useState([]);
 
   const wishlistRedux = useSelector((state) => state.wishlist.wishlist);
+  const CurrentUser = useSelector((state) => state.UserData['UserState']);
+  const currentLange = useSelector((state) => state.lange.langue); // جلب اللغة الحالية
 
-  const  CurrentUser = useSelector((state) => state.UserData['UserState']);
-  // console.log(CurrentUser.uid);
-  // console.log(wishlistRedux);
-  console.log("CurrentUser UID:", CurrentUser.uid);
+  useEffect(() => {
+    if (CurrentUser && CurrentUser.uid && CurrentUser !== 'who know') {
+      const unsub = onSnapshot(
+        doc(db, "users2", CurrentUser.uid),
+        (docSnap) => {
+          if (docSnap.exists()) {
+            setRealData(docSnap.data().allDishes || []);
+          } else {
+            setRealData([]);
+          }
+        },
+        (error) => console.error("Firestore listener error:", error)
+      );
+      return () => unsub();
+    } else {
+      // إذا لم يكن المستخدم مسجلًا، استخدم بيانات Redux
+      setRealData(wishlistRedux);
+    }
+  }, [CurrentUser, wishlistRedux]);
 
-useEffect(() => {
+  return (
+    <div>
+      <div id="aa">
+        {realData.map((dish, idx) => {
+          const title = currentLange === "Ar" 
+            ? dish.title_ar || dish.title || "عنوان غير متوفر" 
+            : dish.title || "Title not available";
+          
+          const description = currentLange === "Ar" 
+            ? dish.description_ar || dish.description || "الوصف غير متوفر" 
+            : dish.description || "Description not available";
+          
+          const price = dish.price ? `${dish.price} LE` : "السعر غير متوفر";
 
-  if (CurrentUser != 'who know') {
-
-    const getDishes = async () => {
-      try {
-    
-     const docRef = doc(db, "users2", CurrentUser.uid );
-     const docSnap = await getDoc(docRef);
-     if (docSnap.exists()) {
-    console.log("Document data:", docSnap.data()['allDishes']);
-    setRealData(docSnap.data()['allDishes']);
-  } else {
-    console.log("No such document!");
-  }
-      } catch (error) {
-        console.error("???????????????????????", error);
-      }
-    };
-  
-    getDishes();
-  }else{
-    setRealData(wishlistRedux);
-  }
-
-  
-  
-}, [CurrentUser, wishlistRedux]);
-
-
-// ####################################################
-    return (
-        
-         <div className="">
-
-
-            <div id="aa" >
-       
-            {realData.map((dish) => (
-  <Card
-    
-    title={dish.title}
-    poster_path={dish.poster_path}
-  />
-))}
-
+          return (
+            <Card
+              key={idx}
+              title={title}
+              poster_path={dish.poster_path || "default-image.jpg"}
+              price={price}
+              description={description}
+            />
+          );
+        })}
       </div>
-        <div className="flex justify-center mt-10">
-      </div>
-
-        
-       </div>
-    );
+      <div className="flex justify-center mt-10"></div>
+    </div>
+  );
 }
+
 export default Wishlist;
