@@ -22,7 +22,7 @@ function Nav() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [WishlistCountFirestore, setWishlistCountFirestore] = useState([]);
+  const [WishlistCountFirestore, setWishlistCountFirestore] = useState(0);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -154,17 +154,42 @@ function Nav() {
 
         <div className={`collapse navbar-collapse ${isOpen ? "show" : ""}`} id="navbarNavDropdown">
           <ul className="navbar-nav mx-auto">
-            {["Home", "Menu", "Reservation", "Contact Us"].map((tab) => (
-              <li className="nav-item" key={tab}>
-                <Link
-                  to={`/${tab === "Home" ? "" : tab.replace(" ", "").toLowerCase()}`}
-                  className={`nav-link ${activeTab === tab ? "active" : ""} ${textColorClass}`}
-                  onClick={() => setActiveTab(tab)}
-                >
-                  {tab}
-                </Link>
-              </li>
-            ))}
+            <li className="nav-item">
+              <Link
+                to="/"
+                className={`nav-link ${activeTab === "Home" ? "active" : ""} ${textColorClass}`}
+                onClick={() => setActiveTab("Home")}
+              >
+                {text?.home || (currentLange === "Ar" ? "الرئيسية" : "Home")}
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                to="/menu"
+                className={`nav-link ${activeTab === "Menu" ? "active" : ""} ${textColorClass}`}
+                onClick={() => setActiveTab("Menu")}
+              >
+                {text?.menu || (currentLange === "Ar" ? "القائمة" : "Menu")}
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                to="/reservation"
+                className={`nav-link ${activeTab === "Reservation" ? "active" : ""} ${textColorClass}`}
+                onClick={() => setActiveTab("Reservation")}
+              >
+                {text?.reservation || (currentLange === "Ar" ? "الحجز" : "Reservation")}
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                to="/ContactUs"
+                className={`nav-link ${activeTab === "Contact Us" ? "active" : ""} ${textColorClass}`}
+                onClick={() => setActiveTab("Contact Us")}
+              >
+                {text?.contactUs || (currentLange === "Ar" ? "اتصل بنا" : "Contact Us")}
+              </Link>
+            </li>
             {userState55 !== "who know" && (
               <li className="nav-item">
                 <Link
@@ -172,7 +197,7 @@ function Nav() {
                   className={`nav-link ${activeTab === "My Orders" ? "active" : ""} ${textColorClass}`}
                   onClick={() => setActiveTab("My Orders")}
                 >
-                  My Orders
+                  {text?.myOrders || (currentLange === "Ar" ? "طلباتي" : "My Orders")}
                 </Link>
               </li>
             )}
@@ -194,7 +219,7 @@ function Nav() {
                       theme === "dark" ? "bg-dark text-white" : "bg-light text-dark"
                     }`}
                     type="search"
-                    placeholder="Search"
+                    placeholder={text?.search || (currentLange === "Ar" ? "بحث" : "Search")}
                     aria-label="Search"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -215,12 +240,14 @@ function Nav() {
                 checked={theme === "dark"}
               />
               <label className="form-check-label" htmlFor="themeSwitch">
-                {theme === "dark" ? "Dark" : "Light"}
+                {theme === "dark"
+                  ? text?.darkMode || (currentLange === "Ar" ? "الوضع المظلم" : "Dark")
+                  : text?.lightMode || (currentLange === "Ar" ? "الوضع الفاتح" : "Light")}
               </label>
             </div>
 
             <button onClick={changeLang} className="lang-switch-btn">
-              {text.lang}
+              {text?.lang || (currentLange === "Ar" ? "English" : "العربية")}
             </button>
 
             <div className="buttons d-flex gap-2">
@@ -240,7 +267,7 @@ function Nav() {
                       className={`btn btn-outline-${theme === "dark" ? "light" : "dark"} btn-md`}
                     >
                       <i className="fas fa-user me-2"></i>
-                      {text.signIn}
+                      {text?.signIn || (currentLange === "Ar" ? "تسجيل الدخول" : "Sign In")}
                     </button>
                   </Link>
                   <Link to="/Register">
@@ -248,7 +275,7 @@ function Nav() {
                       className={`btn btn-${theme === "dark" ? "light" : "dark"} btn-md`}
                     >
                       <i className="fas fa-user-plus me-2"></i>
-                      {text.register}
+                      {text?.register || (currentLange === "Ar" ? "التسجيل" : "Register")}
                     </button>
                   </Link>
                 </>
@@ -276,7 +303,7 @@ function Nav() {
                       className={`btn btn-${theme === "dark" ? "light" : "dark"} btn-md`}
                     >
                       <i className="fas fa-sign-out-alt me-2"></i>
-                      {text.logout}
+                      {text?.logout || (currentLange === "Ar" ? "تسجيل الخروج" : "Logout")}
                     </button>
                   </Link>
                 </>

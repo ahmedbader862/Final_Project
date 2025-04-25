@@ -126,6 +126,7 @@
 
 .navbar .btn {
   transition: color 2s ease;
+}
 .lang-switch-btn {
   background-color: #ff6b6b;
   color: white;
@@ -146,4 +147,15 @@
 .lang-switch-btn:focus {
   outline: none;
   box-shadow: 0 0 8px rgba(255, 107, 107, 0.8);
+}
+.lang-switch-btn {
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }

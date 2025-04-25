@@ -3,6 +3,7 @@ import { db } from "../../firebase/firebase";
 import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
 import { ThemeContext } from "../../Context/ThemeContext"; // تأكد من المسار
 import "./ReservationForm.css";
+import { useSelector } from "react-redux";
 
 const ReservationForm = ({ selectedTable, setSelectedTable }) => {
   const [name, setName] = useState("");
@@ -60,7 +61,7 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
   };
 
   return (
-    <div className="my-5">
+    <div className="py-5">
       <h2 className={`text-center mb-3 ${textColor}`}>{text.reservationFormTitle}</h2>
       {selectedTable && <p className={textColor}>{text.selectedTable}: {selectedTable}</p>}
       <form className="d-flex flex-column gap-2" onSubmit={handleSubmit}>
