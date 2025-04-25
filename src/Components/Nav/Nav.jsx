@@ -3,238 +3,246 @@ import "./Nav.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
-auth,
-signOut,
-onAuthStateChanged,
-collection,
-query,
-db,
-where,
-getDocs,
+  auth,
+  signOut,
+  onAuthStateChanged,
+  collection,
+  query,
+  db,
+  where,
+  getDocs,
 } from "../../firebase/firebase";
-import { setUserState , setLange } from "../../redux/reduxtoolkit";
+import { setUserState, setLange } from "../../redux/reduxtoolkit";
 import { ThemeContext } from "../../Context/ThemeContext";
 
 function Nav() {
-const [activeTab, setActiveTab] = useState("Home");
-const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("Home");
+  const [isOpen, setIsOpen] = useState(false);
 
-const dispatch = useDispatch();
-const userState55 = useSelector((state) => state.UserData["UserState"]);
-const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const userState55 = useSelector((state) => state.UserData["UserState"]);
+  const navigate = useNavigate();
 
-const currentLange = useSelector((state) => state.lange.langue);
-const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
 
-const changeLang = () => {
-   dispatch(setLange(currentLange === "En" ? "Ar" : "En"));
-};
+  const changeLang = () => {
+    dispatch(setLange(currentLange === "En" ? "Ar" : "En"));
+  };
 
-const logout = () => {
+  const logout = () => {
     signOut(auth)
-    .then(() => {
+      .then(() => {
         console.log("%%%%%%%%%% user log out ");
         dispatch(setUserState("who know"));
         navigate("/signin");
-    })
-    .catch((error) => {
+      })
+      .catch((error) => {
         console.log(error);
-    });
-};
+      });
+  };
 
-const { theme, toggleTheme } = useContext(ThemeContext);
+  const { theme, toggleTheme } = useContext(ThemeContext);
 
-const textColorClass = theme === "dark" ? "text-white" : "text-dark";
-const iconColorClass = theme === "dark" ? "text-white" : "text-dark";
+  const textColorClass = theme === "dark" ? "text-white" : "text-dark";
+  const iconColorClass = theme === "dark" ? "text-white" : "text-dark";
 
-useEffect(() => {
+  useEffect(() => {
     const authState = onAuthStateChanged(auth, (user) => {
-    if (user?.displayName == null) {
+      if (user?.displayName == null) {
         getCurrentUserDataFireStore(user);
-    }
+      }
 
-    if (user) {
+      if (user) {
         dispatch(
-        setUserState({
+          setUserState({
             name: user.displayName,
             uid: user.uid,
             email: user.email,
-        })
+          })
         );
-    } else {
+      } else {
         dispatch(setUserState("who know"));
-    }
+      }
     });
 
     const getCurrentUserDataFireStore = async (user) => {
-    const q = query(collection(db, "users2"), where("uid", "==", user.uid));
-    const querySnapshot = await getDocs(q);
+      const q = query(collection(db, "users2"), where("uid", "==", user.uid));
+      const querySnapshot = await getDocs(q);
 
-    querySnapshot.forEach((doc) => {
+      querySnapshot.forEach((doc) => {
         dispatch(
-        setUserState({
+          setUserState({
             name: doc.data().name,
             uid: user.uid,
             email: user.email,
-        })
+          })
         );
-    });
+      });
     };
 
     return () => authState();
-}, [dispatch]);
+  }, [dispatch]);
 
-return (
+  return (
     <nav
-    className={`navbar h-10 navbar-expand-lg fixed-top ${
+      className={`navbar h-10 navbar-expand-lg fixed-top ${
         theme === "dark" ? "bg-custom-dark navbar-dark" : "bg-light navbar-light"
-    }`}
+      }`}
     >
-    <div className="container-fluid d-flex justify-content-between align-items-center">
+      <div className="container-fluid d-flex justify-content-between align-items-center">
         <a className={`navbar-brand text-3xl fw-bold ${textColorClass}`} href="/">
-        TastyBites
+          TastyBites
         </a>
 
         <button
-        className="navbar-toggler"
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-        aria-label="Toggle navigation"
+          className="navbar-toggler"
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-expanded={isOpen}
+          aria-label="Toggle navigation"
         >
-        <span className="navbar-toggler-icon"></span>
+          <span className="navbar-toggler-icon"></span>
         </button>
 
         <div
-        className={`collapse navbar-collapse ${isOpen ? "show" : ""}`}
-        id="navbarNavDropdown"
+          className={`collapse navbar-collapse ${isOpen ? "show" : ""}`}
+          id="navbarNavDropdown"
         >
-        <ul className="navbar-nav mx-auto">
+          <ul className="navbar-nav mx-auto">
             <li className="nav-item">
-                <Link
+              <Link
                 to="/"
                 className={`nav-link ${activeTab === "Home" ? "active" : ""} ${textColorClass}`}
                 onClick={() => setActiveTab("Home")}
-                >
+              >
                 {text.home}
-                </Link>
+              </Link>
             </li>
             <li className="nav-item">
-                <Link
+              <Link
                 to="/menu"
                 className={`nav-link ${activeTab === "Menu" ? "active" : ""} ${textColorClass}`}
                 onClick={() => setActiveTab("Menu")}
-                >
+              >
                 {text.menu}
-                </Link>
+              </Link>
             </li>
             <li className="nav-item">
-                <Link
+              <Link
                 to="/reservation"
                 className={`nav-link ${activeTab === "Reservation" ? "active" : ""} ${textColorClass}`}
                 onClick={() => setActiveTab("Reservation")}
-                >
+              >
                 {text.reservation}
-                </Link>
+              </Link>
             </li>
-            <li className="nav-item">
+            {userState55 !== "who know" && (
+              <li className="nav-item">
                 <Link
+                  to="/my-reservations"
+                  className={`nav-link ${activeTab === "My Reservations" ? "active" : ""} ${textColorClass}`}
+                  onClick={() => setActiveTab("My Reservations")}
+                >
+                  {text.myReservations || "My Reservations"}
+                </Link>
+              </li>
+            )}
+            <li className="nav-item">
+              <Link
                 to="/ContactUs"
                 className={`nav-link ${activeTab === "Contact Us" ? "active" : ""} ${textColorClass}`}
                 onClick={() => setActiveTab("Contact Us")}
-                >
+              >
                 {text.contactUs}
-                </Link>
+              </Link>
             </li>
             {userState55 !== "who know" && (
-            <li className="nav-item">
+              <li className="nav-item">
                 <Link
-                to="/orders"
-                className={`nav-link ${activeTab === "My Orders" ? "active" : ""} ${textColorClass}`}
-                onClick={() => setActiveTab("My Orders")}
+                  to="/orders"
+                  className={`nav-link ${activeTab === "My Orders" ? "active" : ""} ${textColorClass}`}
+                  onClick={() => setActiveTab("My Orders")}
                 >
-                {text.myOrders}
+                  {text.myOrders}
                 </Link>
-            </li>
+              </li>
             )}
-        </ul>
+          </ul>
 
-        <div className="d-flex align-items-center gap-4">
+          <div className="d-flex align-items-center gap-4">
             {/* Theme Switch */}
             <div className={`form-check form-switch me-3 ${textColorClass}`}>
-            <input
+              <input
                 className="form-check-input"
                 type="checkbox"
                 id="themeSwitch"
                 onChange={toggleTheme}
                 checked={theme === "dark"}
-            />
-            <label className="form-check-label" htmlFor="themeSwitch">
+              />
+              <label className="form-check-label" htmlFor="themeSwitch">
                 {theme === "dark" ? "Dark" : "Light"}
-            </label>
+              </label>
             </div>
 
-{/* ########################################### */}
-{/* ########################################### */}
-{/* ########################################### */}
             <button
-            onClick={changeLang}
-            className="lang-switch-btn"
+              onClick={changeLang}
+              className="lang-switch-btn"
             >
-            {text.lang}
+              {text.lang}
             </button>
 
             {/* Auth Buttons */}
             <div className="buttons d-flex gap-2">
-            {userState55 === "who know" ? (
+              {userState55 === "who know" ? (
                 <>
-                <Link to="/Wishlist" className={`fs-5 ${iconColorClass}`}>
+                  <Link to="/Wishlist" className={`fs-5 ${iconColorClass}`}>
                     <i className="fas fa-heart"></i>
-                </Link>
-                <Link to="/Signin">
+                  </Link>
+                  <Link to="/Signin">
                     <button
-                    className={`btn btn-outline-${theme === "dark" ? "light" : "dark"} btn-md`}
+                      className={`btn btn-outline-${theme === "dark" ? "light" : "dark"} btn-md`}
                     >
-                    <i className="fas fa-user me-2"></i>
-                    {text.signIn}
+                      <i className="fas fa-user me-2"></i>
+                      {text.signIn}
                     </button>
-                </Link>
-                <Link to="/Register">
+                  </Link>
+                  <Link to="/Register">
                     <button
-                    className={`btn btn-${theme === "dark" ? "light" : "dark"} btn-md`}
+                      className={`btn btn-${theme === "dark" ? "light" : "dark"} btn-md`}
                     >
-                    <i className="fas fa-user-plus me-2"></i>
-                    {text.register}
+                      <i className="fas fa-user-plus me-2"></i>
+                      {text.register}
                     </button>
-                </Link>
+                  </Link>
                 </>
-            ) : (
+              ) : (
                 <>
-                <div className="icons d-flex gap-3">
+                  <div className="icons d-flex gap-3">
                     <Link to="/Wishlist" className={`fs-5 ${iconColorClass}`}>
-                    <i className="fas fa-heart"></i>
+                      <i className="fas fa-heart"></i>
                     </Link>
                     <Link to="/cart" className={`fs-5 ${iconColorClass}`}>
-                    <i className="fas fa-shopping-cart"></i>
+                      <i className="fas fa-shopping-cart"></i>
                     </Link>
-                </div>
-                <Link>
+                  </div>
+                  <Link>
                     <button
-                    onClick={logout}
-                    className={`btn btn-${theme === "dark" ? "light" : "dark"} btn-md`}
+                      onClick={logout}
+                      className={`btn btn-${theme === "dark" ? "light" : "dark"} btn-md`}
                     >
-                    <i className="fas fa-sign-out-alt me-2"></i>
-                    {text.logout}
+                      <i className="fas fa-sign-out-alt me-2"></i>
+                      {text.logout}
                     </button>
-                </Link>
+                  </Link>
                 </>
-            )}
+              )}
             </div>
+          </div>
         </div>
-        </div>
-    </div>
+      </div>
     </nav>
-);
+  );
 }
 
 export default Nav;

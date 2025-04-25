@@ -7,6 +7,7 @@ import WelcomePage from './Pages/Welcome/Welcome';
 import Error from './Pages/Error/Error';
 import Menu from './Pages/Menu/Menu';
 import Reservation from './Pages/Reservation/Reservation';
+import UserReservationsPage from './Pages/Reservation/UserReservationsPage'; // Added import
 import ContactUs from './Pages/ContactUs/ContactUs';
 import Register from './Pages/Register/Register';
 import Signin from './Pages/Sign in/signIn';
@@ -51,51 +52,52 @@ function App() {
 
   return (
     <ThemeProvider>
-    <BrowserRouter>
-      <DebugLocation>
-        <div className="min-vh-100 d-flex flex-column">
-          <main className="flex-grow-1">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/signin" element={<Signin />} />
-              <Route path="/menu" element={<Menu />} />
-              <Route path="/Dishes/:id" element={<Dishes />} />
-              <Route path="/reservation" element={<Reservation />} />
-              <Route path="/contactus" element={<ContactUs />} />
-              <Route path="/welcome" element={<WelcomePage />} />
-              <Route path="/wishlist" element={<Wishlist />} />
-              <Route path="/cart" element={<ProtectedRoute element={Cart} />} />
-              <Route path="/shippingadress" element={<Shipping />} />
-              <Route path="/order-confirmation" element={<OrderConfirmation />} />
-              <Route
-                path="/track-order"
-                element={<OrderTracking userId={userState !== "who know" ? userState.uid : null} />}
-              />
-              <Route
-                path="/orders"
-                element={<Orders userId={userState !== "who know" ? userState.uid : null} />}
-              />
-              <Route path="/admin/*" element={<AdminDashboard />} />
-              <Route path="*" element={<Error />} />
-            </Routes>
-          </main>
-          <Footer />
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-          />
-        </div>
-      </DebugLocation>
-    </BrowserRouter>
+      <BrowserRouter>
+        <DebugLocation>
+          <div className="min-vh-100 d-flex flex-column">
+            <main className="flex-grow-1">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/signin" element={<Signin />} />
+                <Route path="/menu" element={<Menu />} />
+                <Route path="/Dishes/:id" element={<Dishes />} />
+                <Route path="/reservation" element={<Reservation />} />
+                <Route path="/my-reservations" element={<UserReservationsPage />} /> {/* Added route */}
+                <Route path="/contactus" element={<ContactUs />} />
+                <Route path="/welcome" element={<WelcomePage />} />
+                <Route path="/wishlist" element={<Wishlist />} />
+                <Route path="/cart" element={<ProtectedRoute element={Cart} />} />
+                <Route path="/shippingadress" element={<Shipping />} />
+                <Route path="/order-confirmation" element={<OrderConfirmation />} />
+                <Route
+                  path="/track-order"
+                  element={<OrderTracking userId={userState !== "who know" ? userState.uid : null} />}
+                />
+                <Route
+                  path="/orders"
+                  element={<Orders userId={userState !== "who know" ? userState.uid : null} />}
+                />
+                <Route path="/admin/*" element={<AdminDashboard />} />
+                <Route path="*" element={<Error />} />
+              </Routes>
+            </main>
+            <Footer />
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="light"
+            />
+          </div>
+        </DebugLocation>
+      </BrowserRouter>
     </ThemeProvider>
   );
 }

@@ -1,6 +1,38 @@
 import React from 'react';
 import { CheckCircle, XCircle, Trash } from 'react-bootstrap-icons';
 
+const normalizeItems = (items) => {
+  // Handle array case
+  if (Array.isArray(items)) {
+    return items
+      .filter(item => item && typeof item === 'object') // Ensure valid objects
+      .map((item, index) => ({
+        id: item.id || index,
+        title: item.title || 'Unknown Item',
+        quantity: Math.max(1, Math.floor(item.quantity || 1)), // Ensure quantity is at least 1
+      }));
+  }
+
+  // Optional: Handle string case (uncomment if legacy data exists)
+  /*
+  if (typeof items === 'string' && items.trim()) {
+    return items.split(',').map((item, index) => ({
+      id: index,
+      title: item.trim() || 'Unknown Item',
+      quantity: 1,
+    }));
+  }
+  */
+
+  // Log unexpected types for debugging
+  if (items !== null && items !== undefined) {
+    console.warn('Unexpected items type:', typeof items, items);
+  }
+
+  // Default to empty array for null, undefined, or other types
+  return [];
+};
+
 const OrderCard = ({ order, updateStatus, updateTrackingStatus, deleteOrder }) => {
   const paymentStatus = order.paymentMethod === "cash_on_delivery" ? "Cash on Delivery" : "Paid (PayPal)";
   const trackingStatuses = [
@@ -9,6 +41,9 @@ const OrderCard = ({ order, updateStatus, updateTrackingStatus, deleteOrder }) =
     "Out for Delivery",
     "Delivered"
   ];
+
+  // Normalize items
+  const items = normalizeItems(order.items);
 
   return (
     <div className="order-card mb-4">
@@ -32,14 +67,14 @@ const OrderCard = ({ order, updateStatus, updateTrackingStatus, deleteOrder }) =
         <div className="order-section">
           <span className="section-label">Items:</span>
           <span>
-            {Array.isArray(order.items)
-              ? order.items.map((item, index) => (
-                  <span key={index}>
+            {items.length > 0
+              ? items.map((item, index) => (
+                  <span key={item.id}>
                     {item.title} (x{item.quantity})
-                    {index < order.items.length - 1 ? ', ' : ''}
+                    {index < items.length - 1 ? ', ' : ''}
                   </span>
                 ))
-              : order.items || 'No items'}
+              : 'No items'}
           </span>
         </div>
         <div className="order-section">

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Route, Routes, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Container, Row, Col, Button } from "react-bootstrap";
+import { Container, Row, Col, Button, Card } from "react-bootstrap";
 import {
   auth,
   db,
@@ -33,9 +33,11 @@ import RefundMessage from "../AdminOrder/RefundMessage";
 import CategorySelector from "../AdminControl/CategorySelector";
 import MenuItemCard from "../AdminControl/MenuItemCard";
 import ItemModal from "../AdminControl/ItemModal";
+import { ThemeContext } from "../../Context/ThemeContext";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend);
 
+// AdminDashboard Component
 const AdminDashboard = () => {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -94,6 +96,11 @@ const AdminDashboard = () => {
                 </NavLink>
               </li>
               <li className="nav-item">
+                <NavLink to="/admin/reservations" className="nav-link">
+                  Reservations
+                </NavLink>
+              </li>
+              <li className="nav-item">
                 <NavLink to="/admin/menu" className="nav-link">
                   Menu
                 </NavLink>
@@ -114,6 +121,7 @@ const AdminDashboard = () => {
         <Col md={10} className="main-content p-4">
           <Routes>
             <Route path="orders" element={<AdminOrdersPage />} />
+            <Route path="reservations" element={<AdminReservationsPage />} />
             <Route path="menu" element={<AdminPanel />} />
             <Route path="chat" element={<AdminChat />} />
             <Route path="/" element={<AdminOrdersPage />} />
@@ -125,13 +133,14 @@ const AdminDashboard = () => {
   );
 };
 
+// AdminOrdersPage Component
 const AdminOrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [refundMessage, setRefundMessage] = useState(null);
-  const [sortOrder, setSortOrder] = useState("newest"); // "newest" or "oldest"
-  const [statusFilter, setStatusFilter] = useState("all"); // "all", "pending", "accepted", "rejected"
-  const [paymentFilter, setPaymentFilter] = useState("all"); // "all", "cash_on_delivery", "paypal"
+  const [sortOrder, setSortOrder] = useState("newest");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [paymentFilter, setPaymentFilter] = useState("all");
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -149,17 +158,14 @@ const AdminOrdersPage = () => {
   const applyFilters = (ordersToFilter, sort, status, payment) => {
     let filtered = [...ordersToFilter];
 
-    // Filter by status
     if (status !== "all") {
       filtered = filtered.filter(order => order.status === status);
     }
 
-    // Filter by payment method
     if (payment !== "all") {
       filtered = filtered.filter(order => order.paymentMethod === payment);
     }
 
-    // Sort by date
     filtered.sort((a, b) => {
       const dateA = a.timestamp?.seconds ? a.timestamp.toDate() : new Date(a.timestamp);
       const dateB = b.timestamp?.seconds ? b.timestamp.toDate() : new Date(b.timestamp);
@@ -317,7 +323,6 @@ const AdminOrdersPage = () => {
         )}
       </div>
       <div className="d-flex flex-wrap gap-3 mb-4 justify-content-center">
-        {/* Sort Dropdown */}
         <div className="dropdown">
           <button
             className="btn btn-outline-light dropdown-toggle"
@@ -348,7 +353,6 @@ const AdminOrdersPage = () => {
           </ul>
         </div>
 
-        {/* Status Filter Dropdown */}
         <div className="dropdown">
           <button
             className="btn btn-outline-light dropdown-toggle"
@@ -395,7 +399,6 @@ const AdminOrdersPage = () => {
           </ul>
         </div>
 
-        {/* Payment Method Filter Dropdown */}
         <div className="dropdown">
           <button
             className="btn btn-outline-light dropdown-toggle"
@@ -447,6 +450,172 @@ const AdminOrdersPage = () => {
   );
 };
 
+// AdminReservationsPage Component
+const AdminReservationsPage = () => {
+  const [reservations, setReservations] = useState([]);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, "reservations"),
+      (snapshot) => {
+        const fetchedReservations = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        console.log("Fetched reservations:", fetchedReservations);
+        setReservations(fetchedReservations);
+      },
+      (error) => {
+        console.error("Error fetching reservations:", error);
+        Swal.fire("Error!", "Failed to fetch reservations: " + error.message, "error");
+      }
+    );
+    return () => unsubscribe();
+  }, []);
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "pending":
+        return "#D4A017";
+      case "accepted":
+        return "#4A919E";
+      case "rejected":
+        return "#B73E3E";
+      default:
+        return "#ffffff";
+    }
+  };
+
+  const updateStatus = async (reservationId, newStatus) => {
+    try {
+      const docId = String(reservationId);
+      if (!docId) {
+        throw new Error("Invalid reservation ID");
+      }
+
+      const reservationRef = doc(db, "reservations", docId);
+      const docSnap = await getDoc(reservationRef);
+      if (!docSnap.exists()) {
+        setReservations((prevReservations) =>
+          prevReservations.filter((res) => res.id !== docId)
+        );
+        throw new Error(`Reservation with ID ${docId} does not exist. It may have been deleted.`);
+      }
+
+      await updateDoc(reservationRef, { status: newStatus });
+      Swal.fire("Success!", `Reservation ${docId} ${newStatus}`, "success");
+    } catch (error) {
+      console.error("Error updating reservation:", error);
+      Swal.fire("Error!", `Failed to update reservation: ${error.message}`, "error");
+    }
+  };
+
+  const deleteReservation = (reservationId) =>
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Delete Reservation #${reservationId}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "Yes, delete!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await deleteDoc(doc(db, "reservations", reservationId));
+        Swal.fire("Deleted!", `Reservation #${reservationId} deleted`, "success");
+      }
+    });
+
+  const handleRefresh = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, "reservations"));
+      const fetchedReservations = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      console.log("Manually refreshed reservations:", fetchedReservations);
+      setReservations(fetchedReservations);
+      Swal.fire("Success!", "Reservations refreshed successfully", "success");
+    } catch (error) {
+      console.error("Error refreshing reservations:", error);
+      Swal.fire("Error!", "Failed to refresh reservations: " + error.message, "error");
+    }
+  };
+
+  return (
+    <div className="container mt-5">
+      <div className="d-flex justify-content-between mb-4 align-items-center flex-wrap">
+        <h2 className="text-white mb-3">Reservations Management</h2>
+        <Button variant="primary" onClick={handleRefresh}>
+          Refresh Reservations
+        </Button>
+      </div>
+
+      {reservations.length > 0 ? (
+        <Row>
+          {reservations.map((reservation) => (
+            <Col md={6} lg={4} className="mb-4" key={reservation.id}>
+              <Card className="bg-dark text-white border-0 shadow">
+                <Card.Body>
+                  <Card.Title className="d-flex justify-content-between align-items-center">
+                    <span>
+                      Reservation #{reservation.reservationId || reservation.id || "Unknown"}
+                    </span>
+                    <span
+                      style={{
+                        color: getStatusColor(reservation.status),
+                        fontWeight: "bold",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {reservation.status || "pending"}
+                    </span>
+                  </Card.Title>
+                  <Card.Text>
+                    <strong>Table ID:</strong> {reservation.tableId || "N/A"} <br />
+                    <strong>Name:</strong> {reservation.name || "N/A"} <br />
+                    <strong>Date:</strong>{" "}
+                    {reservation.date
+                      ? new Date(reservation.date).toLocaleString()
+                      : "N/A"}{" "}
+                    <br />
+                    <strong>Number of Persons:</strong>{" "}
+                    {reservation.numPersons || "N/A"} <br />
+                    <strong>Time Arriving:</strong> {reservation.timeArriving || "N/A"} <br />
+                    <strong>Time Leaving:</strong> {reservation.timeLeaving || "N/A"} <br />
+                    <strong>Phone:</strong> {reservation.phone || "N/A"} <br />
+                  </Card.Text>
+                  <div className="d-flex gap-2">
+                    <Button
+                      variant="success"
+                      size="sm"
+                      onClick={() => updateStatus(reservation.id, "accepted")}
+                      disabled={reservation.status === "accepted"}
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => updateStatus(reservation.id, "rejected")}
+                      disabled={reservation.status === "rejected"}
+                    >
+                      Reject
+                    </Button>
+                    <Button
+                      variant="warning"
+                      size="sm"
+                      onClick={() => deleteReservation(reservation.id)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      ) : (
+        <p className="text-white">No reservations found.</p>
+      )}
+    </div>
+  );
+};
+
+// AdminPanel Component
 const AdminPanel = () => {
   const [user, setUser] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -606,12 +775,14 @@ const AdminPanel = () => {
         handleSubmit={handleSubmit}
         handleDelete={handleDelete}
         handleAddCategory={handleAddCategory}
+        selected/* eslint-disable-next-line no-unused-vars */
         selectedItem={selectedItem}
       />
     </Container>
   );
 };
 
+// AdminChat Component
 const AdminChat = () => {
   const userState55 = useSelector((state) => state.UserData["UserState"]);
   const [allUsers, setAllUsers] = useState([]);
