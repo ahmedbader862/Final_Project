@@ -2,34 +2,33 @@ import React, { useEffect, useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
-    auth,
-    signOut,
-    onAuthStateChanged,
-    collection,
-    query,
-    db,
-    where,
-    getDocs,
+  auth,
+  signOut,
+  onAuthStateChanged,
+  collection,
+  query,
+  db,
+  where,
+  getDocs,
   onSnapshot,
   doc,
 } from "../../firebase/firebase";
-import { setUserState, setLange } from "../../redux/reduxtoolkit";
 import { setUserState, setLange } from "../../redux/reduxtoolkit";
 import { ThemeContext } from "../../Context/ThemeContext";
 import "./Nav.css";
 
 function Nav() {
-    const [activeTab, setActiveTab] = useState("Home");
-    const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("Home");
+  const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [WishlistCountFirestore, setWishlistCountFirestore] = useState(0);
+  const [wishlistCountFirestore, setWishlistCountFirestore] = useState(0);
 
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-    const userState55 = useSelector((state) => state.UserData["UserState"]);
-      const currentLange = useSelector((state) => state.lange.langue);
-    const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
+  const userState = useSelector((state) => state.UserData["UserState"]);
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
   const wishlistRedux = useSelector((state) => state.wishlist.wishlist);
   const wishlistCount = wishlistRedux.length;
 
@@ -37,73 +36,63 @@ function Nav() {
   const textColorClass = theme === "dark" ? "text-white" : "text-dark";
   const iconColorClass = theme === "dark" ? "text-white" : "text-dark";
 
-    const changeLang = () => {
-     dispatch(setLange(currentLange === "En" ? "Ar" : "En"));
-    };
+  const changeLang = () => {
+    dispatch(setLange(currentLange === "En" ? "Ar" : "En"));
+  };
 
-    const logout = () => {
+  const logout = () => {
     signOut(auth)
-        .then(() => {
+      .then(() => {
         console.log("User logged out");
         dispatch(setUserState("who know"));
         navigate("/signin");
       })
       .catch((error) => {
-        console.error(error);
-      });
-  };
-      })
-      .catch((error) => {
-        console.log(error);
+        console.error("Error logging out:", error);
       });
   };
 
-  const { theme, toggleTheme } = useContext(ThemeContext);
-
-  const textColorClass = theme === "dark" ? "text-white" : "text-dark";
-  const iconColorClass = theme === "dark" ? "text-white" : "text-dark";
-
-    useEffect(() => {
-    const authState = onAuthStateChanged(auth, (user) => {
-        if (user) {
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
         if (!user.displayName) {
           getCurrentUserDataFireStore(user);
-            } else {
+        } else {
           dispatch(
-              setUserState({
+            setUserState({
               name: user.displayName,
               uid: user.uid,
               email: user.email,
-              })
+            })
           );
         }
-        } else {
+      } else {
         dispatch(setUserState("who know"));
-        }
+      }
     });
 
     const getCurrentUserDataFireStore = async (user) => {
       if (!user) return;
-        const q = query(collection(db, "users2"), where("uid", "==", user.uid));
-        const querySnapshot = await getDocs(q);
+      const q = query(collection(db, "users2"), where("uid", "==", user.uid));
+      const querySnapshot = await getDocs(q);
 
-        querySnapshot.forEach((doc) => {
+      querySnapshot.forEach((doc) => {
         dispatch(
-            setUserState({
+          setUserState({
             name: doc.data().name,
             uid: user.uid,
             email: user.email,
-            })
+          })
         );
-        });
+      });
     };
 
-    return () => authState();
-    }, [dispatch]);
+    return () => unsubscribe();
+  }, [dispatch]);
 
   useEffect(() => {
-    if (userState55 && userState55.uid && userState55 !== "who know") {
-      const docRef = doc(db, "users2", userState55.uid);
+    if (userState && userState.uid && userState !== "who know") {
+      const docRef = doc(db, "users2", userState.uid);
 
       const unsubscribe = onSnapshot(
         docRef,
@@ -122,7 +111,7 @@ function Nav() {
 
       return () => unsubscribe();
     }
-  }, [userState55]);
+  }, [userState]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -137,41 +126,35 @@ function Nav() {
     setIsSearchOpen(!isSearchOpen);
   };
 
-    return (
+  return (
     <nav
-        className={`navbar h-10 navbar-expand-lg fixed-top ${
+      className={`navbar h-10 navbar-expand-lg fixed-top ${
         theme === "dark" ? "bg-custom-dark navbar-dark" : "bg-light navbar-light"
-        }`}
+      }`}
     >
-        <div className="container-fluid d-flex justify-content-between align-items-center">
-        <a className={`navbar-brand text-3xl fw-bold ${textColorClass}`} href="/">
+      <div className="container-fluid d-flex justify-content-between align-items-center">
+        <Link className={`navbar-brand text-3xl fw-bold ${textColorClass}`} to="/">
           <img
             src={theme === "dark" ? "/Images/logo dark-mood.svg" : "/Images/logo light-mood.svg"}
             style={{ width: "80px", height: "50px" }}
             alt="Logo"
           />
-            TastyBites
-        </a>
+          TastyBites
+        </Link>
 
         <button
-            className="navbar-toggler"
-            type="button"
-            onClick={() => setIsOpen(!isOpen)}
-            aria-expanded={isOpen}
-            aria-label="Toggle navigation"
+          className="navbar-toggler"
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-expanded={isOpen}
+          aria-label="Toggle navigation"
         >
-            <span className="navbar-toggler-icon"></span>
+          <span className="navbar-toggler-icon"></span>
         </button>
 
-        <div
-          className={`collapse navbar-collapse ${isOpen ? "show" : ""}`}
-          id="navbarNavDropdown"
-        >
-          <ul className="navbar-nav mx-auto">
         <div className={`collapse navbar-collapse ${isOpen ? "show" : ""}`} id="navbarNavDropdown">
           <ul className="navbar-nav mx-auto">
             <li className="nav-item">
-              <Link
               <Link
                 to="/"
                 className={`nav-link ${activeTab === "Home" ? "active" : ""} ${textColorClass}`}
@@ -179,12 +162,8 @@ function Nav() {
               >
                 {text?.home || (currentLange === "Ar" ? "الرئيسية" : "Home")}
               </Link>
-              >
-                {text.home}
-              </Link>
             </li>
             <li className="nav-item">
-              <Link
               <Link
                 to="/menu"
                 className={`nav-link ${activeTab === "Menu" ? "active" : ""} ${textColorClass}`}
@@ -192,36 +171,28 @@ function Nav() {
               >
                 {text?.menu || (currentLange === "Ar" ? "القائمة" : "Menu")}
               </Link>
-              >
-                {text.menu}
-              </Link>
             </li>
             <li className="nav-item">
-              <Link
               <Link
                 to="/reservation"
                 className={`nav-link ${activeTab === "Reservation" ? "active" : ""} ${textColorClass}`}
                 onClick={() => setActiveTab("Reservation")}
               >
-                {text.reservation}
-              </Link>
-              >
                 {text?.reservation || (currentLange === "Ar" ? "الحجز" : "Reservation")}
               </Link>
             </li>
-            {userState55 !== "who know" && (
+            {userState !== "who know" && (
               <li className="nav-item">
                 <Link
                   to="/my-reservations"
                   className={`nav-link ${activeTab === "My Reservations" ? "active" : ""} ${textColorClass}`}
                   onClick={() => setActiveTab("My Reservations")}
                 >
-                  {text.myReservations || "My Reservations"}
+                  {text?.myReservations || (currentLange === "Ar" ? "حجوزاتي" : "My Reservations")}
                 </Link>
               </li>
             )}
             <li className="nav-item">
-              <Link
               <Link
                 to="/ContactUs"
                 className={`nav-link ${activeTab === "Contact Us" ? "active" : ""} ${textColorClass}`}
@@ -229,24 +200,21 @@ function Nav() {
               >
                 {text?.contactUs || (currentLange === "Ar" ? "اتصل بنا" : "Contact Us")}
               </Link>
-              >
-                {text.contactUs}
-              </Link>
             </li>
-            {userState55 !== "who know" && (
-                <li className="nav-item">
+            {userState !== "who know" && (
+              <li className="nav-item">
                 <Link
-                    to="/orders"
-                    className={`nav-link ${activeTab === "My Orders" ? "active" : ""} ${textColorClass}`}
-                    onClick={() => setActiveTab("My Orders")}
+                  to="/orders"
+                  className={`nav-link ${activeTab === "My Orders" ? "active" : ""} ${textColorClass}`}
+                  onClick={() => setActiveTab("My Orders")}
                 >
-                    {text?.myOrders || (currentLange === "Ar" ? "طلباتي" : "My Orders")}
+                  {text?.myOrders || (currentLange === "Ar" ? "طلباتي" : "My Orders")}
                 </Link>
-                </li>
+              </li>
             )}
-            </ul>
+          </ul>
 
-            <div className="d-flex align-items-center">
+          <div className="d-flex align-items-center gap-4 ms-3">
             <button
               className={`btn ${iconColorClass} p-2`}
               onClick={toggleSearch}
@@ -271,22 +239,20 @@ function Nav() {
                 </form>
               </div>
             )}
-          </div>
 
-          <div className="d-flex align-items-center gap-4 ms-3">
             <div className={`form-check form-switch ${textColorClass}`}>
-                <input
+              <input
                 className="form-check-input"
                 type="checkbox"
                 id="themeSwitch"
                 onChange={toggleTheme}
                 checked={theme === "dark"}
-                />
-                <label className="form-check-label" htmlFor="themeSwitch">
+              />
+              <label className="form-check-label" htmlFor="themeSwitch">
                 {theme === "dark"
                   ? text?.darkMode || (currentLange === "Ar" ? "الوضع المظلم" : "Dark")
                   : text?.lightMode || (currentLange === "Ar" ? "الوضع الفاتح" : "Light")}
-                </label>
+              </label>
             </div>
 
             <button onClick={changeLang} className="lang-switch-btn">
@@ -294,9 +260,9 @@ function Nav() {
             </button>
 
             <div className="buttons d-flex gap-2">
-                {userState55 === "who know" ? (
+              {userState === "who know" ? (
                 <>
-                    <Link
+                  <Link
                     to="/Wishlist"
                     className={`fs-5 position-relative ${
                       wishlistCount > 0 ? "text-danger" : iconColorClass
@@ -304,59 +270,55 @@ function Nav() {
                   >
                     <i className="fas fa-heart"></i>
                     {wishlistCount > 0 && <span className="wishlist-count">{wishlistCount}</span>}
-                    </Link>
-                    <Link to="/Signin">
+                  </Link>
+                  <Link to="/Signin">
                     <button
-                        className={`btn btn-outline-${theme === "dark" ? "light" : "dark"} btn-md`}
+                      className={`btn btn-outline-${theme === "dark" ? "light" : "dark"} btn-md`}
                     >
-                        <i className="fas fa-user me-2"></i>
-                        {text?.signIn || (currentLange === "Ar" ? "تسجيل الدخول" : "Sign In")}
+                      <i className="fas fa-user me-2"></i>
+                      {text?.signIn || (currentLange === "Ar" ? "تسجيل الدخول" : "Sign In")}
                     </button>
-                    </Link>
-                    <Link to="/Register">
-                    <button
-                      className={`btn btn-${theme === "dark" ? "light" : "dark"} btn-md`}
-                    >
-                        <i className="fas fa-user-plus me-2"></i>
-                        {text?.register || (currentLange === "Ar" ? "التسجيل" : "Register")}
+                  </Link>
+                  <Link to="/Register">
+                    <button className={`btn btn-${theme === "dark" ? "light" : "dark"} btn-md`}>
+                      <i className="fas fa-user-plus me-2"></i>
+                      {text?.register || (currentLange === "Ar" ? "التسجيل" : "Register")}
                     </button>
-                    </Link>
+                  </Link>
                 </>
-                ) : (
+              ) : (
                 <>
-                    <div className="icons d-flex gap-3">
+                  <div className="icons d-flex gap-3">
                     <Link
                       to="/Wishlist"
                       className={`fs-5 position-relative ${
-                        WishlistCountFirestore > 0 ? "text-danger" : iconColorClass
+                        wishlistCountFirestore > 0 ? "text-danger" : iconColorClass
                       }`}
                     >
-                        <i className="fas fa-heart"></i>
-                      {WishlistCountFirestore > 0 && (
-                        <span className="wishlist-count">{WishlistCountFirestore}</span>
+                      <i className="fas fa-heart"></i>
+                      {wishlistCountFirestore > 0 && (
+                        <span className="wishlist-count">{wishlistCountFirestore}</span>
                       )}
                     </Link>
                     <Link to="/cart" className={`fs-5 ${iconColorClass}`}>
-                        <i className="fas fa-shopping-cart"></i>
+                      <i className="fas fa-shopping-cart"></i>
                     </Link>
-                    </div>
-                    <Link>
-                    <button
-                        onClick={logout}
-                        className={`btn btn-${theme === "dark" ? "light" : "dark"} btn-md`}
-                    >
-                        <i className="fas fa-sign-out-alt me-2"></i>
-                        {text?.logout || (currentLange === "Ar" ? "تسجيل الخروج" : "Logout")}
-                    </button>
-                    </Link>
+                  </div>
+                  <button
+                    onClick={logout}
+                    className={`btn btn-${theme === "dark" ? "light" : "dark"} btn-md`}
+                  >
+                    <i className="fas fa-sign-out-alt me-2"></i>
+                    {text?.logout || (currentLange === "Ar" ? "تسجيل الخروج" : "Logout")}
+                  </button>
                 </>
-                )}
+              )}
             </div>
-            </div>
+          </div>
         </div>
-        </div>
+      </div>
     </nav>
-    );
+  );
 }
 
 export default Nav;
