@@ -27,7 +27,7 @@ const ReservationPage = () => {
           </div>
 
           <div className="col-md-6">
-            <h2 className="text-center">{text.reservationForm}</h2>
+            {/* <h2 className="text-center">{text.reservationForm}</h2> */}
             <ReservationForm
               selectedTable={selectedTable}
               setSelectedTable={setSelectedTable}

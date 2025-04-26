@@ -1,0 +1,33 @@
+.order-card .status-badge.status-accepted {
+    background-color: #28a745 !important; /* ✅ Green */
+    color: white !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
+    display: inline-block !important;
+    text-transform: capitalize !important;
+  }
+  
+  .order-card .status-badge.status-rejected {
+    background-color: #dc3545 !important; /* ❌ Red */
+    color: white !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
+    display: inline-block !important;
+    text-transform: capitalize !important;
+  }
+  
+  .order-card .status-badge.status-pending {
+    background-color: #ffc107 !important; /* ⏳ Yellow */
+    color: black !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
+    display: inline-block !important;
+    text-transform: capitalize !important;
+  }
+  
