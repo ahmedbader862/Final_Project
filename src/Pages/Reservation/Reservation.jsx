@@ -16,7 +16,7 @@ const ReservationPage = () => {
   return (
     <div className={` ${bgColor} ${textColor} py-5 rounded`}>
       <div className="pt-5 container">
-        <h1 className="text-center mb-4">{text.reservationTitle}</h1>
+        <h1 className="text-center mb-4">{text.reservation}</h1>
 
         <div className="row d-flex flex-column justify-content-center align-items-center">
           <div className="col-md-6 mb-4">
