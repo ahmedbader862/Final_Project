@@ -65,6 +65,7 @@ import { Navigate, useNavigate } from "react-router-dom";
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5, duration: 0.5 }}
+                onClick={() => Navigate("/signin")}
             >
                 <span className="position-relative z-1">Sign In</span>
                 <motion.span
