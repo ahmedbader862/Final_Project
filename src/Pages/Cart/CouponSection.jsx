@@ -1,6 +1,9 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 
 const CouponSection = ({ couponCode, setCouponCode, handleApplyCoupon, cartItems, theme }) => {
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
   const cardBg = theme === 'dark' ? 'bg-dark text-white border-secondary' : 'bg-white text-dark border-light';
   const inputClass = theme === 'dark' ? 'bg-secondary text-white' : 'bg-light text-dark';
   const labelClass = theme === 'dark' ? 'text-light' : 'text-dark';
@@ -19,7 +22,7 @@ const CouponSection = ({ couponCode, setCouponCode, handleApplyCoupon, cartItems
             disabled={cartItems.length === 0}
           />
           <label className={`form-label badge bdg px-2 mt-1 ${labelClass}`} htmlFor="discountCode">
-            Coupon Code
+            {text?.couponCodeLabel || "Coupon Code"}
           </label>
         </div>
         <button
@@ -27,7 +30,7 @@ const CouponSection = ({ couponCode, setCouponCode, handleApplyCoupon, cartItems
           className={`btn btn-lg ms-3 ${btnClass}`}
           onClick={handleApplyCoupon}
         >
-          Apply
+          {text?.apply || "Apply"}
         </button>
       </div>
     </div>

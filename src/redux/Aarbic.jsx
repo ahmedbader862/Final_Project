@@ -1,6 +1,6 @@
 const arabic = {
-  // Existing keys from previous components
-  lang: "En",
+  // Existing keys (unchanged)
+  lang: "English",
   home: "الرئيسية",
   menu: "القائمة",
   reservation: "الحجز",
@@ -15,43 +15,6 @@ const arabic = {
   noMessages: "لا توجد رسائل بعد. ابدأ المحادثة!",
   typeMessage: "اكتب رسالتك...",
   sendButton: "إرسال",
-  description: "desc_ar",
-  myOrdersTitle: "طلباتي",
-  sortNewest: "الأحدث أولاً",
-  sortOldest: "الأقدم أولاً",
-  statusAll: "الكل",
-  statusPending: "قيد الانتظار",
-  statusAccepted: "مقبول",
-  paymentAll: "الكل",
-  paymentCash: "الدفع عند الاستلام",
-  paymentPayPal: "باي بال",
-  noOrders: "لا توجد طلبات تطابق الفلاتر المحددة.",
-  orderItems: "العناصر:",
-  totalDue: "الإجمالي المستحق",
-  totalPaid: "الإجمالي المدفوع",
-  status: "الحالة",
-  placed: "تم الطلب في",
-  trackingStatus: "حالة التتبع",
-  shippingDetails: "تفاصيل الشحن",
-  city: "المدينة",
-  phone: "الهاتف",
-  details: "التفاصيل",
-  trackOrder: "تتبع الطلب",
-  deleteOrder: "حذف الطلب",
-  myReservationsTitle: "حجوزاتي",
-  pendingMessage: "في انتظار موافقة الإدارة. سيتم إخطارك بمجرد التأكيد.",
-  acceptedMessage: "تم تأكيد الحجز الخاص بك! نتطلع لرؤيتك.",
-  rejectedMessage: "عذرًا، لم يتم الموافقة على الحجز الخاص بك. يرجى المحاولة في وقت أو طاولة مختلفة.",
-  noReservations: "لا توجد حجوزات.",
-  makeNewReservation: "قم بحجز جديد",
-  makeReservation: "قم بالحجز",
-  tableIdLabel: "رقم الطاولة",
-  nameLabel: "الاسم",
-  dateLabel: "التاريخ",
-  numPersonsLabel: "عدد الأشخاص",
-  timeArrivingLabel: "وقت الوصول",
-  timeLeavingLabel: "وقت المغادرة",
-  phoneLabel: "الهاتف",
 
   // AdminDashboard
   adminDashboard: "لوحة تحكم الإدارة",
@@ -67,15 +30,15 @@ const arabic = {
 
   // AdminOrdersPage
   ordersManagement: "إدارة الطلبات",
-  sort: "ترتيب:",
+  sort: "ترتيب",
   sortNewest: "الأحدث أولاً",
   sortOldest: "الأقدم أولاً",
-  status: "الحالة:",
+  status: "الحالة",
   statusAll: "الكل",
   statusPending: "معلق",
   statusAccepted: "مقبول",
   statusRejected: "مرفوض",
-  payment: "الدفع:",
+  payment: "الدفع",
   paymentAll: "الكل",
   paymentCod: "الدفع عند الاستلام",
   paymentPaypal: "باي بال",
@@ -99,13 +62,13 @@ const arabic = {
   reservationsManagement: "إدارة الحجوزات",
   refreshReservations: "تحديث الحجوزات",
   reservationTitle: "الحجز #{reservationId}",
-  tableId: "معرف الطاولة:",
-  name: "الاسم:",
-  date: "التاريخ:",
-  numPersons: "عدد الأشخاص:",
-  timeArriving: "وقت الوصول:",
-  timeLeaving: "وقت المغادرة:",
-  phone: "الهاتف:",
+  tableId: "معرف الطاولة", // Removed colon
+  name: "الاسم", // Removed colon
+  date: "التاريخ", // Removed colon
+  numPersons: "عدد الأشخاص", // Removed colon
+  timeArriving: "وقت الوصول", // Removed colon
+  timeLeaving: "وقت المغادرة", // Removed colon
+  phone: "الهاتف", // Removed colon
   accept: "قبول",
   reject: "رفض",
   delete: "حذف",
@@ -149,6 +112,7 @@ const arabic = {
   failedLoadUsers: "فشل في تحميل المستخدمين. حاول مرة أخرى.",
   noUsersFound: "لم يتم العثور على مستخدمين.",
   selectUserToChat: "اختر مستخدمًا لبدء الدردشة.",
+
   // StatsSection
   totalOrders: "إجمالي الطلبات",
   totalRevenue: "إجمالي الإيرادات",
@@ -207,21 +171,21 @@ const arabic = {
 
   // OrderCard
   order: "الطلب #{orderId}",
-  items: "العناصر:",
+  items: "العناصر",
   noItems: "لا توجد عناصر",
   total: "الإجمالي:",
-  placed: "تم الطلب:",
-  shippingDetails: "تفاصيل الشحن:",
-  city: "المدينة:",
-  phone: "الهاتف:",
-  details: "التفاصيل:",
+  placed: "تم الطلب",
+  shippingDetails: "تفاصيل الشحن",
+  city: "المدينة",
+  phone: "الهاتف",
+  details: "التفاصيل",
   discountApplied: "تم تطبيق الخصم:",
   discountYes: "نعم (20%)",
   discountNo: "لا",
-  payment: "الدفع:",
+  payment: "الدفع",
   cashOnDelivery: "الدفع عند الاستلام",
   paidPaypal: "مدفوع (باي بال)",
-  trackingStatus: "حالة التتبع:",
+  trackingStatus: "حالة التتبع",
   orderPlaced: "تم تقديم الطلب",
   processing: "قيد المعالجة",
   outForDelivery: "خارج للتوصيل",
@@ -232,6 +196,59 @@ const arabic = {
   statusPending: "معلق",
   statusAccepted: "مقبول",
   statusRejected: "مرفوض",
+
+  // Orders Component
+  noOrdersMatchFilters: "لا توجد طلبات تطابق الفلاتر المحددة.",
+  totalDue: "الإجمالي المستحق",
+  totalPaid: "الإجمالي المدفوع",
+  trackOrder: "تتبع الطلب",
+  authenticationRequired: "المصادقة مطلوبة",
+  pleaseSignIn: "يرجى تسجيل الدخول لعرض طلباتك.",
+  failedFetchOrders: "فشل في جلب الطلبات. حاول مرة أخرى.",
+  deleteOrderConfirmText: "أنت على وشك حذف الطلب #{orderId}. هذا الإجراء لا يمكن التراجع عنه.",
+  deleteOrderConfirmButton: "نعم، احذف!",
+  deleteOrderSuccessMessage: "تم حذف الطلب #{orderId}.",
+  deleteOrderError: "حدث خطأ أثناء حذف الطلب.",
+
+  // UserReservationsPage
+  myReservationsTitle: "حجوزاتي",
+  mustBeLoggedIn: "يجب أن تكون مسجلاً لعرض حجوزاتك.",
+  failedLoadReservations: "فشل في تحميل الحجوزات: ",
+  tableIdLabel: "معرف الطاولة", // Already updated above as `tableId`
+  unknown: "غير معروف",
+  nameLabel: "الاسم", // Already updated above as `name`
+  dateLabel: "التاريخ", // Already updated above as `date`
+  numPersonsLabel: "عدد الأشخاص", // Already updated above as `numPersons`
+  timeArrivingLabel: "وقت الوصول", // Already updated above as `timeArriving`
+  timeLeavingLabel: "وقت المغادرة", // Already updated above as `timeLeaving`
+  phoneLabel: "الهاتف", // Already updated above as `phone`
+  pendingMessage: "في انتظار موافقة الإدارة. سيتم إشعارك بمجرد التأكيد.",
+  acceptedMessage: "تم تأكيد حجزك! نتطلع إلى رؤيتك.",
+  rejectedMessage: "عذراً، لم يتم الموافقة على حجزك. يرجى تجربة وقت أو طاولة مختلفة.",
+  noReservations: "لم يتم العثور على حجوزات.",
+  makeNewReservation: "إنشاء حجز جديد",
+  makeReservation: "إنشاء حجز",
+
+  // Cart Component
+  yourCart: "عربة التسوق الخاصة بك",
+  cartEmpty: "عربة التسوق فارغة.",
+  addedToCart: "تمت الإضافة إلى عربة التسوق",
+  subtotal: "المجموع الفرعي",
+  discount20: "الخصم (20%)",
+  total: "الإجمالي",
+  couponCodeLabel: "كود الخصم",
+  apply: "تطبيق",
+  orderNow: "اطلب الآن",
+  currency: "جنيه",
+  invalidCoupon: "كود خصم غير صالح",
+  invalidCouponMessage: "كود الخصم الذي أدخلته غير صالح.",
+  emptyCart: "عربة فارغة",
+  emptyCartMessage: "عربتك فارغة. أضف عناصر للمتابعة.",
+  removeItem: "إزالة العنصر",
+  removeItemConfirm: 'هل أنت متأكد أنك تريد إزالة "{title}" من عربتك؟',
+  confirmRemove: "نعم، أزلها!",
+  removed: "تمت الإزالة!",
+  removedMessage: 'تمت إزالة "{title}" من عربتك.',
 };
 
 export default arabic;
