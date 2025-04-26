@@ -42,6 +42,7 @@ function Wishlist() {
         <h1 className={`text-center mb-4 ${textColor}`}>
           {currentLange === "Ar" ? "قائمة رغباتك" : "Your Wishlist"}
         </h1>
+
         {realData.length > 0 ? (
           <div className="row g-2 justify-content-center">
             {realData.map((dish, index) => {
@@ -59,7 +60,13 @@ function Wishlist() {
               );
             })}
           </div>
-        ) : (
+        ) 
+        
+        
+        : 
+        
+        
+        (
           <p className={`text-center fs-4 mt-5 ${textColor}`}>
             {currentLange === "Ar" ? "قائمة رغباتك فارغة" : "Your wishlist is empty."}
           </p>

@@ -15,7 +15,7 @@ import { useSelector } from 'react-redux';
 function Menu() {
   const navigate = useNavigate();
   const { theme } = useContext(ThemeContext);
-  const currentLange = useSelector((state) => state.lange.langue);
+  const currentLange = useSelector((state) => state.lange?.langue || "en");
   const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
   const [categories, setCategories] = useState([]);
   const [menuItems, setMenuItems] = useState({});
@@ -87,8 +87,9 @@ function Menu() {
   }, [categories, text, currentLange]);
 
   const handleAddToCart = (item) => {
-    toast.success(`${item.title} added to cart!`, {
-      position: 'top-right',
+    const displayTitle = currentLange === "ar" ? item.title_ar : item.title;
+    toast.success(`${displayTitle} أضيف إلى العربة!`, {
+      position: "top-right",
       autoClose: 2000,
       hideProgressBar: false,
       closeOnClick: true,
@@ -98,8 +99,9 @@ function Menu() {
   };
 
   const handleAddToWishlist = (item) => {
-    toast.info(`${item.title} added to wishlist!`, {
-      position: 'top-right',
+    const displayTitle = currentLange === "ar" ? item.title_ar : item.title;
+    toast.info(`${displayTitle} أضيف إلى قائمة الرغبات!`, {
+      position: "top-right",
       autoClose: 2000,
       hideProgressBar: false,
       closeOnClick: true,
@@ -107,6 +109,7 @@ function Menu() {
       draggable: true,
     });
   };
+
 
   const handleNavigate = (category) => {
     navigate(`/Dishes/${category}`);
@@ -148,8 +151,10 @@ function Menu() {
               <Card
                 poster_path={item.image}
                 title={item.title}
+                title_ar={item.title_ar}
                 price={item.price}
                 description={item.description}
+                desc_ar={item.desc_ar}
                 onAddToCart={() => handleAddToCart(item)}
                 onAddToWishlist={() => handleAddToWishlist(item)}
               />
