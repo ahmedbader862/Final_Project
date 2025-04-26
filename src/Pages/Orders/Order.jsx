@@ -5,6 +5,7 @@ import { auth } from '../../firebase/firebase';
 import Swal from 'sweetalert2';
 import './Order.css';
 import { ThemeContext } from "../../Context/ThemeContext";
+import { useSelector } from "react-redux";
 
 const Orders = () => {
   const { theme } = useContext(ThemeContext);
@@ -14,6 +15,9 @@ const Orders = () => {
   const [sortOrder, setSortOrder] = useState("newest");
   const [statusFilter, setStatusFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
+
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
 
   useEffect(() => {
     const unsubscribeAuth = auth.onAuthStateChanged((user) => {
@@ -122,57 +126,103 @@ const Orders = () => {
 
   return (
     <div className={`orders-container py-5 ${bgClass}`}>
-      <div className="container ">
-        <h2 className={`pt-5 pb-4 pt-5 text-center ${textClass}`}>My Orders</h2>
+      <div className="container">
+        <h2 className={`pt-5 pb-4 pt-5 text-center ${textClass}`}>
+          {text.myOrdersTitle}
+        </h2>
 
         <div className="d-flex flex-wrap gap-3 mb-4 justify-content-center">
           {/* Sort Dropdown */}
           <div className="dropdown">
-            <button className={`btn dropdown-toggle ${theme === "dark" ? "btn-outline-light" : "btn-outline-dark"}`} type="button" data-bs-toggle="dropdown">
-              Sort: {sortOrder === "newest" ? "Newest First" : "Oldest First"}
+            <button
+              className={`btn dropdown-toggle ${theme === "dark" ? "btn-outline-light" : "btn-outline-dark"}`}
+              type="button"
+              data-bs-toggle="dropdown"
+            >
+              {text.sortNewest}
             </button>
             <ul className={`dropdown-menu ${theme === "dark" ? "dropdown-menu-dark" : ""}`}>
-              <li><button className="dropdown-item" onClick={() => handleSortChange("newest")}>Newest First</button></li>
-              <li><button className="dropdown-item" onClick={() => handleSortChange("oldest")}>Oldest First</button></li>
+              <li>
+                <button className="dropdown-item" onClick={() => handleSortChange("newest")}>
+                  {text.sortNewest}
+                </button>
+              </li>
+              <li>
+                <button className="dropdown-item" onClick={() => handleSortChange("oldest")}>
+                  {text.sortOldest}
+                </button>
+              </li>
             </ul>
           </div>
 
           {/* Status Filter Dropdown */}
           <div className="dropdown">
-            <button className={`btn dropdown-toggle ${theme === "dark" ? "btn-outline-light" : "btn-outline-dark"}`} type="button" data-bs-toggle="dropdown">
-              Status: {statusFilter === "all" ? "All" : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+            <button
+              className={`btn dropdown-toggle ${theme === "dark" ? "btn-outline-light" : "btn-outline-dark"}`}
+              type="button"
+              data-bs-toggle="dropdown"
+            >
+              {text.statusAll}
             </button>
             <ul className={`dropdown-menu ${theme === "dark" ? "dropdown-menu-dark" : ""}`}>
-              <li><button className="dropdown-item" onClick={() => handleStatusFilterChange("all")}>All</button></li>
-              <li><button className="dropdown-item" onClick={() => handleStatusFilterChange("pending")}>Pending</button></li>
-              <li><button className="dropdown-item" onClick={() => handleStatusFilterChange("accepted")}>Accepted</button></li>
+              <li>
+                <button className="dropdown-item" onClick={() => handleStatusFilterChange("all")}>
+                  {text.statusAll}
+                </button>
+              </li>
+              <li>
+                <button className="dropdown-item" onClick={() => handleStatusFilterChange("pending")}>
+                  {text.statusPending}
+                </button>
+              </li>
+              <li>
+                <button className="dropdown-item" onClick={() => handleStatusFilterChange("accepted")}>
+                  {text.statusAccepted}
+                </button>
+              </li>
             </ul>
           </div>
 
           {/* Payment Filter Dropdown */}
           <div className="dropdown">
-            <button className={`btn dropdown-toggle ${theme === "dark" ? "btn-outline-light" : "btn-outline-dark"}`} type="button" data-bs-toggle="dropdown">
-              Payment: {paymentFilter === "all" ? "All" : paymentFilter === "cash_on_delivery" ? "Cash on Delivery" : "PayPal"}
+            <button
+              className={`btn dropdown-toggle ${theme === "dark" ? "btn-outline-light" : "btn-outline-dark"}`}
+              type="button"
+              data-bs-toggle="dropdown"
+            >
+              {text.paymentAll}
             </button>
             <ul className={`dropdown-menu ${theme === "dark" ? "dropdown-menu-dark" : ""}`}>
-              <li><button className="dropdown-item" onClick={() => handlePaymentFilterChange("all")}>All</button></li>
-              <li><button className="dropdown-item" onClick={() => handlePaymentFilterChange("cash_on_delivery")}>Cash on Delivery</button></li>
-              <li><button className="dropdown-item" onClick={() => handlePaymentFilterChange("paypal")}>PayPal</button></li>
+              <li>
+                <button className="dropdown-item" onClick={() => handlePaymentFilterChange("all")}>
+                  {text.paymentAll}
+                </button>
+              </li>
+              <li>
+                <button className="dropdown-item" onClick={() => handlePaymentFilterChange("cash_on_delivery")}>
+                  {text.paymentCash}
+                </button>
+              </li>
+              <li>
+                <button className="dropdown-item" onClick={() => handlePaymentFilterChange("paypal")}>
+                  {text.paymentPayPal}
+                </button>
+              </li>
             </ul>
           </div>
         </div>
 
         {filteredOrders.length === 0 ? (
-          <p className={`${textClass} text-center`}>No orders match the selected filters.</p>
+          <p className={`${textClass} text-center`}>{text.noOrders}</p>
         ) : (
           <div className="row justify-content-center g-4">
-            {filteredOrders.map(order => (
+            {filteredOrders.map((order) => (
               <div className="col-12 col-md-6 col-lg-4" key={order.id}>
                 <div className={`tracking-card h-100 ${theme === "dark" ? "bg-custom-dark text-white" : "bg-white text-dark"}`}>
                   <div className="card-body">
-                    <h5 className={`card-title-order ${textClass}`}>Order #{order.id}</h5>
+                    <h5 className={`card-title-order ${textClass}`}>{text.orderItems}</h5>
                     <div className="card-text">
-                      <strong className="text-muted">Items:</strong>
+                      <strong className="text-muted">{text.itemsLabel}:</strong>
                       <ul className="item-list">
                         {Array.isArray(order.items) && order.items.map((item, index) => (
                           <li key={index}>
@@ -181,9 +231,9 @@ const Orders = () => {
                         ))}
                       </ul>
                       <p className={`text-break ${textClass}`}>
-                        <strong>{order.paymentMethod === 'cash_on_delivery' ? 'Total Due' : 'Total Paid'}:</strong> {parseFloat(order.total).toFixed(2)} LE<br />
-                        <strong>Status:</strong> {order.status}<br />
-                        <strong>Placed:</strong> {
+                        <strong>{order.paymentMethod === 'cash_on_delivery' ? text.totalDue : text.totalPaid}:</strong> {parseFloat(order.total).toFixed(2)} LE<br />
+                        <strong>{text.statusLabel}:</strong> {order.status}<br />
+                        <strong>{text.placedLabel}:</strong> {
                           order.timestamp
                             ? new Date(order.timestamp.seconds ? order.timestamp.toDate() : order.timestamp).toLocaleString('en-US', {
                                 month: '2-digit',
@@ -194,15 +244,15 @@ const Orders = () => {
                               })
                             : 'N/A'
                         }<br />
-                        <strong>Tracking Status:</strong> {order.trackingStatus}
+                        <strong>{text.trackingStatusLabel}:</strong> {order.trackingStatus}
                       </p>
                       {order.shipping && (
                         <div>
-                          <strong className="text-muted">Shipping Details:</strong>
+                          <strong className="text-muted">{text.shippingDetailsLabel}:</strong>
                           <p className={`ms-3 text-break ${textClass}`}>
-                            City: {order.shipping.city}<br />
-                            Phone: {order.shipping.phone}<br />
-                            Details: {order.shipping.details}
+                            {text.cityLabel}: {order.shipping.city}<br />
+                            {text.phoneLabel}: {order.shipping.phone}<br />
+                            {text.detailsLabel}: {order.shipping.details}
                           </p>
                         </div>
                       )}
@@ -211,13 +261,13 @@ const Orders = () => {
                           className="btn btn-primary-custom btn-sm"
                           onClick={() => handleTrackOrder(order.id, order.total)}
                         >
-                          <i className="bi bi-truck me-2"></i>Track Order
+                          <i className="bi bi-truck me-2"></i>{text.trackOrderButton}
                         </button>
                         <button 
                           className="btn btn-danger-custom btn-sm"
                           onClick={() => handleDeleteOrder(order.id)}
                         >
-                          <i className="bi bi-trash me-2"></i>Delete
+                          <i className="bi bi-trash me-2"></i>{text.deleteButton}
                         </button>
                       </div>
                     </div>

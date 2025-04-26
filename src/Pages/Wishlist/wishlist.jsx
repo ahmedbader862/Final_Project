@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import { db, doc, getDoc } from '../../firebase/firebase';
+import { db, doc } from '../../firebase/firebase';
 import { onSnapshot } from 'firebase/firestore';
 import { useEffect, useState, useContext } from "react";
 import { ThemeContext } from "../../Context/ThemeContext";
@@ -30,7 +30,7 @@ function Wishlist() {
     } else {
       setRealData(wishlistRedux || []);
     }
-  }, [CurrentUser, wishlistRedux]);
+  }, [CurrentUser, wishlistRedux , currentLange]);
 
   // Theme classes
   const bgColor = theme === "dark" ? "bg-custom-dark" : "bg-custom-light";
@@ -45,23 +45,15 @@ function Wishlist() {
         {realData.length > 0 ? (
           <div className="row g-2 justify-content-center">
             {realData.map((dish, index) => {
-              const title = currentLange === "Ar"
-                ? dish.title_ar || dish.title || "عنوان غير متوفر"
-                : dish.title || "Title not available";
-              const description = currentLange === "Ar"
-                ? dish.description_ar || dish.description || "الوصف غير متوفر"
-                : dish.description || "Description not available";
-              const price = dish.price
-                ? `${dish.price} ${currentLange === "Ar" ? "جنيه" : "LE"}`
-                : currentLange === "Ar" ? "السعر غير متوفر" : "Price not available";
-
               return (
                 <div className="col-12 col-md-6 col-lg-3" key={index}>
                   <Card
-                    title={title}
+                    title={dish.title} // العنوان بالإنجليزية
+                    title_ar={dish.title_ar} // العنوان بالعربية
                     poster_path={dish.poster_path || "default-image.jpg"}
-                    price={price}
-                    description={description}
+                    price={dish.price} // السعر
+                    description={dish.description} // الوصف بالإنجليزية
+                    desc_ar={dish.desc_ar} // الوصف بالعربية
                   />
                 </div>
               );

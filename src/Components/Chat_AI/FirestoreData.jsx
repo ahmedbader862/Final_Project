@@ -172,7 +172,7 @@ function FirestoreData() {
 
 
   return (
- <h1>fffffffffffffffffffffffffff</h1>
+    <div></div>
   );
   
 }

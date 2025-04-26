@@ -75,7 +75,7 @@ const UserReservationsPage = () => {
   return (
     <div className={` ${bgColor} ${textColor} py-5 rounded`}>
       <div className="container">
-        <h1 className="text-center mb-4">{text.myReservationsTitle || "My Reservations"}</h1>
+        <h1 className="text-center mb-4">{text.myReservationsTitle}</h1>
 
         {error && (
           <Alert variant="danger" onClose={() => setError("")} dismissible>
@@ -92,7 +92,7 @@ const UserReservationsPage = () => {
                     <Card.Body>
                       <Card.Title className="d-flex justify-content-between align-items-center">
                         <span>
-                          Reservation #{reservation.reservationId || reservation.id || "Unknown"}
+                          {text.tableIdLabel}: {reservation.reservationId || reservation.id || "Unknown"}
                         </span>
                         <span
                           style={{
@@ -105,18 +105,18 @@ const UserReservationsPage = () => {
                         </span>
                       </Card.Title>
                       <Card.Text>
-                        <strong>Table ID:</strong> {reservation.tableId || "N/A"} <br />
-                        <strong>Name:</strong> {reservation.name || "N/A"} <br />
-                        <strong>Date:</strong>{" "}
+                        <strong>{text.tableIdLabel}:</strong> {reservation.tableId || "N/A"} <br />
+                        <strong>{text.nameLabel}:</strong> {reservation.name || "N/A"} <br />
+                        <strong>{text.dateLabel}:</strong>{" "}
                         {reservation.date
                           ? new Date(reservation.date).toLocaleString()
                           : "N/A"}{" "}
                         <br />
-                        <strong>Number of Persons:</strong>{" "}
+                        <strong>{text.numPersonsLabel}:</strong>{" "}
                         {reservation.numPersons || "N/A"} <br />
-                        <strong>Time Arriving:</strong> {reservation.timeArriving || "N/A"} <br />
-                        <strong>Time Leaving:</strong> {reservation.timeLeaving || "N/A"} <br />
-                        <strong>Phone:</strong> {reservation.phone || "N/A"} <br />
+                        <strong>{text.timeArrivingLabel}:</strong> {reservation.timeArriving || "N/A"} <br />
+                        <strong>{text.timeLeavingLabel}:</strong> {reservation.timeLeaving || "N/A"} <br />
+                        <strong>{text.phoneLabel}:</strong> {reservation.phone || "N/A"} <br />
                         <em>{getStatusMessage(reservation.status || "pending")}</em>
                       </Card.Text>
                     </Card.Body>
@@ -129,18 +129,18 @@ const UserReservationsPage = () => {
                 className={btnClass}
                 onClick={() => navigate("/reservation")}
               >
-                {text.makeNewReservation || "Make a New Reservation"}
+                {text.makeNewReservation}
               </Button>
             </div>
           </>
         ) : (
           <div className="text-center">
-            <p>{text.noReservations || "No reservations found."}</p>
+            <p>{text.noReservations}</p>
             <Button
               className={btnClass}
               onClick={() => navigate("/reservation")}
             >
-              {text.makeReservation || "Make a Reservation"}
+              {text.makeReservation}
             </Button>
           </div>
         )}
