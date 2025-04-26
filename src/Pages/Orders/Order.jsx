@@ -15,6 +15,8 @@ const Orders = () => {
   const [sortOrder, setSortOrder] = useState("newest");
   const [statusFilter, setStatusFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ordersPerPage = 6;
 
   const currentLange = useSelector((state) => state.lange.langue);
   const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
@@ -44,6 +46,7 @@ const Orders = () => {
 
         setOrders(userOrders);
         applyFilters(userOrders, sortOrder, statusFilter, paymentFilter);
+        setCurrentPage(1); // Reset to first page when filters change
       }, (error) => {
         console.error("Error fetching orders:", error);
         Swal.fire({
@@ -82,16 +85,19 @@ const Orders = () => {
   const handleSortChange = (newSortOrder) => {
     setSortOrder(newSortOrder);
     applyFilters(orders, newSortOrder, statusFilter, paymentFilter);
+    setCurrentPage(1);
   };
 
   const handleStatusFilterChange = (newStatus) => {
     setStatusFilter(newStatus);
     applyFilters(orders, sortOrder, newStatus, paymentFilter);
+    setCurrentPage(1);
   };
 
   const handlePaymentFilterChange = (newPayment) => {
     setPaymentFilter(newPayment);
     applyFilters(orders, sortOrder, statusFilter, newPayment);
+    setCurrentPage(1);
   };
 
   const handleDeleteOrder = async (orderId) => {
@@ -121,8 +127,47 @@ const Orders = () => {
     navigate('/track-order', { state: { orderId, total: parseFloat(total).toFixed(2) } });
   };
 
+  // Pagination logic
+  const indexOfLastOrder = currentPage * ordersPerPage;
+  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage + 1 < maxPagesToShow) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+    return pageNumbers;
+  };
+
   const bgClass = theme === "dark" ? "bg-custom-dark" : "bg-light";
   const textClass = theme === "dark" ? "text-white" : "text-dark";
+  const buttonClass = theme === "dark" ? "bg-dark text-white" : "bg-light text-dark";
 
   return (
     <div className={`orders-container py-5 ${bgClass}`}>
@@ -130,6 +175,7 @@ const Orders = () => {
         <h2 className={`pt-5 pb-4 pt-5 text-center ${textClass}`}>
           {text.myOrdersTitle}
         </h2>
+        <h2 className={`pt-5 pb-4 text-center ${textClass}`}>My Orders</h2>
 
         <div className="d-flex flex-wrap gap-3 mb-4 justify-content-center">
           {/* Sort Dropdown */}
@@ -269,13 +315,113 @@ const Orders = () => {
                         >
                           <i className="bi bi-trash me-2"></i>{text.deleteButton}
                         </button>
+          <>
+            <div className="row justify-content-center g-4">
+              {currentOrders.map(order => (
+                <div className="col-12 col-md-6 col-lg-4" key={order.id}>
+                  <div className={`tracking-card h-100 ${theme === "dark" ? "bg-custom-dark text-white" : "bg-white text-dark"}`}>
+                    <div className="card-body">
+                      <h5 className={`card-title-order ${textClass}`}>Order #{order.id}</h5>
+                      <div className="card-text">
+                        <strong className="text-muted">Items:</strong>
+                        <ul className="item-list">
+                          {Array.isArray(order.items) && order.items.map((item, index) => (
+                            <li key={index}>
+                              {item.title} (x{item.quantity}) - {item.total.toFixed(2)} LE
+                            </li>
+                          ))}
+                        </ul>
+                        <p className={`text-break ${textClass}`}>
+                          <strong>{order.paymentMethod === 'cash_on_delivery' ? 'Total Due' : 'Total Paid'}:</strong> {parseFloat(order.total).toFixed(2)} LE<br />
+                          <strong>Status:</strong> {order.status}<br />
+                          <strong>Placed:</strong> {
+                            order.timestamp
+                              ? new Date(order.timestamp.seconds ? order.timestamp.toDate() : order.timestamp).toLocaleString('en-US', {
+                                  month: '2-digit',
+                                  day: '2-digit',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })
+                              : 'N/A'
+                          }<br />
+                          <strong>Tracking Status:</strong> {order.trackingStatus}
+                        </p>
+                        {order.shipping && (
+                          <div>
+                            <strong className="text-muted">Shipping Details:</strong>
+                            <p className={`ms-3 text-break ${textClass}`}>
+                              City: {order.shipping.city}<br />
+                              Phone: {order.shipping.phone}<br />
+                              Details: {order.shipping.details}
+                            </p>
+                          </div>
+                        )}
+                        <div className="d-flex flex-wrap gap-2 mt-3">
+                          <button 
+                            className="btn btn-primary-custom btn-sm"
+                            onClick={() => handleTrackOrder(order.id, order.total)}
+                          >
+                            <i className="bi bi-truck me-2"></i>Track Order
+                          </button>
+                          <button 
+                            className="btn btn-danger-custom btn-sm"
+                            onClick={() => handleDeleteOrder(order.id)}
+                          >
+                            <i className="bi bi-trash me-2"></i>Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            <div className="d-flex justify-content-center mt-5">
+              <nav>
+                <ul className="pagination">
+                  <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                    <button 
+                      className={`page-link ${buttonClass}`} 
+                      onClick={handlePrevious}
+                      disabled={currentPage === 1}
+                      style={{ borderRadius: '50px', margin: '0 5px' }}
+                    >
+                      Previous
+                    </button>
+                  </li>
+                  {getPageNumbers().map(number => (
+                    <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
+                      <button 
+                        className={`page-link ${buttonClass}`} 
+                        onClick={() => handlePageChange(number)}
+                        style={{ 
+                          borderRadius: '50px', 
+                          margin: '0 5px',
+                          backgroundColor: currentPage === number ? (theme === "dark" ? '#555' : '#ddd') : '',
+                          border: 'none'
+                        }}
+                      >
+                        {number}
+                      </button>
+                    </li>
+                  ))}
+                  <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                    <button 
+                      className={`page-link ${buttonClass}`} 
+                      onClick={handleNext}
+                      disabled={currentPage === totalPages}
+                      style={{ borderRadius: '50px', margin: '0 5px' }}
+                    >
+                      Next
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </>
         )}
       </div>
     </div>

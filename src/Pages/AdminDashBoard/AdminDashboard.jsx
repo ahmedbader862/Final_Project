@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Route, Routes, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Container, Row, Col, Button, Card } from "react-bootstrap";
+import { Container, Row, Col, Button, Card, Dropdown } from "react-bootstrap";
 import {
   auth,
   db,
@@ -23,19 +23,61 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend } from "chart.js";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+setLange
 import Chat from '../../Components/Chat_Box/chat';
 import './AdminDashboard.css';
 import StatsSection from "../AdminOrder/StatsSection";
 import ChartsSection from "../AdminOrder/ChartsSection";
 import OrdersList from "../AdminOrder/OrdersList";
 import RefundMessage from "../AdminOrder/RefundMessage";
-import CategorySelector from "../AdminControl/CategorySelector";
 import MenuItemCard from "../AdminControl/MenuItemCard";
 import ItemModal from "../AdminControl/ItemModal";
 import { ThemeContext } from "../../Context/ThemeContext";
+import { setLange } from "../../redux/reduxtoolkit";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend);
+
+// CategorySelector Component
+const CategorySelector = ({ categories, selectedCategory, setSelectedCategory, setShowModal, setFormData }) => {
+  const { theme } = useContext(ThemeContext);
+  const textColor = theme === "dark" ? "text-white" : "text-dark";
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
+
+  return (
+    <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+      <div className="d-flex align-items-center gap-3">
+        <h2 className={`d-inline me-3 ${textColor}`}>
+          {text?.menuManagement || (currentLange === "Ar" ? "إدارة القائمة" : "Menu Management")}
+        </h2>
+        <Dropdown>
+          <Dropdown.Toggle variant="outline-light" id="categoryDropdown">
+            {categories.find(cat => cat.id === selectedCategory)?.name || 
+             text?.selectCategory || (currentLange === "Ar" ? "اختر فئة" : "Select Category")}
+          </Dropdown.Toggle>
+          <Dropdown.Menu className="dropdown-menu-dark">
+            {categories.map(cat => (
+              <Dropdown.Item key={cat.id} onClick={() => setSelectedCategory(cat.id)}>
+                {(currentLange === "Ar" && cat.category_ar) ? cat.category_ar : cat.name || cat.id}
+              </Dropdown.Item>
+            ))}
+          </Dropdown.Menu>
+        </Dropdown>
+      </div>
+      {/* Commented out Add Category button as per provided code */}
+      {/* <Button
+        variant="success"
+        onClick={() => {
+          setFormData({ title: "", description: "", desc_ar: "", category: "", category_ar: "", price: "", image: "", imageFile: null });
+          setShowModal("addCategory");
+        }}
+      >
+        {text?.addCategory || (currentLange === "Ar" ? "إضافة فئة" : "Add Category")}
+      </Button> */}
+    </div>
+  );
+};
 
 // AdminDashboard Component
 const AdminDashboard = () => {
@@ -43,6 +85,12 @@ const AdminDashboard = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { theme } = useContext(ThemeContext);
+  const textColor = theme === "dark" ? "text-white" : "text-dark";
+  const bgColor = theme === "dark" ? "bg-dark" : "bg-light";
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -67,16 +115,23 @@ const AdminDashboard = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      toast.success("Logged out successfully!");
+      toast.success(text?.logoutSuccess || (currentLange === "Ar" ? "تم تسجيل الخروج بنجاح!" : "Logged out successfully!"));
       navigate("/signin");
     } catch (error) {
       console.error("Error logging out:", error);
-      toast.error("Failed to log out: " + error.message);
+      toast.error(
+        text?.logoutFailed?.replace("{error}", error.message) ||
+        (currentLange === "Ar" ? `فشل في تسجيل الخروج: ${error.message}` : `Failed to log out: ${error.message}`)
+      );
     }
   };
 
+  const handleToggleLanguage = () => {
+    dispatch(setLange(currentLange === "En" ? "Ar" : "En"));
+  };
+
   if (!user) {
-    return <p>Loading...</p>;
+    return <p className={textColor}>{text?.loading || (currentLange === "Ar" ? "جارٍ التحميل..." : "Loading...")}</p>;
   }
 
   if (!isAdmin) {
@@ -84,35 +139,46 @@ const AdminDashboard = () => {
   }
 
   return (
-    <Container fluid>
+    <Container fluid className={bgColor}>
       <Row>
         <Col md={2} className="sidebar p-0">
           <div className="sidebar-content">
-            <h3>Admin Dashboard</h3>
+            <h3 className={textColor}>
+              {text?.adminDashboard || (currentLange === "Ar" ? "لوحة تحكم الإدارة" : "Admin Dashboard")}
+            </h3>
             <ul className="nav flex-column">
               <li className="nav-item">
                 <NavLink to="/admin/orders" className="nav-link">
-                  Orders
+                  {text?.orders || (currentLange === "Ar" ? "الطلبات" : "Orders")}
                 </NavLink>
               </li>
               <li className="nav-item">
                 <NavLink to="/admin/reservations" className="nav-link">
-                  Reservations
+                  {text?.reservations || (currentLange === "Ar" ? "الحجوزات" : "Reservations")}
                 </NavLink>
               </li>
               <li className="nav-item">
                 <NavLink to="/admin/menu" className="nav-link">
-                  Menu
+                  {text?.menu || (currentLange === "Ar" ? "القائمة" : "Menu")}
                 </NavLink>
               </li>
               <li className="nav-item">
                 <NavLink to="/admin/chat" className="nav-link">
-                  Chat
+                  {text?.chat || (currentLange === "Ar" ? "الدردشة" : "Chat")}
                 </NavLink>
               </li>
               <li className="nav-item mt-3">
                 <Button variant="danger" onClick={handleLogout} className="w-100">
-                  Logout
+                  {text?.logout || (currentLange === "Ar" ? "تسجيل الخروج" : "Logout")}
+                </Button>
+              </li>
+              <li className="nav-item mt-2">
+                <Button
+                  variant="secondary"
+                  onClick={handleToggleLanguage}
+                  className="w-100"
+                >
+                  {text?.toggleLanguage || (currentLange === "Ar" ? "الإنجليزية" : "Arabic")}
                 </Button>
               </li>
             </ul>
@@ -125,7 +191,12 @@ const AdminDashboard = () => {
             <Route path="menu" element={<AdminPanel />} />
             <Route path="chat" element={<AdminChat />} />
             <Route path="/" element={<AdminOrdersPage />} />
-            <Route path="*" element={<div>Route not found: {location.pathname}</div>} />
+            <Route path="*" element={
+              <div className={textColor}>
+                {text?.routeNotFound?.replace("{pathname}", location.pathname) ||
+                (currentLange === "Ar" ? `المسار غير موجود: ${location.pathname}` : `Route not found: ${location.pathname}`)}
+              </div>
+            } />
           </Routes>
         </Col>
       </Row>
@@ -141,6 +212,10 @@ const AdminOrdersPage = () => {
   const [sortOrder, setSortOrder] = useState("newest");
   const [statusFilter, setStatusFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
+  const { theme } = useContext(ThemeContext);
+  const textColor = theme === "dark" ? "text-white" : "text-dark";
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -204,13 +279,26 @@ const AdminOrdersPage = () => {
             trackingStatus: orderData.trackingStatus || "Order Placed",
           }),
         });
-        Swal.fire("Success!", `Order ${orderId} accepted`, "success");
+        Swal.fire(
+          text?.success || (currentLange === "Ar" ? "نجاح!" : "Success!"),
+          text?.orderAccepted?.replace("{orderId}", orderId) ||
+          (currentLange === "Ar" ? `تم قبول الطلب #${orderId}` : `Order #${orderId} accepted`),
+          "success"
+        );
       } else if (newStatus === "rejected") {
-        setRefundMessage(`Order #${orderId}: Refunding soon (if PayPal).`);
+        setRefundMessage(
+          text?.refundMessage?.replace("{orderId}", orderId) ||
+          (currentLange === "Ar" ? `الطلب #${orderId}: سيتم الاسترداد قريبًا (إذا كان باي بال).` : `Order #${orderId}: Refunding soon (if PayPal).`)
+        );
         setTimeout(() => setRefundMessage(null), 5000);
       }
     } catch (error) {
-      Swal.fire("Error!", `Failed to update order: ${error.message}`, "error");
+      Swal.fire(
+        text?.error || (currentLange === "Ar" ? "خطأ!" : "Error!"),
+        text?.orderUpdateFailed?.replace("{error}", error.message) ||
+        (currentLange === "Ar" ? `فشل في تحديث الطلب: ${error.message}` : `Failed to update order: ${error.message}`),
+        "error"
+      );
     }
   };
 
@@ -219,31 +307,41 @@ const AdminOrdersPage = () => {
 
   const deleteOrder = (orderId) =>
     Swal.fire({
-      title: "Are you sure?",
-      text: `Delete Order #${orderId}?`,
+      title: text?.deleteOrderConfirmTitle || (currentLange === "Ar" ? "هل أنت متأكد؟" : "Are you sure?"),
+      text: text?.deleteOrderConfirmText?.replace("{orderId}", orderId) ||
+            (currentLange === "Ar" ? `حذف الطلب #${orderId}؟` : `Delete Order #${orderId}?`),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
-      confirmButtonText: "Yes, delete!",
+      confirmButtonText: text?.deleteOrderConfirmButton || (currentLange === "Ar" ? "نعم، احذف!" : "Yes, delete!"),
     }).then(async (result) => {
       if (result.isConfirmed) {
         await deleteDoc(doc(db, "orders", orderId));
-        Swal.fire("Deleted!", `Order #${orderId} deleted`, "success");
+        Swal.fire(
+          text?.deleteOrderSuccessTitle || (currentLange === "Ar" ? "تم الحذف!" : "Deleted!"),
+          text?.deleteOrderSuccessMessage?.replace("{orderId}", orderId) ||
+          (currentLange === "Ar" ? `تم حذف الطلب #${orderId}` : `Order #${orderId} deleted`),
+          "success"
+        );
       }
     });
 
   const clearAllOrders = () =>
     Swal.fire({
-      title: "Delete all orders?",
+      title: text?.clearAllOrdersConfirmTitle || (currentLange === "Ar" ? "حذف جميع الطلبات؟" : "Delete all orders?"),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
-      confirmButtonText: "Yes, delete all!",
+      confirmButtonText: text?.clearAllOrdersConfirmButton || (currentLange === "Ar" ? "نعم، احذف الكل!" : "Yes, delete all!"),
     }).then(async (result) => {
       if (result.isConfirmed) {
         const snapshot = await getDocs(collection(db, "orders"));
         await Promise.all(snapshot.docs.map((doc) => deleteDoc(doc.ref)));
-        Swal.fire("Deleted!", "All orders cleared", "success");
+        Swal.fire(
+          text?.clearAllOrdersSuccessTitle || (currentLange === "Ar" ? "تم الحذف!" : "Deleted!"),
+          text?.clearAllOrdersSuccessMessage || (currentLange === "Ar" ? "تم مسح جميع الطلبات" : "All orders cleared"),
+          "success"
+        );
       }
     });
 
@@ -282,11 +380,15 @@ const AdminOrdersPage = () => {
       lineChartData: {
         labels: Object.keys(ordersByDate),
         datasets: [
-          { label: "Orders Over Time", data: Object.values(ordersByDate), borderColor: "#4A919E", tension: 0.1 },
+          { label: text?.ordersOverTime || (currentLange === "Ar" ? "الطلبات بمرور الوقت" : "Orders Over Time"), data: Object.values(ordersByDate), borderColor: "#4A919E", tension: 0.1 },
         ],
       },
       statusPieChartData: {
-        labels: ["Pending", "Accepted", "Rejected"],
+        labels: [
+          text?.statusPending || (currentLange === "Ar" ? "معلق" : "Pending"),
+          text?.statusAccepted || (currentLange === "Ar" ? "مقبول" : "Accepted"),
+          text?.statusRejected || (currentLange === "Ar" ? "مرفوض" : "Rejected")
+        ],
         datasets: [
           {
             data: [statusBreakdown.pending, statusBreakdown.accepted, statusBreakdown.rejected],
@@ -297,7 +399,10 @@ const AdminOrdersPage = () => {
         ],
       },
       paymentPieChartData: {
-        labels: ["Cash on Delivery", "Paid (PayPal)"],
+        labels: [
+          text?.paymentCod || (currentLange === "Ar" ? "الدفع عند الاستلام" : "Cash on Delivery"),
+          text?.paymentPaypal || (currentLange === "Ar" ? "باي بال" : "Paid (PayPal)")
+        ],
         datasets: [
           {
             data: [paymentBreakdown.cod, paymentBreakdown.paid],
@@ -312,15 +417,15 @@ const AdminOrdersPage = () => {
 
   const { totalOrders, totalRevenue, avgOrderValue, pendingOrders, lineChartData, statusPieChartData, paymentPieChartData } = getChartData(filteredOrders);
 
+  const filterKey = `${sortOrder}-${statusFilter}-${paymentFilter}`;
+
   return (
     <div className="container mt-5">
       <div className="d-flex justify-content-between mb-4 align-items-center flex-wrap">
-        <h2 className="text-white mb-3">Orders Management</h2>
-        {orders.length > 0 && (
-          <Button className="btn btn-danger btn-sm mb-3" onClick={clearAllOrders}>
-            Clear All Orders
-          </Button>
-        )}
+        <h2 className={textColor}>
+          {text?.ordersManagement || (currentLange === "Ar" ? "إدارة الطلبات" : "Orders Management")}
+        </h2>
+        {/* Clear All Orders button commented out as per original code */}
       </div>
       <div className="d-flex flex-wrap gap-3 mb-4 justify-content-center">
         <div className="dropdown">
@@ -331,23 +436,20 @@ const AdminOrdersPage = () => {
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            Sort: {sortOrder === "newest" ? "Newest First" : "Oldest First"}
+            {text?.sort || (currentLange === "Ar" ? "ترتيب:" : "Sort:")}{" "}
+            {sortOrder === "newest"
+              ? text?.sortNewest || (currentLange === "Ar" ? "الأحدث أولاً" : "Newest First")
+              : text?.sortOldest || (currentLange === "Ar" ? "الأقدم أولاً" : "Oldest First")}
           </button>
           <ul className="dropdown-menu dropdown-menu-dark" aria-labelledby="sortDropdown">
             <li>
-              <button
-                className="dropdown-item"
-                onClick={() => handleSortChange("newest")}
-              >
-                Newest First
+              <button className="dropdown-item" onClick={() => handleSortChange("newest")}>
+                {text?.sortNewest || (currentLange === "Ar" ? "الأحدث أولاً" : "Newest First")}
               </button>
             </li>
             <li>
-              <button
-                className="dropdown-item"
-                onClick={() => handleSortChange("oldest")}
-              >
-                Oldest First
+              <button className="dropdown-item" onClick={() => handleSortChange("oldest")}>
+                {text?.sortOldest || (currentLange === "Ar" ? "الأقدم أولاً" : "Oldest First")}
               </button>
             </li>
           </ul>
@@ -361,39 +463,33 @@ const AdminOrdersPage = () => {
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            Status: {statusFilter === "all" ? "All" : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+            {text?.status || (currentLange === "Ar" ? "الحالة:" : "Status:")}{" "}
+            {statusFilter === "all"
+              ? text?.statusAll || (currentLange === "Ar" ? "الكل" : "All")
+              : text?.[`status${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}`] ||
+                (currentLange === "Ar"
+                  ? statusFilter === "pending" ? "معلق" : statusFilter === "accepted" ? "مقبول" : "مرفوض"
+                  : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1))}
           </button>
           <ul className="dropdown-menu dropdown-menu-dark" aria-labelledby="statusDropdown">
             <li>
-              <button
-                className="dropdown-item"
-                onClick={() => handleStatusFilterChange("all")}
-              >
-                All
+              <button className="dropdown-item" onClick={() => handleStatusFilterChange("all")}>
+                {text?.statusAll || (currentLange === "Ar" ? "الكل" : "All")}
               </button>
             </li>
             <li>
-              <button
-                className="dropdown-item"
-                onClick={() => handleStatusFilterChange("pending")}
-              >
-                Pending
+              <button className="dropdown-item" onClick={() => handleStatusFilterChange("pending")}>
+                {text?.statusPending || (currentLange === "Ar" ? "معلق" : "Pending")}
               </button>
             </li>
             <li>
-              <button
-                className="dropdown-item"
-                onClick={() => handleStatusFilterChange("accepted")}
-              >
-                Accepted
+              <button className="dropdown-item" onClick={() => handleStatusFilterChange("accepted")}>
+                {text?.statusAccepted || (currentLange === "Ar" ? "مقبول" : "Accepted")}
               </button>
             </li>
             <li>
-              <button
-                className="dropdown-item"
-                onClick={() => handleStatusFilterChange("rejected")}
-              >
-                Rejected
+              <button className="dropdown-item" onClick={() => handleStatusFilterChange("rejected")}>
+                {text?.statusRejected || (currentLange === "Ar" ? "مرفوض" : "Rejected")}
               </button>
             </li>
           </ul>
@@ -407,31 +503,27 @@ const AdminOrdersPage = () => {
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            Payment: {paymentFilter === "all" ? "All" : paymentFilter === "cash_on_delivery" ? "Cash on Delivery" : "PayPal"}
+            {text?.payment || (currentLange === "Ar" ? "الدفع:" : "Payment:")}{" "}
+            {paymentFilter === "all"
+              ? text?.paymentAll || (currentLange === "Ar" ? "الكل" : "All")
+              : paymentFilter === "cash_on_delivery"
+              ? text?.paymentCod || (currentLange === "Ar" ? "الدفع عند الاستلام" : "Cash on Delivery")
+              : text?.paymentPaypal || (currentLange === "Ar" ? "باي بال" : "PayPal")}
           </button>
           <ul className="dropdown-menu dropdown-menu-dark" aria-labelledby="paymentDropdown">
             <li>
-              <button
-                className="dropdown-item"
-                onClick={() => handlePaymentFilterChange("all")}
-              >
-                All
+              <button className="dropdown-item" onClick={() => handlePaymentFilterChange("all")}>
+                {text?.paymentAll || (currentLange === "Ar" ? "الكل" : "All")}
               </button>
             </li>
             <li>
-              <button
-                className="dropdown-item"
-                onClick={() => handlePaymentFilterChange("cash_on_delivery")}
-              >
-                Cash on Delivery
+              <button className="dropdown-item" onClick={() => handlePaymentFilterChange("cash_on_delivery")}>
+                {text?.paymentCod || (currentLange === "Ar" ? "الدفع عند الاستلام" : "Cash on Delivery")}
               </button>
             </li>
             <li>
-              <button
-                className="dropdown-item"
-                onClick={() => handlePaymentFilterChange("paypal")}
-              >
-                PayPal
+              <button className="dropdown-item" onClick={() => handlePaymentFilterChange("paypal")}>
+                {text?.paymentPaypal || (currentLange === "Ar" ? "باي بال" : "PayPal")}
               </button>
             </li>
           </ul>
@@ -442,10 +534,20 @@ const AdminOrdersPage = () => {
       {filteredOrders.length > 0 && (
         <>
           <ChartsSection lineChartData={lineChartData} statusPieChartData={statusPieChartData} paymentPieChartData={paymentPieChartData} />
-          <OrdersList orders={filteredOrders} updateStatus={updateStatus} updateTrackingStatus={updateTrackingStatus} deleteOrder={deleteOrder} />
+          <OrdersList 
+            key={filterKey}
+            orders={filteredOrders} 
+            updateStatus={updateStatus} 
+            updateTrackingStatus={updateTrackingStatus} 
+            deleteOrder={deleteOrder} 
+          />
         </>
       )}
-      {filteredOrders.length === 0 && <p>No orders match the selected filters.</p>}
+      {filteredOrders.length === 0 && (
+        <p className={textColor}>
+          {text?.noOrdersFiltered || (currentLange === "Ar" ? "لا توجد طلبات تطابق الفلاتر المحددة." : "No orders match the selected filters.")}
+        </p>
+      )}
     </div>
   );
 };
@@ -453,22 +555,33 @@ const AdminOrdersPage = () => {
 // AdminReservationsPage Component
 const AdminReservationsPage = () => {
   const [reservations, setReservations] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const reservationsPerPage = 6;
+  const { theme } = useContext(ThemeContext);
+  const textColor = theme === "dark" ? "text-white" : "text-dark";
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
       collection(db, "reservations"),
       (snapshot) => {
         const fetchedReservations = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        console.log("Fetched reservations:", fetchedReservations);
         setReservations(fetchedReservations);
+        setCurrentPage(1);
       },
       (error) => {
         console.error("Error fetching reservations:", error);
-        Swal.fire("Error!", "Failed to fetch reservations: " + error.message, "error");
+        Swal.fire(
+          text?.refreshErrorTitle || (currentLange === "Ar" ? "خطأ!" : "Error!"),
+          text?.refreshErrorMessage?.replace("{error}", error.message) ||
+          (currentLange === "Ar" ? `فشل في جلب الحجوزات: ${error.message}` : `Failed to fetch reservations: ${error.message}`),
+          "error"
+        );
       }
     );
     return () => unsubscribe();
-  }, []);
+  }, [text, currentLange]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -500,25 +613,42 @@ const AdminReservationsPage = () => {
       }
 
       await updateDoc(reservationRef, { status: newStatus });
-      Swal.fire("Success!", `Reservation ${docId} ${newStatus}`, "success");
+      Swal.fire(
+        text?.refreshSuccessTitle || (currentLange === "Ar" ? "نجاح!" : "Success!"),
+        text?.reservationStatusSuccess
+          ?.replace("{reservationId}", docId)
+          ?.replace("{status}", newStatus) ||
+        (currentLange === "Ar" ? `تم تحديث الحجز #${docId} إلى ${newStatus}` : `Reservation #${docId} ${newStatus}`),
+        "success"
+      );
     } catch (error) {
-      console.error("Error updating reservation:", error);
-      Swal.fire("Error!", `Failed to update reservation: ${error.message}`, "error");
+      Swal.fire(
+        text?.refreshErrorTitle || (currentLange === "Ar" ? "خطأ!" : "Error!"),
+        text?.reservationStatusError?.replace("{error}", error.message) ||
+        (currentLange === "Ar" ? `فشل في تحديث الحجز: ${error.message}` : `Failed to update reservation: ${error.message}`),
+        "error"
+      );
     }
   };
 
   const deleteReservation = (reservationId) =>
     Swal.fire({
-      title: "Are you sure?",
-      text: `Delete Reservation #${reservationId}?`,
+      title: text?.deleteReservationConfirmTitle || (currentLange === "Ar" ? "هل أنت متأكد؟" : "Are you sure?"),
+      text: text?.deleteReservationConfirmText?.replace("{reservationId}", reservationId) ||
+            (currentLange === "Ar" ? `حذف الحجز #${reservationId}؟` : `Delete Reservation #${reservationId}?`),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
-      confirmButtonText: "Yes, delete!",
+      confirmButtonText: text?.deleteReservationConfirmButton || (currentLange === "Ar" ? "نعم، احذف!" : "Yes, delete!"),
     }).then(async (result) => {
       if (result.isConfirmed) {
         await deleteDoc(doc(db, "reservations", reservationId));
-        Swal.fire("Deleted!", `Reservation #${reservationId} deleted`, "success");
+        Swal.fire(
+          text?.deleteReservationSuccessTitle || (currentLange === "Ar" ? "تم الحذف!" : "Deleted!"),
+          text?.deleteReservationSuccessMessage?.replace("{reservationId}", reservationId) ||
+          (currentLange === "Ar" ? `تم حذف الحجز #${reservationId}` : `Reservation #${reservationId} deleted`),
+          "success"
+        );
       }
     });
 
@@ -526,90 +656,185 @@ const AdminReservationsPage = () => {
     try {
       const snapshot = await getDocs(collection(db, "reservations"));
       const fetchedReservations = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      console.log("Manually refreshed reservations:", fetchedReservations);
       setReservations(fetchedReservations);
-      Swal.fire("Success!", "Reservations refreshed successfully", "success");
+      setCurrentPage(1);
+      Swal.fire(
+        text?.refreshSuccessTitle || (currentLange === "Ar" ? "نجاح!" : "Success!"),
+        text?.refreshSuccessMessage || (currentLange === "Ar" ? "تم تحديث الحجوزات بنجاح" : "Reservations refreshed successfully"),
+        "success"
+      );
     } catch (error) {
       console.error("Error refreshing reservations:", error);
-      Swal.fire("Error!", "Failed to refresh reservations: " + error.message, "error");
+      Swal.fire(
+        text?.refreshErrorTitle || (currentLange === "Ar" ? "خطأ!" : "Error!"),
+        text?.refreshErrorMessage?.replace("{error}", error.message) ||
+        (currentLange === "Ar" ? `فشل في جلب الحجوزات: ${error.message}` : `Failed to fetch reservations: ${error.message}`),
+        "error"
+      );
     }
+  };
+
+  const indexOfLastReservation = currentPage * reservationsPerPage;
+  const indexOfFirstReservation = indexOfLastReservation - reservationsPerPage;
+  const currentReservations = reservations.slice(indexOfFirstReservation, indexOfLastReservation);
+  const totalPages = Math.ceil(reservations.length / reservationsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage + 1 < maxPagesToShow) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+    return pageNumbers;
   };
 
   return (
     <div className="container mt-5">
       <div className="d-flex justify-content-between mb-4 align-items-center flex-wrap">
-        <h2 className="text-white mb-3">Reservations Management</h2>
+        <h2 className={textColor}>
+          {text?.reservationsManagement || (currentLange === "Ar" ? "إدارة الحجوزات" : "Reservations Management")}
+        </h2>
         <Button variant="primary" onClick={handleRefresh}>
-          Refresh Reservations
+          {text?.refreshReservations || (currentLange === "Ar" ? "تحديث الحجوزات" : "Refresh Reservations")}
         </Button>
       </div>
 
       {reservations.length > 0 ? (
-        <Row>
-          {reservations.map((reservation) => (
-            <Col md={6} lg={4} className="mb-4" key={reservation.id}>
-              <Card className="bg-dark text-white border-0 shadow">
-                <Card.Body>
-                  <Card.Title className="d-flex justify-content-between align-items-center">
-                    <span>
-                      Reservation #{reservation.reservationId || reservation.id || "Unknown"}
-                    </span>
-                    <span
-                      style={{
-                        color: getStatusColor(reservation.status),
-                        fontWeight: "bold",
-                        textTransform: "uppercase",
+        <>
+          <Row>
+            {currentReservations.map((reservation) => (
+              <Col md={6} lg={4} className="mb-4" key={reservation.id}>
+                <Card className="bg-dark text-white border-0 shadow">
+                  <Card.Body>
+                    <Card.Title className="d-flex justify-content-between align-items-center">
+                      <span>
+                        {text?.reservationTitle?.replace("{reservationId}", reservation.reservationId || reservation.id || "Unknown") ||
+                        (currentLange === "Ar" ? `الحجز #${reservation.reservationId || reservation.id || "غير معروف"}` : `Reservation #${reservation.reservationId || reservation.id || "Unknown"}`)}
+                      </span>
+                      <span
+                        style={{
+                          color: getStatusColor(reservation.status),
+                          fontWeight: "bold",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {reservation.status || "pending"}
+                      </span>
+                    </Card.Title>
+                    <Card.Text>
+                      <strong>{text?.tableId || (currentLange === "Ar" ? "معرف الطاولة:" : "Table ID:")}</strong> {reservation.tableId || "N/A"} <br />
+                      <strong>{text?.name || (currentLange === "Ar" ? "الاسم:" : "Name:")}</strong> {reservation.name || "N/A"} <br />
+                      <strong>{text?.date || (currentLange === "Ar" ? "التاريخ:" : "Date:")}</strong>{" "}
+                      {reservation.date
+                        ? new Date(reservation.date).toLocaleString()
+                        : "N/A"}{" "}
+                      <br />
+                      <strong>{text?.numPersons || (currentLange === "Ar" ? "عدد الأشخاص:" : "Number of Persons:")}</strong>{" "}
+                      {reservation.numPersons || "N/A"} <br />
+                      <strong>{text?.timeArriving || (currentLange === "Ar" ? "وقت الوصول:" : "Time Arriving:")}</strong> {reservation.timeArriving || "N/A"} <br />
+                      <strong>{text?.timeLeaving || (currentLange === "Ar" ? "وقت المغادرة:" : "Time Leaving:")}</strong> {reservation.timeLeaving || "N/A"} <br />
+                      <strong>{text?.phone || (currentLange === "Ar" ? "الهاتف:" : "Phone:")}</strong> {reservation.phone || "N/A"} <br />
+                    </Card.Text>
+                    <div className="d-flex gap-2">
+                      <Button
+                        variant="success"
+                        size="sm"
+                        onClick={() => updateStatus(reservation.id, "accepted")}
+                        disabled={reservation.status === "accepted"}
+                      >
+                        {text?.accept || (currentLange === "Ar" ? "قبول" : "Accept")}
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => updateStatus(reservation.id, "rejected")}
+                        disabled={reservation.status === "rejected"}
+                      >
+                        {text?.reject || (currentLange === "Ar" ? "رفض" : "Reject")}
+                      </Button>
+                      <Button
+                        variant="warning"
+                        size="sm"
+                        onClick={() => deleteReservation(reservation.id)}
+                      >
+                        {text?.delete || (currentLange === "Ar" ? "حذف" : "Delete")}
+                      </Button>
+                    </div>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+          <div className="d-flex justify-content-center mt-5">
+            <nav>
+              <ul className="pagination">
+                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                  <button 
+                    className="page-link bg-dark text-white" 
+                    onClick={handlePrevious}
+                    disabled={currentPage === 1}
+                    style={{ borderRadius: '50px', margin: '0 5px' }}
+                  >
+                    {text?.previous || (currentLange === "Ar" ? "السابق" : "Previous")}
+                  </button>
+                </li>
+                {getPageNumbers().map(number => (
+                  <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
+                    <button 
+                      className="page-link bg-dark text-white" 
+                      onClick={() => handlePageChange(number)}
+                      style={{ 
+                        borderRadius: '50px', 
+                        margin: '0 5px',
+                        backgroundColor: currentPage === number ? '#555' : '',
+                        border: 'none'
                       }}
                     >
-                      {reservation.status || "pending"}
-                    </span>
-                  </Card.Title>
-                  <Card.Text>
-                    <strong>Table ID:</strong> {reservation.tableId || "N/A"} <br />
-                    <strong>Name:</strong> {reservation.name || "N/A"} <br />
-                    <strong>Date:</strong>{" "}
-                    {reservation.date
-                      ? new Date(reservation.date).toLocaleString()
-                      : "N/A"}{" "}
-                    <br />
-                    <strong>Number of Persons:</strong>{" "}
-                    {reservation.numPersons || "N/A"} <br />
-                    <strong>Time Arriving:</strong> {reservation.timeArriving || "N/A"} <br />
-                    <strong>Time Leaving:</strong> {reservation.timeLeaving || "N/A"} <br />
-                    <strong>Phone:</strong> {reservation.phone || "N/A"} <br />
-                  </Card.Text>
-                  <div className="d-flex gap-2">
-                    <Button
-                      variant="success"
-                      size="sm"
-                      onClick={() => updateStatus(reservation.id, "accepted")}
-                      disabled={reservation.status === "accepted"}
-                    >
-                      Accept
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => updateStatus(reservation.id, "rejected")}
-                      disabled={reservation.status === "rejected"}
-                    >
-                      Reject
-                    </Button>
-                    <Button
-                      variant="warning"
-                      size="sm"
-                      onClick={() => deleteReservation(reservation.id)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+                      {number}
+                    </button>
+                  </li>
+                ))}
+                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                  <button 
+                    className="page-link bg-dark text-white" 
+                    onClick={handleNext}
+                    disabled={currentPage === totalPages}
+                    style={{ borderRadius: '50px', margin: '0 5px' }}
+                  >
+                    {text?.next || (currentLange === "Ar" ? "التالي" : "Next")}
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </>
       ) : (
-        <p className="text-white">No reservations found.</p>
+        <p className={textColor}>
+          {text?.noReservations || (currentLange === "Ar" ? "لا توجد حجوزات." : "No reservations found.")}
+        </p>
       )}
     </div>
   );
@@ -623,7 +848,23 @@ const AdminPanel = () => {
   const [menuItems, setMenuItems] = useState([]);
   const [showModal, setShowModal] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [formData, setFormData] = useState({ title: "", description: "", price: "", image: "", imageFile: null });
+  const [formData, setFormData] = useState({ 
+    title: "", 
+    title_ar: "", 
+    name_en: "", 
+    name_ar: "", 
+    description: "", 
+    desc_ar: "", 
+    category: "", 
+    category_ar: "", 
+    price: "", 
+    image: "", 
+    imageFile: null 
+  });
+  const { theme } = useContext(ThemeContext);
+  const textColor = theme === "dark" ? "text-white" : "text-dark";
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => setUser(user));
@@ -640,9 +881,9 @@ const AdminPanel = () => {
       })
       .catch((error) => {
         console.error("Error loading categories:", error);
-        toast.error("Failed to load categories");
+        toast.error(text?.failedLoadCategories || (currentLange === "Ar" ? "فشل في تحميل الفئات" : "Failed to load categories"));
       });
-  }, [user]);
+  }, [user, text, currentLange]);
 
   useEffect(() => {
     if (!selectedCategory) return;
@@ -654,11 +895,11 @@ const AdminPanel = () => {
       },
       (error) => {
         console.error("Error fetching menu items:", error);
-        toast.error("Failed to load menu items");
+        toast.error(text?.failedLoadMenuItems || (currentLange === "Ar" ? "فشل في تحميل عناصر القائمة" : "Failed to load menu items"));
       }
     );
     return unsubscribe;
-  }, [selectedCategory]);
+  }, [selectedCategory, text, currentLange]);
 
   const uploadImageToStorage = async (file) => {
     if (!file) return null;
@@ -669,7 +910,10 @@ const AdminPanel = () => {
       return await getDownloadURL(storageRef);
     } catch (error) {
       console.error("Error uploading image:", error);
-      toast.error(`Failed to upload image: ${error.message}`);
+      toast.error(
+        text?.failedUploadImage?.replace("{error}", error.message) ||
+        (currentLange === "Ar" ? `فشل في رفع الصورة: ${error.message}` : `Failed to upload image: ${error.message}`)
+      );
       throw error;
     }
   };
@@ -680,23 +924,44 @@ const AdminPanel = () => {
       if (values.imageFile) imageUrl = await uploadImageToStorage(values.imageFile);
       const itemData = {
         title: values.title,
+        title_ar: values.title_ar,
+        name_en: values.name_en,
+        name_ar: values.name_ar,
         description: values.description,
+        desc_ar: values.desc_ar,
+        category: selectedCategory,
+        category_ar: categories.find(cat => cat.id === selectedCategory)?.category_ar || values.category_ar,
         price: parseFloat(values.price),
         image: imageUrl || "",
       };
       if (showModal === "add") {
         await addDoc(collection(db, `menu/${selectedCategory}/items`), itemData);
-        toast.success("Item added!");
+        toast.success(text?.itemAdded || (currentLange === "Ar" ? "تم إضافة العنصر!" : "Item added!"));
       } else if (showModal === "edit") {
         const docRef = doc(db, `menu/${selectedCategory}/items`, selectedItem.docId);
         await updateDoc(docRef, itemData);
-        toast.success("Item updated!");
+        toast.success(text?.itemUpdated || (currentLange === "Ar" ? "تم تحديث العنصر!" : "Item updated!"));
       }
       setShowModal(null);
-      setFormData({ title: "", description: "", price: "", image: "", imageFile: null });
+      setFormData({ 
+        title: "", 
+        title_ar: "", 
+        name_en: "", 
+        name_ar: "", 
+        description: "", 
+        desc_ar: "", 
+        category: "", 
+        category_ar: "", 
+        price: "", 
+        image: "", 
+        imageFile: null 
+      });
     } catch (error) {
       console.error("Error saving item:", error);
-      toast.error(`Error saving item: ${error.message}`);
+      toast.error(
+        text?.errorSavingItem?.replace("{error}", error.message) ||
+        (currentLange === "Ar" ? `خطأ في حفظ العنصر: ${error.message}` : `Error saving item: ${error.message}`)
+      );
     }
   };
 
@@ -704,11 +969,14 @@ const AdminPanel = () => {
     try {
       const docRef = doc(db, `menu/${selectedCategory}/items`, selectedItem.docId);
       await deleteDoc(docRef);
-      toast.success("Item deleted!");
+      toast.success(text?.itemDeleted || (currentLange === "Ar" ? "تم حذف العنصر!" : "Item deleted!"));
       setShowModal(null);
     } catch (error) {
       console.error("Error deleting item:", error);
-      toast.error(`Error deleting item: ${error.message}`);
+      toast.error(
+        text?.errorSavingItem?.replace("{error}", error.message) ||
+        (currentLange === "Ar" ? `خطأ في حذف العنصر: ${error.message}` : `Error deleting item: ${error.message}`)
+      );
     }
   };
 
@@ -716,13 +984,28 @@ const AdminPanel = () => {
     const newCategory = formData.title;
     if (!newCategory) return;
     try {
-      await setDoc(doc(db, "menu", newCategory), { name: newCategory });
-      toast.success("Category added!");
+      await setDoc(doc(db, "menu", newCategory), { 
+        name: newCategory,
+        category_ar: formData.category_ar || newCategory
+      });
+      toast.success(text?.categoryAdded || (currentLange === "Ar" ? "تم إضافة الفئة!" : "Category added!"));
       setShowModal(null);
-      setFormData({ title: "", description: "", price: "", image: "", imageFile: null });
+      setFormData({ 
+        title: "", 
+        title_ar: "", 
+        name_en: "", 
+        name_ar: "", 
+        description: "", 
+        desc_ar: "", 
+        category: "", 
+        category_ar: "", 
+        price: "", 
+        image: "", 
+        imageFile: null 
+      });
     } catch (error) {
       console.error("Error adding category:", error);
-      toast.error("Error adding category");
+      toast.error(text?.errorAddingCategory || (currentLange === "Ar" ? "خطأ في إضافة الفئة" : "Error adding category"));
     }
   };
 
@@ -730,7 +1013,13 @@ const AdminPanel = () => {
     setSelectedItem(item);
     setFormData({
       title: item.title || "",
+      title_ar: item.title_ar || "",
+      name_en: item.name_en || "",
+      name_ar: item.name_ar || "",
       description: item.description || "",
+      desc_ar: item.desc_ar || "",
+      category: item.category || selectedCategory,
+      category_ar: item.category_ar || categories.find(cat => cat.id === selectedCategory)?.category_ar || "",
       price: item.price || "",
       image: item.image || "",
       imageFile: null,
@@ -738,34 +1027,67 @@ const AdminPanel = () => {
     setShowModal("edit");
   };
 
-  if (!user) return <p>Please log in.</p>;
+  if (!user) return (
+    <p className={`${textColor} text-center mt-5`}>
+      {text?.pleaseLogIn || (currentLange === "Ar" ? "يرجى تسجيل الدخول." : "Please log in.")}
+    </p>
+  );
 
   return (
     <Container fluid className="mt-5">
-      <Row>
-        <Col md={12} className="p-4">
-          <CategorySelector categories={categories} selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
-          <Button
-            onClick={() => {
-              setFormData({ title: "", description: "", price: "", image: "", imageFile: null });
-              setShowModal("add");
-            }}
-            className="mb-4"
-          >
-            Add Item
-          </Button>
-          <Row>
-            {menuItems.map((item) => (
-              <MenuItemCard
-                key={item.docId}
-                item={item}
-                openEditModal={openEditModal}
-                setSelectedItem={setSelectedItem}
-                setShowModal={setShowModal}
-              />
-            ))}
-          </Row>
+      <Row className="mb-4">
+        <Col>
+          <CategorySelector 
+            categories={categories} 
+            selectedCategory={selectedCategory} 
+            setSelectedCategory={setSelectedCategory} 
+            setShowModal={setShowModal}
+            setFormData={setFormData}
+          />
+          <div className="d-flex flex-wrap gap-3 align-items-center">
+            <Button
+              variant="primary"
+              onClick={() => {
+                const selectedCat = categories.find(cat => cat.id === selectedCategory);
+                setFormData({ 
+                  title: "", 
+                  title_ar: "", 
+                  name_en: "", 
+                  name_ar: "", 
+                  description: "", 
+                  desc_ar: "", 
+                  category: selectedCategory || "", 
+                  category_ar: selectedCat?.category_ar || "", 
+                  price: "", 
+                  image: "", 
+                  imageFile: null 
+                });
+                setShowModal("add");
+              }}
+            >
+              {text?.addItem || (currentLange === "Ar" ? "إضافة عنصر" : "Add Item")}
+            </Button>
+          </div>
         </Col>
+      </Row>
+      <Row>
+        {menuItems.length > 0 ? (
+          menuItems.map((item) => (
+            <MenuItemCard
+              key={item.docId}
+              item={item}
+              openEditModal={openEditModal}
+              setSelectedItem={setSelectedItem}
+              setShowModal={setShowModal}
+            />
+          ))
+        ) : (
+          <Col>
+            <p className={`${textColor} text-center`}>
+              {text?.noItemsInCategory || (currentLange === "Ar" ? "لا توجد عناصر في هذه الفئة." : "No items found in this category.")}
+            </p>
+          </Col>
+        )}
       </Row>
       <ItemModal
         showModal={showModal}
@@ -775,8 +1097,9 @@ const AdminPanel = () => {
         handleSubmit={handleSubmit}
         handleDelete={handleDelete}
         handleAddCategory={handleAddCategory}
-        selected/* eslint-disable-next-line no-unused-vars */
         selectedItem={selectedItem}
+        categories={categories}
+        selectedCategory={selectedCategory}
       />
     </Container>
   );
@@ -785,17 +1108,21 @@ const AdminPanel = () => {
 // AdminChat Component
 const AdminChat = () => {
   const userState55 = useSelector((state) => state.UserData["UserState"]);
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
   const [allUsers, setAllUsers] = useState([]);
   const [userName, setUserName] = useState("");
   const [userUID, setUserUID] = useState("");
   const [showChat, setShowChat] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { theme } = useContext(ThemeContext);
+  const textColor = theme === "dark" ? "text-white" : "text-dark";
 
   useEffect(() => {
     const fetchUsers = async () => {
       if (!userState55 || !userState55.uid) {
-        setError("User data not available. Please try logging in again.");
+        setError(text?.failedLoadUsers || (currentLange === "Ar" ? "بيانات المستخدم غير متاحة. حاول تسجيل الدخول مرة أخرى." : "User data not available. Please try logging in again."));
         setLoading(false);
         return;
       }
@@ -817,14 +1144,14 @@ const AdminChat = () => {
         setAllUsers(docsData);
       } catch (err) {
         console.error("Error fetching users:", err);
-        setError("Failed to load users. Please try again.");
+        setError(text?.failedLoadUsers || (currentLange === "Ar" ? "فشل في تحميل المستخدمين. حاول مرة أخرى." : "Failed to load users. Please try again."));
       } finally {
         setLoading(false);
       }
     };
 
     fetchUsers();
-  }, [userState55]);
+  }, [userState55, text, currentLange]);
 
   const handleUserData = (user) => {
     setUserName(user.name);
@@ -836,9 +1163,13 @@ const AdminChat = () => {
     <div className="admin-chat-container">
       <Row>
         <Col md={3} className="chat-sidebar">
-          <h4 className="sidebar-title">Users</h4>
+          <h4 className={`sidebar-title ${textColor}`}>
+            {text?.users || (currentLange === "Ar" ? "المستخدمون" : "Users")}
+          </h4>
           {loading ? (
-            <p className="text-muted">Loading users...</p>
+            <p className="text-muted">
+              {text?.loadingUsers || (currentLange === "Ar" ? "جارٍ تحميل المستخدمين..." : "Loading users...")}
+            </p>
           ) : error ? (
             <p className="text-danger">{error}</p>
           ) : allUsers.length > 0 ? (
@@ -852,7 +1183,9 @@ const AdminChat = () => {
               </div>
             ))
           ) : (
-            <p className="text-muted">No users found.</p>
+            <p className="text-muted">
+              {text?.noUsersFound || (currentLange === "Ar" ? "لم يتم العثور على مستخدمين." : "No users found.")}
+            </p>
           )}
         </Col>
 
@@ -860,13 +1193,18 @@ const AdminChat = () => {
           {showChat ? (
             <>
               <div className="chat-header">
-                <h5>Chatting with {userName}</h5>
+                <h5 className={textColor}>
+                  {text?.chattingWith?.replace("{userName}", userName) ||
+                  (currentLange === "Ar" ? `الدردشة مع ${userName}` : `Chatting with ${userName}`)}
+                </h5>
               </div>
               <Chat userName={userName} uidChats={userUID} showChat={showChat} />
             </>
           ) : (
             <div className="chat-placeholder">
-              <p>Select a user to start chatting.</p>
+              <p className={textColor}>
+                {text?.selectUserToChat || (currentLange === "Ar" ? "اختر مستخدمًا لبدء الدردشة." : "Select a user to start chatting.")}
+              </p>
             </div>
           )}
         </Col>

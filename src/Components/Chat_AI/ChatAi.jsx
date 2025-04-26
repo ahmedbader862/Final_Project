@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import axios from "axios";
+
 import './Chat_AI.css';
+
 
 function Chat_AI() {
   const fireData = useSelector((state) => state.fireData?.FireData?.[3]);

@@ -9,6 +9,8 @@ import { Card, Row, Col, Alert, Button } from "react-bootstrap";
 const UserReservationsPage = () => {
   const [reservations, setReservations] = useState([]);
   const [error, setError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const reservationsPerPage = 6;
 
   const { theme } = useContext(ThemeContext);
   const currentLange = useSelector((state) => state.lange.langue);
@@ -19,6 +21,7 @@ const UserReservationsPage = () => {
   const textColor = theme === "dark" ? "text-white" : "text-dark";
   const cardBg = theme === "dark" ? "bg-dark text-white" : "bg-light text-dark";
   const btnClass = theme === "dark" ? "btn-outline-light" : "btn-outline-dark";
+  const pageBtnClass = theme === "dark" ? "bg-dark text-white" : "bg-light text-dark";
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -37,6 +40,7 @@ const UserReservationsPage = () => {
           ...doc.data(),
         }));
         setReservations(userReservations);
+        setCurrentPage(1); // Reset to first page when reservations change
       },
       (error) => {
         setError("Failed to load reservations: " + error.message);
@@ -72,8 +76,46 @@ const UserReservationsPage = () => {
     }
   };
 
+  // Pagination logic
+  const indexOfLastReservation = currentPage * reservationsPerPage;
+  const indexOfFirstReservation = indexOfLastReservation - reservationsPerPage;
+  const currentReservations = reservations.slice(indexOfFirstReservation, indexOfLastReservation);
+  const totalPages = Math.ceil(reservations.length / reservationsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage + 1 < maxPagesToShow) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+    return pageNumbers;
+  };
+
   return (
-    <div className={` ${bgColor} ${textColor} py-5 rounded`}>
+    <div className={` ${bgColor} ${textColor} py-5 rounded mt-5`}>
       <div className="container">
         <h1 className="text-center mb-4">{text.myReservationsTitle}</h1>
 
@@ -86,7 +128,7 @@ const UserReservationsPage = () => {
         {reservations.length > 0 ? (
           <>
             <Row>
-              {reservations.map((reservation) => (
+              {currentReservations.map((reservation) => (
                 <Col md={6} lg={4} className="mb-4" key={reservation.id}>
                   <Card className={`${cardBg} border-0 shadow`}>
                     <Card.Body>
@@ -124,6 +166,49 @@ const UserReservationsPage = () => {
                 </Col>
               ))}
             </Row>
+            {/* Pagination */}
+            <div className="d-flex justify-content-center mt-5">
+              <nav>
+                <ul className="pagination">
+                  <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                    <button 
+                      className={`page-link ${pageBtnClass}`} 
+                      onClick={handlePrevious}
+                      disabled={currentPage === 1}
+                      style={{ borderRadius: '50px', margin: '0 5px' }}
+                    >
+                      Previous
+                    </button>
+                  </li>
+                  {getPageNumbers().map(number => (
+                    <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
+                      <button 
+                        className={`page-link ${pageBtnClass}`} 
+                        onClick={() => handlePageChange(number)}
+                        style={{ 
+                          borderRadius: '50px', 
+                          margin: '0 5px',
+                          backgroundColor: currentPage === number ? (theme === "dark" ? '#555' : '#ddd') : '',
+                          border: 'none'
+                        }}
+                      >
+                        {number}
+                      </button>
+                    </li>
+                  ))}
+                  <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                    <button 
+                      className={`page-link ${pageBtnClass}`} 
+                      onClick={handleNext}
+                      disabled={currentPage === totalPages}
+                      style={{ borderRadius: '50px', margin: '0 5px' }}
+                    >
+                      Next
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
             <div className="text-center mt-4">
               <Button
                 className={btnClass}
