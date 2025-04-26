@@ -29,6 +29,8 @@ import AdminDashboard from './Pages/AdminDashBoard/AdminDashboard';
 import { ThemeProvider } from './Context/ThemeContext';
 import Orders from './Pages/Orders/Order';
 import SearchResults from './Pages/SearchResults';
+import FirestoreData from './Components/Chat_AI/FirestoreData';
+import Chat_AI from './Components/Chat_AI/ChatAi';
 
 // Wrapper component to debug location and conditionally render Nav
 const DebugLocation = ({ children }) => {
@@ -85,6 +87,8 @@ function App() {
                 <Route path="*" element={<Error />} />
               </Routes>
             </main>
+           <Chat_AI/>
+           <FirestoreData/>
             <Footer />
             <ToastContainer
               position="top-right"
@@ -102,6 +106,7 @@ function App() {
         </DebugLocation>
       </BrowserRouter>
     </ThemeProvider>
+
   );
 }
 
