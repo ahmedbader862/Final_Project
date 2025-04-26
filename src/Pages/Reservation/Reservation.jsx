@@ -16,21 +16,18 @@ const ReservationPage = () => {
   return (
     <div className={` ${bgColor} ${textColor} py-5 rounded`}>
       <div className="pt-5 container">
-        <h1 className="text-center mb-4">{text.reservationTitle}</h1>
+        <h1 className="text-center mb-4">{text.reservation}</h1>
 
         <div className="row d-flex flex-column justify-content-center align-items-center">
-          {/* قسم اختيار الطاولة */}
           <div className="col-md-6 mb-4">
-            {/* <h2 className="text-center">{text.selectTable}</h2> */}
             <TableSelection
               selectedTable={selectedTable}
               setSelectedTable={setSelectedTable}
             />
           </div>
 
-          {/* قسم الحجز */}
           <div className="col-md-6">
-            <h2 className="text-center">{text.reservationForm}</h2>
+            {/* <h2 className="text-center">{text.reservationForm}</h2> */}
             <ReservationForm
               selectedTable={selectedTable}
               setSelectedTable={setSelectedTable}

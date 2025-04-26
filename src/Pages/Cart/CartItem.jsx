@@ -1,8 +1,11 @@
 import React, { useContext } from 'react';
+import { useSelector } from 'react-redux';
 import { ThemeContext } from '../../Context/ThemeContext';
 
 const CartItem = ({ item, handleStepDown, handleStepUp, handleRemoveItem, calculateTotalPrice }) => {
   const { theme } = useContext(ThemeContext);
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
 
   const cardClass = theme === 'dark' ? 'bg-dark text-white border-secondary' : 'bg-light text-dark';
   const inputBg = theme === 'dark' ? 'bg-secondary text-white border-0' : '';
@@ -15,14 +18,14 @@ const CartItem = ({ item, handleStepDown, handleStepUp, handleRemoveItem, calcul
             <img
               src={item.poster_path}
               className="img-fluid rounded-3 w-100"
-              alt={item.title}
+              alt={item.title + (text?.addedToCart || " added to cart")}
               style={{ objectFit: 'cover' }}
             />
           </div>
 
           <div className="col-8 col-md-3">
             <p className="fw-bold mb-1">{item.title}</p>
-            <p className="text-muted small mb-0">Added to cart</p>
+            <p className="text-muted small mb-0">{text?.addedToCart || "Added to cart"}</p>
           </div>
 
           <div className="col-12 col-md-3 d-flex align-items-center mt-2 mt-md-0">
@@ -43,7 +46,7 @@ const CartItem = ({ item, handleStepDown, handleStepUp, handleRemoveItem, calcul
           </div>
 
           <div className="col-6 col-md-2 mt-2 mt-md-0">
-            <h6 className="mb-0">{calculateTotalPrice(item)} LE</h6>
+            <h6 className="mb-0">{calculateTotalPrice(item)} {text?.currency || "LE"}</h6>
           </div>
 
           <div className="col-6 col-md-2 text-end mt-2 mt-md-0">

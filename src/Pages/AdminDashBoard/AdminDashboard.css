@@ -548,3 +548,71 @@ body {
   background-color: #f8f9fa !important;
   border-top: 1px solid #dee2e6 !important;
 }
+
+.chat-sidebar {
+  max-height: calc(100vh - 60px - 50px); /* Adjust for header/footer heights */
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding: 10px; /* Optional: for better spacing */
+}
+
+.admin-chat-container {
+  display: flex;
+  flex-direction: column; /* Stack vertically on small screens */
+  min-height: calc(100vh - 60px - 50px); /* Adjust for header/footer */
+  padding-bottom: 50px; /* Add padding to account for footer height */
+}
+
+.chat-sidebar {
+  max-height: calc(100vh - 60px - 50px); /* Adjust for header/footer */
+  overflow-y: auto;
+  padding: 10px;
+  background-color: #2a2f3b; /* Matches screenshot */
+}
+
+/* On small screens */
+@media (max-width: 767.98px) {
+  .chat-sidebar {
+    max-height: 30vh; /* Limited height for sidebar */
+    margin-bottom: 20px; /* Space between sidebar and chat content */
+  }
+
+  .chat-content {
+    max-height: calc(60vh - 50px); /* Reduce height to account for footer */
+    overflow-y: auto; /* Allow scrolling */
+  }
+}
+
+/* On larger screens */
+@media (min-width: 768px) {
+
+  .chat-sidebar {
+    max-height: calc(100vh - 60px - 50px); /* Full height */
+    margin-bottom: 0;
+  }
+
+  .chat-content {
+    flex-grow: 1;
+    min-height: auto;
+  }
+}
+
+.chat-content {
+  background-color: #1c2526; /* Matches screenshot */
+  padding: 20px;
+}
+
+.user-card {
+  padding: 10px;
+  cursor: pointer;
+  color: white;
+}
+
+.user-card.active {
+  background-color: #3b4a54; /* Matches the active user in screenshot */
+}
+
+.chat-header {
+  margin-bottom: 20px;
+}
+
+

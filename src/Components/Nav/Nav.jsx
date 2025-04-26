@@ -22,11 +22,11 @@ function Nav() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [WishlistCountFirestore, setWishlistCountFirestore] = useState(0);
+  const [wishlistCountFirestore, setWishlistCountFirestore] = useState(0);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const userState55 = useSelector((state) => state.UserData["UserState"]);
+  const userState = useSelector((state) => state.UserData["UserState"]);
   const currentLange = useSelector((state) => state.lange.langue);
   const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
   const wishlistRedux = useSelector((state) => state.wishlist.wishlist);
@@ -48,12 +48,12 @@ function Nav() {
         navigate("/signin");
       })
       .catch((error) => {
-        console.error(error);
+        console.error("Error logging out:", error);
       });
   };
 
   useEffect(() => {
-    const authState = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         if (!user.displayName) {
           getCurrentUserDataFireStore(user);
@@ -87,12 +87,12 @@ function Nav() {
       });
     };
 
-    return () => authState();
+    return () => unsubscribe();
   }, [dispatch]);
 
   useEffect(() => {
-    if (userState55 && userState55.uid && userState55 !== "who know") {
-      const docRef = doc(db, "users2", userState55.uid);
+    if (userState && userState.uid && userState !== "who know") {
+      const docRef = doc(db, "users2", userState.uid);
 
       const unsubscribe = onSnapshot(
         docRef,
@@ -111,7 +111,7 @@ function Nav() {
 
       return () => unsubscribe();
     }
-  }, [userState55]);
+  }, [userState]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -133,14 +133,14 @@ function Nav() {
       }`}
     >
       <div className="container-fluid d-flex justify-content-between align-items-center">
-        <a className={`navbar-brand text-3xl fw-bold ${textColorClass}`} href="/">
+        <Link className={`navbar-brand text-3xl fw-bold ${textColorClass}`} to="/">
           <img
             src={theme === "dark" ? "/Images/logo dark-mood.svg" : "/Images/logo light-mood.svg"}
             style={{ width: "80px", height: "50px" }}
             alt="Logo"
           />
           TastyBites
-        </a>
+        </Link>
 
         <button
           className="navbar-toggler"
@@ -181,6 +181,17 @@ function Nav() {
                 {text?.reservation || (currentLange === "Ar" ? "الحجز" : "Reservation")}
               </Link>
             </li>
+            {userState !== "who know" && (
+              <li className="nav-item">
+                <Link
+                  to="/my-reservations"
+                  className={`nav-link ${activeTab === "My Reservations" ? "active" : ""} ${textColorClass}`}
+                  onClick={() => setActiveTab("My Reservations")}
+                >
+                  {text?.myReservations || (currentLange === "Ar" ? "حجوزاتي" : "My Reservations")}
+                </Link>
+              </li>
+            )}
             <li className="nav-item">
               <Link
                 to="/ContactUs"
@@ -190,7 +201,7 @@ function Nav() {
                 {text?.contactUs || (currentLange === "Ar" ? "اتصل بنا" : "Contact Us")}
               </Link>
             </li>
-            {userState55 !== "who know" && (
+            {userState !== "who know" && (
               <li className="nav-item">
                 <Link
                   to="/orders"
@@ -203,7 +214,7 @@ function Nav() {
             )}
           </ul>
 
-          <div className="d-flex align-items-center">
+          <div className="d-flex align-items-center gap-4 ms-3">
             <button
               className={`btn ${iconColorClass} p-2`}
               onClick={toggleSearch}
@@ -228,9 +239,7 @@ function Nav() {
                 </form>
               </div>
             )}
-          </div>
 
-          <div className="d-flex align-items-center gap-4 ms-3">
             <div className={`form-check form-switch ${textColorClass}`}>
               <input
                 className="form-check-input"
@@ -251,7 +260,7 @@ function Nav() {
             </button>
 
             <div className="buttons d-flex gap-2">
-              {userState55 === "who know" ? (
+              {userState === "who know" ? (
                 <>
                   <Link
                     to="/Wishlist"
@@ -271,9 +280,7 @@ function Nav() {
                     </button>
                   </Link>
                   <Link to="/Register">
-                    <button
-                      className={`btn btn-${theme === "dark" ? "light" : "dark"} btn-md`}
-                    >
+                    <button className={`btn btn-${theme === "dark" ? "light" : "dark"} btn-md`}>
                       <i className="fas fa-user-plus me-2"></i>
                       {text?.register || (currentLange === "Ar" ? "التسجيل" : "Register")}
                     </button>
@@ -285,27 +292,25 @@ function Nav() {
                     <Link
                       to="/Wishlist"
                       className={`fs-5 position-relative ${
-                        WishlistCountFirestore > 0 ? "text-danger" : iconColorClass
+                        wishlistCountFirestore > 0 ? "text-danger" : iconColorClass
                       }`}
                     >
                       <i className="fas fa-heart"></i>
-                      {WishlistCountFirestore > 0 && (
-                        <span className="wishlist-count">{WishlistCountFirestore}</span>
+                      {wishlistCountFirestore > 0 && (
+                        <span className="wishlist-count">{wishlistCountFirestore}</span>
                       )}
                     </Link>
                     <Link to="/cart" className={`fs-5 ${iconColorClass}`}>
                       <i className="fas fa-shopping-cart"></i>
                     </Link>
                   </div>
-                  <Link>
-                    <button
-                      onClick={logout}
-                      className={`btn btn-${theme === "dark" ? "light" : "dark"} btn-md`}
-                    >
-                      <i className="fas fa-sign-out-alt me-2"></i>
-                      {text?.logout || (currentLange === "Ar" ? "تسجيل الخروج" : "Logout")}
-                    </button>
-                  </Link>
+                  <button
+                    onClick={logout}
+                    className={`btn btn-${theme === "dark" ? "light" : "dark"} btn-md`}
+                  >
+                    <i className="fas fa-sign-out-alt me-2"></i>
+                    {text?.logout || (currentLange === "Ar" ? "تسجيل الخروج" : "Logout")}
+                  </button>
                 </>
               )}
             </div>

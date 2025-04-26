@@ -8,7 +8,7 @@ import { ThemeContext } from "../../Context/ThemeContext";
 import Modal from "react-bootstrap/Modal";
 import "../Card/card.css";
 
-function Carde({ title, poster_path, description, price }) {
+function Carde({ title, poster_path, description, price, title_ar, desc_ar }) {
   const dispatch = useDispatch();
   const { theme } = useContext(ThemeContext);
   const [showModal, setShowModal] = useState(false);
@@ -70,12 +70,18 @@ function Carde({ title, poster_path, description, price }) {
 
   const toggleFirestore = async () => {
     if (!user?.uid) {
-      return toast.error("User not authenticated", {
-        position: "top-right",
-        autoClose: 2000,
-      });
+      // إذا لم يكن المستخدم مسجل الدخول، قم بالتعامل مع Redux فقط
+      if (isInWishlist) {
+        handleRemoveWishlist(); // حذف من Redux
+        setIsInWishlistFirestore(false); // تحديث لون القلب
+      } else {
+        handleAddWishlist(); // إضافة إلى Redux
+        setIsInWishlistFirestore(true); // تحديث لون القلب
+      }
+      return;
     }
 
+    // إذا كان المستخدم مسجل الدخول، قم بالتعامل مع Firestore فقط
     try {
       const docRef = doc(db, "users2", user.uid);
       const docSnap = await getDoc(docRef);
@@ -83,18 +89,23 @@ function Carde({ title, poster_path, description, price }) {
       const dishExists = dishes.some((dish) => dish.title === safeTitle);
 
       const updatedDishes = dishExists
-        ? dishes.filter((dish) => dish.title !== safeTitle)
-        : [
-            ...dishes,
-            {
-              title: safeTitle,
-              poster_path: safePosterPath,
-              description: safeDescription,
-              price: safePrice,
-            },
-          ];
+  ? dishes.filter((dish) => dish.title !== safeTitle)
+  : [
+      ...dishes,
+      {
+        title: safeTitle, // العنوان بالإنجليزية
+        title_ar: title_ar || "عنوان غير متوفر", // لا تستخدم safeTitle هنا
+        poster_path: safePosterPath,
+        description: safeDescription, // الوصف بالإنجليزية
+        desc_ar: desc_ar || "الوصف غير متوفر", // لا تستخدم safeDescription هنا
+        price: safePrice,
+      },
+    ]; // إضافة الطبق
 
       await setDoc(docRef, { allDishes: updatedDishes }, { merge: true });
+
+      // تحديث الحالة المحلية بناءً على Firestore
+      setIsInWishlistFirestore(!dishExists);
 
       toast[dishExists ? "info" : "success"](
         `${safeTitle} ${dishExists ? "removed from" : "added to"} wishlist!`,
@@ -166,16 +177,26 @@ function Carde({ title, poster_path, description, price }) {
         style={{ cursor: "pointer" }}
       >
         <button
-          className={`fav-icon ${isInWishlist ? "active" : ""}`}
+          className={`fav-icon ${user?.uid ? (isInWishlistFirestore ? "active" : "") : (isInWishlist ? "active" : "")}`}
           onClick={(e) => {
             e.stopPropagation();
-            user === "who know" ? handleAddWishlist() : toggleFirestore();
+            toggleFirestore();
           }}
         >
           <i
             className="fas fa-heart"
             style={{
-              color: isInWishlist ? "red" : theme === "dark" ? "#ffffffcc" : "#6c757d",
+              color: user?.uid
+                ? isInWishlistFirestore
+                  ? "red"
+                  : theme === "dark"
+                  ? "#ffffffcc"
+                  : "#6c757d"
+                : isInWishlist
+                ? "red"
+                : theme === "dark"
+                ? "#ffffffcc"
+                : "#6c757d",
               transition: "color 0.3s ease",
             }}
           ></i>
