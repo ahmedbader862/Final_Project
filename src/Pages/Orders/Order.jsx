@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useNavigate } from 'react-router-dom';
-import { db, collection, query, where, onSnapshot, doc, deleteDoc } from '../../firebase/firebase';
-import { auth } from '../../firebase/firebase';
-import Swal from 'sweetalert2';
-import './Order.css';
+import { useNavigate } from "react-router-dom";
+import { db, collection, query, where, onSnapshot, doc, deleteDoc } from "../../firebase/firebase";
+import { auth } from "../../firebase/firebase";
+import Swal from "sweetalert2";
+import "./Order.css";
 import { ThemeContext } from "../../Context/ThemeContext";
 import { useSelector } from "react-redux";
 
@@ -25,52 +25,56 @@ const Orders = () => {
     const unsubscribeAuth = auth.onAuthStateChanged((user) => {
       if (!user) {
         Swal.fire({
-          icon: 'error',
-          title: 'Authentication Required',
-          text: 'Please sign in to view your orders.',
+          icon: "error",
+          title: text.authRequiredTitle || "Authentication Required",
+          text: text.authRequiredMessage || "Please sign in to view your orders.",
         });
-        navigate('/signin');
+        navigate("/signin");
         return;
       }
 
       const userId = user.uid;
       const q = query(collection(db, "orders"), where("userId", "==", userId));
 
-      const unsubscribeOrders = onSnapshot(q, (snapshot) => {
-        const userOrders = snapshot.docs
-          .map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          }))
-          .filter(order => order.status !== "rejected");
+      const unsubscribeOrders = onSnapshot(
+        q,
+        (snapshot) => {
+          const userOrders = snapshot.docs
+            .map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }))
+            .filter((order) => order.status !== "rejected");
 
-        setOrders(userOrders);
-        applyFilters(userOrders, sortOrder, statusFilter, paymentFilter);
-        setCurrentPage(1); // Reset to first page when filters change
-      }, (error) => {
-        console.error("Error fetching orders:", error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Failed to fetch orders. Please try again.',
-        });
-      });
+          setOrders(userOrders);
+          applyFilters(userOrders, sortOrder, statusFilter, paymentFilter);
+          setCurrentPage(1); // Reset to first page when filters change
+        },
+        (error) => {
+          console.error("Error fetching orders:", error);
+          Swal.fire({
+            icon: "error",
+            title: text.fetchErrorTitle || "Error",
+            text: text.fetchErrorMessage || "Failed to fetch orders. Please try again.",
+          });
+        }
+      );
 
       return () => unsubscribeOrders();
     });
 
     return () => unsubscribeAuth();
-  }, [navigate]);
+  }, [navigate, text, sortOrder, statusFilter, paymentFilter]);
 
   const applyFilters = (ordersToFilter, sort, status, payment) => {
     let filtered = [...ordersToFilter];
 
     if (status !== "all") {
-      filtered = filtered.filter(order => order.status === status);
+      filtered = filtered.filter((order) => order.status === status);
     }
 
     if (payment !== "all") {
-      filtered = filtered.filter(order => order.paymentMethod === payment);
+      filtered = filtered.filter((order) => order.paymentMethod === payment);
     }
 
     filtered.sort((a, b) => {
@@ -102,29 +106,29 @@ const Orders = () => {
 
   const handleDeleteOrder = async (orderId) => {
     Swal.fire({
-      title: `Are you sure?`,
-      text: `You are about to delete Order #${orderId}. This action cannot be undone.`,
-      icon: 'warning',
+      title: text.deleteConfirmTitle || "Are you sure?",
+      text: text.deleteConfirmMessage || `You are about to delete Order #${orderId}. This action cannot be undone.`,
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#B73E3E',
-      cancelButtonColor: '#4A919E',
-      confirmButtonText: 'Yes, delete it!'
+      confirmButtonColor: "#B73E3E",
+      cancelButtonColor: "#4A919E",
+      confirmButtonText: text.confirmDelete || "Yes, delete it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           const orderRef = doc(db, "orders", orderId);
           await deleteDoc(orderRef);
-          Swal.fire('Deleted!', `Order #${orderId} has been deleted.`, 'success');
+          Swal.fire(text.deleteSuccessTitle || "Deleted!", text.deleteSuccessMessage || `Order #${orderId} has been deleted.`, "success");
         } catch (error) {
           console.error("Error deleting order:", error);
-          Swal.fire('Error!', 'There was an error deleting the order.', 'error');
+          Swal.fire(text.deleteErrorTitle || "Error!", text.deleteErrorMessage || "There was an error deleting the order.", "error");
         }
       }
     });
   };
 
   const handleTrackOrder = (orderId, total) => {
-    navigate('/track-order', { state: { orderId, total: parseFloat(total).toFixed(2) } });
+    navigate("/track-order", { state: { orderId, total: parseFloat(total).toFixed(2) } });
   };
 
   // Pagination logic
@@ -172,10 +176,7 @@ const Orders = () => {
   return (
     <div className={`orders-container py-5 ${bgClass}`}>
       <div className="container">
-        <h2 className={`pt-5 pb-4 pt-5 text-center ${textClass}`}>
-          {text.myOrdersTitle}
-        </h2>
-        <h2 className={`pt-5 pb-4 text-center ${textClass}`}>My Orders</h2>
+        <h2 className={`pt-5 pb-4 text-center ${textClass}`}>{text.myOrdersTitle}</h2>
 
         <div className="d-flex flex-wrap gap-3 mb-4 justify-content-center">
           {/* Sort Dropdown */}
@@ -262,7 +263,7 @@ const Orders = () => {
           <p className={`${textClass} text-center`}>{text.noOrders}</p>
         ) : (
           <div className="row justify-content-center g-4">
-            {filteredOrders.map((order) => (
+            {currentOrders.map((order) => (
               <div className="col-12 col-md-6 col-lg-4" key={order.id}>
                 <div className={`tracking-card h-100 ${theme === "dark" ? "bg-custom-dark text-white" : "bg-white text-dark"}`}>
                   <div className="card-body">
@@ -270,159 +271,111 @@ const Orders = () => {
                     <div className="card-text">
                       <strong className="text-muted">{text.itemsLabel}:</strong>
                       <ul className="item-list">
-                        {Array.isArray(order.items) && order.items.map((item, index) => (
-                          <li key={index}>
-                            {item.title} (x{item.quantity}) - {item.total.toFixed(2)} LE
-                          </li>
-                        ))}
+                        {Array.isArray(order.items) &&
+                          order.items.map((item, index) => (
+                            <li key={index}>
+                              {item.title} (x{item.quantity}) - {item.total.toFixed(2)} LE
+                            </li>
+                          ))}
                       </ul>
                       <p className={`text-break ${textClass}`}>
-                        <strong>{order.paymentMethod === 'cash_on_delivery' ? text.totalDue : text.totalPaid}:</strong> {parseFloat(order.total).toFixed(2)} LE<br />
-                        <strong>{text.statusLabel}:</strong> {order.status}<br />
-                        <strong>{text.placedLabel}:</strong> {
-                          order.timestamp
-                            ? new Date(order.timestamp.seconds ? order.timestamp.toDate() : order.timestamp).toLocaleString('en-US', {
-                                month: '2-digit',
-                                day: '2-digit',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })
-                            : 'N/A'
-                        }<br />
+                        <strong>{order.paymentMethod === "cash_on_delivery" ? text.totalDue : text.totalPaid}:</strong>{" "}
+                        {parseFloat(order.total).toFixed(2)} LE
+                        <br />
+                        <strong>{text.statusLabel}:</strong> {order.status}
+                        <br />
+                        <strong>{text.placedLabel}:</strong>{" "}
+                        {order.timestamp
+                          ? new Date(order.timestamp.seconds ? order.timestamp.toDate() : order.timestamp).toLocaleString("en-US", {
+                              month: "2-digit",
+                              day: "2-digit",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "N/A"}
+                        <br />
                         <strong>{text.trackingStatusLabel}:</strong> {order.trackingStatus}
                       </p>
                       {order.shipping && (
                         <div>
                           <strong className="text-muted">{text.shippingDetailsLabel}:</strong>
                           <p className={`ms-3 text-break ${textClass}`}>
-                            {text.cityLabel}: {order.shipping.city}<br />
-                            {text.phoneLabel}: {order.shipping.phone}<br />
+                            {text.cityLabel}: {order.shipping.city}
+                            <br />
+                            {text.phoneLabel}: {order.shipping.phone}
+                            <br />
                             {text.detailsLabel}: {order.shipping.details}
                           </p>
                         </div>
                       )}
                       <div className="d-flex flex-wrap gap-2 mt-3">
-                        <button 
+                        <button
                           className="btn btn-primary-custom btn-sm"
                           onClick={() => handleTrackOrder(order.id, order.total)}
                         >
-                          <i className="bi bi-truck me-2"></i>{text.trackOrderButton}
+                          <i className="bi bi-truck me-2"></i>
+                          {text.trackOrderButton}
                         </button>
-                        <button 
+                        <button
                           className="btn btn-danger-custom btn-sm"
                           onClick={() => handleDeleteOrder(order.id)}
                         >
-                          <i className="bi bi-trash me-2"></i>{text.deleteButton}
+                          <i className="bi bi-trash me-2"></i>
+                          {text.deleteButton}
                         </button>
-          <>
-            <div className="row justify-content-center g-4">
-              {currentOrders.map(order => (
-                <div className="col-12 col-md-6 col-lg-4" key={order.id}>
-                  <div className={`tracking-card h-100 ${theme === "dark" ? "bg-custom-dark text-white" : "bg-white text-dark"}`}>
-                    <div className="card-body">
-                      <h5 className={`card-title-order ${textClass}`}>Order #{order.id}</h5>
-                      <div className="card-text">
-                        <strong className="text-muted">Items:</strong>
-                        <ul className="item-list">
-                          {Array.isArray(order.items) && order.items.map((item, index) => (
-                            <li key={index}>
-                              {item.title} (x{item.quantity}) - {item.total.toFixed(2)} LE
-                            </li>
-                          ))}
-                        </ul>
-                        <p className={`text-break ${textClass}`}>
-                          <strong>{order.paymentMethod === 'cash_on_delivery' ? 'Total Due' : 'Total Paid'}:</strong> {parseFloat(order.total).toFixed(2)} LE<br />
-                          <strong>Status:</strong> {order.status}<br />
-                          <strong>Placed:</strong> {
-                            order.timestamp
-                              ? new Date(order.timestamp.seconds ? order.timestamp.toDate() : order.timestamp).toLocaleString('en-US', {
-                                  month: '2-digit',
-                                  day: '2-digit',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })
-                              : 'N/A'
-                          }<br />
-                          <strong>Tracking Status:</strong> {order.trackingStatus}
-                        </p>
-                        {order.shipping && (
-                          <div>
-                            <strong className="text-muted">Shipping Details:</strong>
-                            <p className={`ms-3 text-break ${textClass}`}>
-                              City: {order.shipping.city}<br />
-                              Phone: {order.shipping.phone}<br />
-                              Details: {order.shipping.details}
-                            </p>
-                          </div>
-                        )}
-                        <div className="d-flex flex-wrap gap-2 mt-3">
-                          <button 
-                            className="btn btn-primary-custom btn-sm"
-                            onClick={() => handleTrackOrder(order.id, order.total)}
-                          >
-                            <i className="bi bi-truck me-2"></i>Track Order
-                          </button>
-                          <button 
-                            className="btn btn-danger-custom btn-sm"
-                            onClick={() => handleDeleteOrder(order.id)}
-                          >
-                            <i className="bi bi-trash me-2"></i>Delete
-                          </button>
-                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-
-            {/* Pagination */}
-            <div className="d-flex justify-content-center mt-5">
-              <nav>
-                <ul className="pagination">
-                  <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                    <button 
-                      className={`page-link ${buttonClass}`} 
-                      onClick={handlePrevious}
-                      disabled={currentPage === 1}
-                      style={{ borderRadius: '50px', margin: '0 5px' }}
-                    >
-                      Previous
-                    </button>
-                  </li>
-                  {getPageNumbers().map(number => (
-                    <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
-                      <button 
-                        className={`page-link ${buttonClass}`} 
-                        onClick={() => handlePageChange(number)}
-                        style={{ 
-                          borderRadius: '50px', 
-                          margin: '0 5px',
-                          backgroundColor: currentPage === number ? (theme === "dark" ? '#555' : '#ddd') : '',
-                          border: 'none'
-                        }}
-                      >
-                        {number}
-                      </button>
-                    </li>
-                  ))}
-                  <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                    <button 
-                      className={`page-link ${buttonClass}`} 
-                      onClick={handleNext}
-                      disabled={currentPage === totalPages}
-                      style={{ borderRadius: '50px', margin: '0 5px' }}
-                    >
-                      Next
-                    </button>
-                  </li>
-                </ul>
-              </nav>
-            </div>
-          </>
+              </div>
+            ))}
+          </div>
         )}
+
+        {/* Pagination */}
+        <div className="d-flex justify-content-center mt-5">
+          <nav>
+            <ul className="pagination">
+              <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                <button
+                  className={`page-link ${buttonClass}`}
+                  onClick={handlePrevious}
+                  disabled={currentPage === 1}
+                  style={{ borderRadius: "50px", margin: "0 5px" }}
+                >
+                  {text.previous || "Previous"}
+                </button>
+              </li>
+              {getPageNumbers().map((number) => (
+                <li key={number} className={`page-item ${currentPage === number ? "active" : ""}`}>
+                  <button
+                    className={`page-link ${buttonClass}`}
+                    onClick={() => handlePageChange(number)}
+                    style={{
+                      borderRadius: "50px",
+                      margin: "0 5px",
+                      backgroundColor: currentPage === number ? (theme === "dark" ? "#555" : "#ddd") : "",
+                      border: "none",
+                    }}
+                  >
+                    {number}
+                  </button>
+                </li>
+              ))}
+              <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                <button
+                  className={`page-link ${buttonClass}`}
+                  onClick={handleNext}
+                  disabled={currentPage === totalPages}
+                  style={{ borderRadius: "50px", margin: "0 5px" }}
+                >
+                  {text.next || "Next"}
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
       </div>
     </div>
   );
