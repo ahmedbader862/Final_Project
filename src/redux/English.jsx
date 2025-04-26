@@ -1,6 +1,6 @@
 const english = {
-  // Existing keys from previous components
-  lang: "Ar",
+  // Existing keys (unchanged)
+  lang: "Arabic",
   home: "Home",
   menu: "Menu",
   reservation: "Reservation",
@@ -15,43 +15,6 @@ const english = {
   noMessages: "No messages yet. Start the conversation!",
   typeMessage: "Type your message...",
   sendButton: "Send",
-  description: "description",
-  myOrdersTitle: "My Orders",
-  sortNewest: "Newest First",
-  sortOldest: "Oldest First",
-  statusAll: "All",
-  statusPending: "Pending",
-  statusAccepted: "Accepted",
-  paymentAll: "All",
-  paymentCash: "Cash on Delivery",
-  paymentPayPal: "PayPal",
-  noOrders: "No orders match the selected filters.",
-  orderItems: "Items:",
-  totalDue: "Total Due",
-  totalPaid: "Total Paid",
-  status: "Status",
-  placed: "Placed",
-  trackingStatus: "Tracking Status",
-  shippingDetails: "Shipping Details",
-  city: "City",
-  phone: "Phone",
-  details: "Details",
-  trackOrder: "Track Order",
-  deleteOrder: "Delete Order",
-  myReservationsTitle: "My Reservations",
-  pendingMessage: "Awaiting admin approval. You’ll be notified once confirmed.",
-  acceptedMessage: "Your reservation is confirmed! We look forward to seeing you.",
-  rejectedMessage: "Sorry, your reservation was not approved. Please try a different time or table.",
-  noReservations: "No reservations found.",
-  makeNewReservation: "Make a New Reservation",
-  makeReservation: "Make a Reservation",
-  tableIdLabel: "Table ID",
-  nameLabel: "Name",
-  dateLabel: "Date",
-  numPersonsLabel: "Number of Persons",
-  timeArrivingLabel: "Time Arriving",
-  timeLeavingLabel: "Time Leaving",
-  phoneLabel: "Phone",
 
   // AdminDashboard
   adminDashboard: "Admin Dashboard",
@@ -67,15 +30,15 @@ const english = {
 
   // AdminOrdersPage
   ordersManagement: "Orders Management",
-  sort: "Sort:",
+  sort: "Sort",
   sortNewest: "Newest First",
   sortOldest: "Oldest First",
-  status: "Status:",
+  status: "Status",
   statusAll: "All",
   statusPending: "Pending",
   statusAccepted: "Accepted",
   statusRejected: "Rejected",
-  payment: "Payment:",
+  payment: "Payment",
   paymentAll: "All",
   paymentCod: "Cash on Delivery",
   paymentPaypal: "PayPal",
@@ -99,13 +62,13 @@ const english = {
   reservationsManagement: "Reservations Management",
   refreshReservations: "Refresh Reservations",
   reservationTitle: "Reservation #{reservationId}",
-  tableId: "Table ID:",
-  name: "Name:",
-  date: "Date:",
-  numPersons: "Number of Persons:",
-  timeArriving: "Time Arriving:",
-  timeLeaving: "Time Leaving:",
-  phone: "Phone:",
+  tableId: "Table ID", // Removed colon
+  name: "Name", // Removed colon
+  date: "Date", // Removed colon
+  numPersons: "Number of Persons", // Removed colon
+  timeArriving: "Time Arriving", // Removed colon
+  timeLeaving: "Time Leaving", // Removed colon
+  phone: "Phone", // Removed colon
   accept: "Accept",
   reject: "Reject",
   delete: "Delete",
@@ -206,22 +169,23 @@ const english = {
   priceMin: "Price must be at least $0.01",
   priceMax: "Price cannot exceed $10,000",
 
+  // OrderCard
   order: "Order #{orderId}",
-  items: "Items:",
+  items: "Items",
   noItems: "No items",
   total: "Total:",
-  placed: "Placed:",
-  shippingDetails: "Shipping Details:",
-  city: "City:",
-  phone: "Phone:",
-  details: "Details:",
+  placed: "Placed",
+  shippingDetails: "Shipping Details",
+  city: "City",
+  phone: "Phone",
+  details: "Details",
   discountApplied: "Discount Applied:",
   discountYes: "Yes (20%)",
   discountNo: "No",
-  payment: "Payment:",
+  payment: "Payment",
   cashOnDelivery: "Cash on Delivery",
   paidPaypal: "Paid (PayPal)",
-  trackingStatus: "Tracking Status:",
+  trackingStatus: "Tracking Status",
   orderPlaced: "Order Placed",
   processing: "Processing",
   outForDelivery: "Out for Delivery",
@@ -232,7 +196,59 @@ const english = {
   statusPending: "Pending",
   statusAccepted: "Accepted",
   statusRejected: "Rejected",
-};
 
+  // Orders Component
+  noOrdersMatchFilters: "No orders match the selected filters.",
+  totalDue: "Total Due",
+  totalPaid: "Total Paid",
+  trackOrder: "Track Order",
+  authenticationRequired: "Authentication Required",
+  pleaseSignIn: "Please sign in to view your orders.",
+  failedFetchOrders: "Failed to fetch orders. Please try again.",
+  deleteOrderConfirmText: "You are about to delete Order #{orderId}. This action cannot be undone.",
+  deleteOrderConfirmButton: "Yes, delete it!",
+  deleteOrderSuccessMessage: "Order #{orderId} has been deleted.",
+  deleteOrderError: "There was an error deleting the order.",
+
+  // UserReservationsPage
+  myReservationsTitle: "My Reservations",
+  mustBeLoggedIn: "You must be logged in to view your reservations.",
+  failedLoadReservations: "Failed to load reservations: ",
+  tableIdLabel: "Table ID", // Already updated above as `tableId`
+  unknown: "Unknown",
+  nameLabel: "Name", // Already updated above as `name`
+  dateLabel: "Date", // Already updated above as `date`
+  numPersonsLabel: "Number of Persons", // Already updated above as `numPersons`
+  timeArrivingLabel: "Time Arriving", // Already updated above as `timeArriving`
+  timeLeavingLabel: "Time Leaving", // Already updated above as `timeLeaving`
+  phoneLabel: "Phone", // Already updated above as `phone`
+  pendingMessage: "Awaiting admin approval. You’ll be notified once confirmed.",
+  acceptedMessage: "Your reservation is confirmed! We look forward to seeing you.",
+  rejectedMessage: "Sorry, your reservation was not approved. Please try a different time or table.",
+  noReservations: "No reservations found.",
+  makeNewReservation: "Make a New Reservation",
+  makeReservation: "Make a Reservation",
+  
+  // Cart Component
+  yourCart: "Your Cart",
+  cartEmpty: "Your cart is empty.",
+  addedToCart: "Added to cart",
+  subtotal: "Subtotal",
+  discount20: "Discount (20%)",
+  total: "Total",
+  couponCodeLabel: "Coupon Code",
+  apply: "Apply",
+  orderNow: "Order Now",
+  currency: "LE",
+  invalidCoupon: "Invalid Coupon",
+  invalidCouponMessage: "The coupon code you entered is invalid.",
+  emptyCart: "Empty Cart",
+  emptyCartMessage: "Your cart is empty. Add items to proceed.",
+  removeItem: "Remove Item",
+  removeItemConfirm: 'Are you sure you want to remove "{title}" from your cart?',
+  confirmRemove: "Yes, remove it!",
+  removed: "Removed!",
+  removedMessage: '"{title}" has been removed from your cart.',
+};
 
 export default english;

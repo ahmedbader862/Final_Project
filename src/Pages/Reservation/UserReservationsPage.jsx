@@ -26,7 +26,7 @@ const UserReservationsPage = () => {
   useEffect(() => {
     const user = auth.currentUser;
     if (!user) {
-      setError("You must be logged in to view your reservations.");
+      setError(text?.mustBeLoggedIn || "You must be logged in to view your reservations.");
       return;
     }
 
@@ -43,12 +43,12 @@ const UserReservationsPage = () => {
         setCurrentPage(1); // Reset to first page when reservations change
       },
       (error) => {
-        setError("Failed to load reservations: " + error.message);
+        setError((text?.failedLoadReservations || "Failed to load reservations: ") + error.message);
       }
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [text]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -66,11 +66,11 @@ const UserReservationsPage = () => {
   const getStatusMessage = (status) => {
     switch (status) {
       case "pending":
-        return text.pendingMessage || "Awaiting admin approval. You’ll be notified once confirmed.";
+        return text?.pendingMessage || "Awaiting admin approval. You’ll be notified once confirmed.";
       case "accepted":
-        return text.acceptedMessage || "Your reservation is confirmed! We look forward to seeing you.";
+        return text?.acceptedMessage || "Your reservation is confirmed! We look forward to seeing you.";
       case "rejected":
-        return text.rejectedMessage || "Sorry, your reservation was not approved. Please try a different time or table.";
+        return text?.rejectedMessage || "Sorry, your reservation was not approved. Please try a different time or table.";
       default:
         return "";
     }
@@ -117,7 +117,7 @@ const UserReservationsPage = () => {
   return (
     <div className={` ${bgColor} ${textColor} py-5 rounded mt-5`}>
       <div className="container">
-        <h1 className="text-center mb-4">{text.myReservationsTitle}</h1>
+        <h1 className="text-center mb-4">{text?.myReservationsTitle || "My Reservations"}</h1>
 
         {error && (
           <Alert variant="danger" onClose={() => setError("")} dismissible>
@@ -134,7 +134,7 @@ const UserReservationsPage = () => {
                     <Card.Body>
                       <Card.Title className="d-flex justify-content-between align-items-center">
                         <span>
-                          {text.tableIdLabel}: {reservation.reservationId || reservation.id || "Unknown"}
+                          {text?.tableIdLabel || "Table ID"}: {reservation.reservationId || reservation.id || (text?.unknown || "Unknown")}
                         </span>
                         <span
                           style={{
@@ -143,22 +143,28 @@ const UserReservationsPage = () => {
                             textTransform: "uppercase",
                           }}
                         >
-                          {reservation.status || "pending"}
+                          {text[`status${reservation.status.charAt(0).toUpperCase() + reservation.status.slice(1)}`] || reservation.status || "pending"}
                         </span>
                       </Card.Title>
                       <Card.Text>
-                        <strong>{text.tableIdLabel}:</strong> {reservation.tableId || "N/A"} <br />
-                        <strong>{text.nameLabel}:</strong> {reservation.name || "N/A"} <br />
-                        <strong>{text.dateLabel}:</strong>{" "}
+                        <strong>{text?.tableIdLabel || "Table ID"}:</strong> {reservation.tableId || "N/A"} <br />
+                        <strong>{text?.nameLabel || "Name"}:</strong> {reservation.name || "N/A"} <br />
+                        <strong>{text?.dateLabel || "Date"}:</strong>{" "}
                         {reservation.date
-                          ? new Date(reservation.date).toLocaleString()
+                          ? new Date(reservation.date).toLocaleString(currentLange === "Ar" ? 'ar-EG' : 'en-US', {
+                              month: '2-digit',
+                              day: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })
                           : "N/A"}{" "}
                         <br />
-                        <strong>{text.numPersonsLabel}:</strong>{" "}
+                        <strong>{text?.numPersonsLabel || "Number of Persons"}:</strong>{" "}
                         {reservation.numPersons || "N/A"} <br />
-                        <strong>{text.timeArrivingLabel}:</strong> {reservation.timeArriving || "N/A"} <br />
-                        <strong>{text.timeLeavingLabel}:</strong> {reservation.timeLeaving || "N/A"} <br />
-                        <strong>{text.phoneLabel}:</strong> {reservation.phone || "N/A"} <br />
+                        <strong>{text?.timeArrivingLabel || "Time Arriving"}:</strong> {reservation.timeArriving || "N/A"} <br />
+                        <strong>{text?.timeLeavingLabel || "Time Leaving"}:</strong> {reservation.timeLeaving || "N/A"} <br />
+                        <strong>{text?.phoneLabel || "Phone"}:</strong> {reservation.phone || "N/A"} <br />
                         <em>{getStatusMessage(reservation.status || "pending")}</em>
                       </Card.Text>
                     </Card.Body>
@@ -177,7 +183,7 @@ const UserReservationsPage = () => {
                       disabled={currentPage === 1}
                       style={{ borderRadius: '50px', margin: '0 5px' }}
                     >
-                      Previous
+                      {text?.previous || "Previous"}
                     </button>
                   </li>
                   {getPageNumbers().map(number => (
@@ -203,7 +209,7 @@ const UserReservationsPage = () => {
                       disabled={currentPage === totalPages}
                       style={{ borderRadius: '50px', margin: '0 5px' }}
                     >
-                      Next
+                      {text?.next || "Next"}
                     </button>
                   </li>
                 </ul>
@@ -214,18 +220,18 @@ const UserReservationsPage = () => {
                 className={btnClass}
                 onClick={() => navigate("/reservation")}
               >
-                {text.makeNewReservation}
+                {text?.makeNewReservation || "Make a New Reservation"}
               </Button>
             </div>
           </>
         ) : (
           <div className="text-center">
-            <p>{text.noReservations}</p>
+            <p>{text?.noReservations || "No reservations found."}</p>
             <Button
               className={btnClass}
               onClick={() => navigate("/reservation")}
             >
-              {text.makeReservation}
+              {text?.makeReservation || "Make a Reservation"}
             </Button>
           </div>
         )}
