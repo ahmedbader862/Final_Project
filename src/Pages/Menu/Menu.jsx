@@ -1,59 +1,94 @@
-import { useState, useEffect, useContext } from "react";
-import { db, getDocs, collection } from "../../firebase/firebase";
-import { useNavigate } from "react-router-dom";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/free-mode";
+import { useState, useEffect, useContext } from 'react';
+import { db, getDocs, collection, onSnapshot } from '../../firebase/firebase';
+import { useNavigate } from 'react-router-dom';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+import 'swiper/css/free-mode';
 import './Menu.css';
-import { FreeMode } from "swiper/modules";
-import Card from "../../Components/Card/card";
+import { FreeMode } from 'swiper/modules';
+import Card from '../../Components/Card/card';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ThemeContext } from "../../Context/ThemeContext";
-import { useSelector } from "react-redux";
+import { ThemeContext } from '../../Context/ThemeContext';
+import { useSelector } from 'react-redux';
 
 function Menu() {
   const navigate = useNavigate();
-
-  const [softDrinks, setSoftDrinks] = useState([]);
-  const [chickenSandwiches, setChickenSandwiches] = useState([]);
-  const [beefSandwiches, setBeefSandwiches] = useState([]);
-  // const [hotDrinks, setHotDrinks] = useState([]);
-  const [pizzas, setPizzas] = useState([]);
-  const [hotDrinks, setHotDrinks] = useState([]);
   const { theme } = useContext(ThemeContext);
   const currentLange = useSelector((state) => state.lange.langue);
   const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
+  const [categories, setCategories] = useState([]);
+  const [menuItems, setMenuItems] = useState({});
 
   useEffect(() => {
-    const getCategoryData = async (category, setCategory) => {
-      const itemsCollectionRef = collection(db, "menu", category, "items");
-      const querySnapshot = await getDocs(itemsCollectionRef);
-
-      const categoryData = querySnapshot.docs.map((doc) => {
-        const itemData = doc.data();
-        return {
+    // Fetch categories dynamically
+    const fetchCategories = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, 'menu'));
+        const loadedCategories = snapshot.docs.map((doc) => ({
           id: doc.id,
-          title: currentLange === "Ar" ? itemData.title_ar || "عنوان غير متوفر" : itemData.title || "Title not available",
-          description: currentLange === "Ar" ? itemData.desc_ar || "الوصف غير متوفر" : itemData.description || "Description not available",
-          image: itemData.image || "default-image.jpg",
-          price: itemData.price || "Price not available",
-        };
-      });
-
-      setCategory(categoryData);
+          ...doc.data(),
+        }));
+        console.log('Fetched categories:', loadedCategories);
+        setCategories(loadedCategories);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        toast.error(
+          text?.failedLoadCategories ||
+            (currentLange === 'Ar' ? 'فشل في تحميل الفئات' : 'Failed to load categories')
+        );
+      }
     };
+    fetchCategories();
+  }, [text, currentLange]);
 
-    getCategoryData("chicken sandwich", setChickenSandwiches);
-    getCategoryData("beef sandwich", setBeefSandwiches);
-    getCategoryData("pizaa", setPizzas);
-    getCategoryData("soft drinks", setSoftDrinks);
-    getCategoryData("hotDrinks", setHotDrinks);
-  }, [currentLange]);
+  useEffect(() => {
+    // Set up real-time listeners for each category
+    const unsubscribes = categories.map((category) => {
+      const itemsCollectionRef = collection(db, `menu/${category.id}/items`);
+      return onSnapshot(
+        itemsCollectionRef,
+        (snapshot) => {
+          const categoryData = snapshot.docs.map((doc) => {
+            const itemData = doc.data();
+            return {
+              id: doc.id,
+              title:
+                currentLange === 'Ar'
+                  ? itemData.title_ar || 'عنوان غير متوفر'
+                  : itemData.title || 'Title not available',
+              description:
+                currentLange === 'Ar'
+                  ? itemData.desc_ar || 'الوصف غير متوفر'
+                  : itemData.description || 'Description not available',
+              image: itemData.image || 'default-image.jpg',
+              price: itemData.price || 'Price not available',
+            };
+          });
+          console.log(`Updated items for category ${category.id}:`, categoryData);
+          setMenuItems((prev) => ({
+            ...prev,
+            [category.id]: categoryData,
+          }));
+        },
+        (error) => {
+          console.error(`Error fetching items for ${category.id}:`, error);
+          toast.error(
+            text?.failedLoadMenuItems ||
+              (currentLange === 'Ar'
+                ? 'فشل في تحميل عناصر القائمة'
+                : 'Failed to load menu items')
+          );
+        }
+      );
+    });
+
+    return () => unsubscribes.forEach((unsubscribe) => unsubscribe());
+  }, [categories, text, currentLange]);
 
   const handleAddToCart = (item) => {
     toast.success(`${item.title} added to cart!`, {
-      position: "top-right",
+      position: 'top-right',
       autoClose: 2000,
       hideProgressBar: false,
       closeOnClick: true,
@@ -64,7 +99,7 @@ function Menu() {
 
   const handleAddToWishlist = (item) => {
     toast.info(`${item.title} added to wishlist!`, {
-      position: "top-right",
+      position: 'top-right',
       autoClose: 2000,
       hideProgressBar: false,
       closeOnClick: true,
@@ -73,11 +108,9 @@ function Menu() {
     });
   };
 
-  const textColor = theme === "dark" ? "text-white" : "text-dark";
-  const backgroundColor = theme === "dark" ? "bg-custom-dark" : "bg-custom-light";
   const handleNavigate = (category) => {
     navigate(`/Dishes/${category}`);
-  };  
+  };
 
   const renderCategorySection = (title, items, categoryKey) => (
     <div className="category-section mt-5">
@@ -87,11 +120,14 @@ function Menu() {
           onClick={() => handleNavigate(categoryKey)}
           className="see-all-btn text-decoration-none"
         >
-          {text.seeAll} <span><i className="fa-solid fa-greater-than"></i></span>
+          {text?.seeAll || (currentLange === 'Ar' ? 'عرض الكل' : 'See All')}{' '}
+          <span>
+            <i className="fa-solid fa-greater-than"></i>
+          </span>
         </a>
       </div>
 
-      {items.length > 0 ? (
+      {items && items.length > 0 ? (
         <Swiper
           modules={[FreeMode]}
           freeMode={true}
@@ -121,23 +157,25 @@ function Menu() {
           ))}
         </Swiper>
       ) : (
-        <p>{text.noItems}</p>
+        <p>{text?.noItems || (currentLange === 'Ar' ? 'لا توجد عناصر' : 'No items available')}</p>
       )}
     </div>
   );
 
+  const textColor = theme === 'dark' ? 'text-white' : 'text-dark';
+  const backgroundColor = theme === 'dark' ? 'bg-custom-dark' : 'bg-custom-light';
+
   return (
     <div className={`menu-container ${backgroundColor} ${textColor} mt-5`}>
       <div className="container">
-        <h1 className="text-center menu-title">
-          {text.menuTitle}
-        </h1>
-        {renderCategorySection(text.chickenSandwiches, chickenSandwiches, "chicken sandwich")}
-        {renderCategorySection(text.beefSandwiches, beefSandwiches, "beef sandwich")}
-        {renderCategorySection(text.pizzas, pizzas, "pizaa")}
-        {renderCategorySection(text.softDrinks, softDrinks, "soft drinks")}
-        {renderCategorySection(text.Drinks, hotDrinks, "drinks")}
-
+        <h1 className="text-center menu-title">{text?.menuTitle || (currentLange === 'Ar' ? 'القائمة' : 'Our Menu')}</h1>
+        {categories.map((category) =>
+          renderCategorySection(
+            currentLange === 'Ar' ? category.category_ar || category.name : category.name || category.id,
+            menuItems[category.id],
+            category.id
+          )
+        )}
         <ToastContainer />
       </div>
     </div>
