@@ -74,7 +74,7 @@ function Counter() {
     return (
         <div 
             ref={sectionRef} 
-            className={`  count py-5 ${theme === "dark" ? "bg-custom-dark text-white" : "bg-light text-dark"} ${isVisible ? 'animate-section' : ''}`}
+            className={`  count py-5 ${theme === "dark" ? "bg-custom-dark text-white" : "bg-custom-light text-dark"} ${isVisible ? 'animate-section' : ''}`}
         >
             <div className="container">
             <h2 className='text-center mb-5'>

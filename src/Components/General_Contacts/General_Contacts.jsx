@@ -42,7 +42,7 @@ function Contact() {
                             <i className="fa-solid fa-map me-3" style={{ backgroundColor: iconBackgroundColor, padding: '13px', borderRadius: '50%', fontSize: '20px', color: 'white' }}></i>
                             <div className="info">
                                 <h5 className="mb-0" style={{ color: textColor }}>Our Address</h5>
-                                <p className="mb-0" style={{ color: textColor }}>A108 Adam Street, New York, NY 535022</p>
+                                <p className="mb-0" style={{ color: textColor }}>Al menya elgededa</p>
                             </div>
                         </div>
 
@@ -50,7 +50,7 @@ function Contact() {
                             <i className="fa-solid fa-envelope me-3" style={{ backgroundColor: iconBackgroundColor, padding: '13px', borderRadius: '50%', fontSize: '20px', color: 'white' }}></i>
                             <div className="info">
                                 <h5 className="mb-0" style={{ color: textColor }}>Email Us</h5>
-                                <p className="mb-0" style={{ color: textColor }}>contact@example.com</p>
+                                <p className="mb-0" style={{ color: textColor }}>tastyBites@gmail.com</p>
                             </div>
                         </div>
                     </div>
@@ -61,7 +61,7 @@ function Contact() {
                             <i className="fa-solid fa-phone me-3" style={{ backgroundColor: iconBackgroundColor, padding: '13px', borderRadius: '50%', fontSize: '20px', color: 'white' }}></i>
                             <div className="info">
                                 <h5 className="mb-0" style={{ color: textColor }}>Call Us</h5>
-                                <p className="mb-0" style={{ color: textColor }}>+1 5589 55488 55</p>
+                                <p className="mb-0" style={{ color: textColor }}>+20 010 123 4567</p>
                             </div>
                         </div>
 

@@ -70,7 +70,7 @@ function Grid() {
   };
 
   return (
-    <section className={`gallery ${theme === "dark" ? "bg-custom-dark" : "bg-light"}`} id="gallery">
+    <section className={`gallery ${theme === "dark" ? "bg-custom-dark" : "bg-custom-light"}`} id="gallery">
       <div className="container text-dark">
         <motion.div
           className="g-head"

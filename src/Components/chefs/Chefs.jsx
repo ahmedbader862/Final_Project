@@ -46,7 +46,7 @@ function Chefs() {
   return (
     <section
       className={`chefs py-5 ${
-        theme === "dark" ? "bg-custom-dark" : "bg-light"
+        theme === "dark" ? "bg-custom-dark" : "bg-custom-light"
       }`}
       id="chefs"
       ref={ref}
