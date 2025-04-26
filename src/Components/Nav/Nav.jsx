@@ -23,6 +23,7 @@ function Nav() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [wishlistCountFirestore, setWishlistCountFirestore] = useState(0);
+  const [cartCount, setCartCount] = useState(0); // حالة لتخزين عدد العناصر في الكارت
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -111,6 +112,29 @@ function Nav() {
 
       return () => unsubscribe();
     }
+  }, [userState]);
+
+  useEffect(() => {
+    if (!userState?.uid) return;
+
+    const docRef = doc(db, "users2", userState.uid);
+    const unsubscribe = onSnapshot(
+      docRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const cartItems = docSnap.data().cartItems || [];
+          const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0); // حساب العدد الإجمالي
+          setCartCount(totalItems);
+        } else {
+          setCartCount(0);
+        }
+      },
+      (error) => {
+        console.error("Error fetching cart count:", error);
+      }
+    );
+
+    return () => unsubscribe();
   }, [userState]);
 
   const handleSearch = (e) => {
@@ -300,8 +324,9 @@ function Nav() {
                         <span className="wishlist-count">{wishlistCountFirestore}</span>
                       )}
                     </Link>
-                    <Link to="/cart" className={`fs-5 ${iconColorClass}`}>
+                    <Link to="/cart" className={`fs-5 position-relative ${iconColorClass}`}>
                       <i className="fas fa-shopping-cart"></i>
+                      {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
                     </Link>
                   </div>
                   <button
