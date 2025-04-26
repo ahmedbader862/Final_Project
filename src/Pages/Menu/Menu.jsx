@@ -18,30 +18,35 @@ function Menu() {
   const [softDrinks, setSoftDrinks] = useState([]);
   const [chickenSandwiches, setChickenSandwiches] = useState([]);
   const [beefSandwiches, setBeefSandwiches] = useState([]);
-  // const [hotDrinks, setHotDrinks] = useState([]);
   const [pizzas, setPizzas] = useState([]);
   const [hotDrinks, setHotDrinks] = useState([]);
   const { theme } = useContext(ThemeContext);
-  const currentLange = useSelector((state) => state.lange.langue);
+  const currentLange = useSelector((state) => state.lange?.langue || "en");
   const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
 
   useEffect(() => {
     const getCategoryData = async (category, setCategory) => {
-      const itemsCollectionRef = collection(db, "menu", category, "items");
-      const querySnapshot = await getDocs(itemsCollectionRef);
+      try {
+        const itemsCollectionRef = collection(db, "menu", category, "items");
+        const querySnapshot = await getDocs(itemsCollectionRef);
 
-      const categoryData = querySnapshot.docs.map((doc) => {
-        const itemData = doc.data();
-        return {
-          id: doc.id,
-          title: currentLange === "Ar" ? itemData.title_ar || "عنوان غير متوفر" : itemData.title || "Title not available",
-          description: currentLange === "Ar" ? itemData.desc_ar || "الوصف غير متوفر" : itemData.description || "Description not available",
-          image: itemData.image || "default-image.jpg",
-          price: itemData.price || "Price not available",
-        };
-      });
+        const categoryData = querySnapshot.docs.map((doc) => {
+          const itemData = doc.data();
+          return {
+            id: doc.id,
+            title: itemData.title || "Title not available",
+            title_ar: itemData.title_ar || itemData.name_ar || "عنوان غير متوفر",
+            description: itemData.description || "Description not available",
+            desc_ar: itemData.desc_ar || "الوصف غير متوفر",
+            image: itemData.image || "default-image.jpg",
+            price: itemData.price || "Price not available",
+          };
+        });
 
-      setCategory(categoryData);
+        setCategory(categoryData);
+      } catch (error) {
+        console.error(`Error fetching ${category}:`, error);
+      }
     };
 
     getCategoryData("chicken sandwich", setChickenSandwiches);
@@ -49,10 +54,11 @@ function Menu() {
     getCategoryData("pizaa", setPizzas);
     getCategoryData("soft drinks", setSoftDrinks);
     getCategoryData("hotDrinks", setHotDrinks);
-  }, [currentLange]);
+  }, []);
 
   const handleAddToCart = (item) => {
-    toast.success(`${item.title} added to cart!`, {
+    const displayTitle = currentLange === "ar" ? item.title_ar : item.title;
+    toast.success(`${displayTitle} أضيف إلى العربة!`, {
       position: "top-right",
       autoClose: 2000,
       hideProgressBar: false,
@@ -63,7 +69,8 @@ function Menu() {
   };
 
   const handleAddToWishlist = (item) => {
-    toast.info(`${item.title} added to wishlist!`, {
+    const displayTitle = currentLange === "ar" ? item.title_ar : item.title;
+    toast.info(`${displayTitle} أضيف إلى قائمة الرغبات!`, {
       position: "top-right",
       autoClose: 2000,
       hideProgressBar: false,
@@ -75,9 +82,10 @@ function Menu() {
 
   const textColor = theme === "dark" ? "text-white" : "text-dark";
   const backgroundColor = theme === "dark" ? "bg-custom-dark" : "bg-custom-light";
+
   const handleNavigate = (category) => {
     navigate(`/Dishes/${category}`);
-  };  
+  };
 
   const renderCategorySection = (title, items, categoryKey) => (
     <div className="category-section mt-5">
@@ -112,8 +120,10 @@ function Menu() {
               <Card
                 poster_path={item.image}
                 title={item.title}
+                title_ar={item.title_ar}
                 price={item.price}
                 description={item.description}
+                desc_ar={item.desc_ar}
                 onAddToCart={() => handleAddToCart(item)}
                 onAddToWishlist={() => handleAddToWishlist(item)}
               />
@@ -136,8 +146,7 @@ function Menu() {
         {renderCategorySection(text.beefSandwiches, beefSandwiches, "beef sandwich")}
         {renderCategorySection(text.pizzas, pizzas, "pizaa")}
         {renderCategorySection(text.softDrinks, softDrinks, "soft drinks")}
-        {renderCategorySection(text.Drinks, hotDrinks, "drinks")}
-
+        {renderCategorySection(text.Drinks, hotDrinks, "hotDrinks")}
         <ToastContainer />
       </div>
     </div>

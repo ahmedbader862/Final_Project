@@ -59,7 +59,6 @@ function Dishes() {
   // Theme-based classes
   const bgColor = theme === "dark" ? "bg-custom-dark" : "bg-custom-light";
   const textColor = theme === "dark" ? "text-dark" : "text-white";
-
   const paginationBg = theme === "dark" ? "bg-dark text-white border-secondary" : "";
   const activePage = theme === "dark" ? "bg-secondary text-white border-0" : "bg-light text-dark";
 
@@ -70,22 +69,16 @@ function Dishes() {
           {currentDishes.map((dish) => (
             <div className="col-12 col-md-6 col-lg-4" key={dish.id}>
               <Card
-                title={
-                  currentLange === "Ar"
-                    ? dish.title_ar || dish.name_ar || "عنوان غير متوفر"
-                    : dish[titleKey] || "Title not available"
-                }
+                title={dish[titleKey] || "Title not available"}
+                title_ar={dish.title_ar || dish.name_ar || "عنوان غير متوفر"}
                 poster_path={
                   Array.isArray(dish[imageKey])
-                    ? dish[imageKey][1]?.lg || ''
-                    : dish[imageKey]
+                    ? dish[imageKey][1]?.lg || "default-image.jpg"
+                    : dish[imageKey] || "default-image.jpg"
                 }
                 price={dish.price}
-                description={
-                  currentLange === "Ar"
-                    ? dish.desc_ar || "لا يوجد وصف"
-                    : dish.description || "No description"
-                }
+                description={dish.description || "No description"}
+                desc_ar={dish.desc_ar || "لا يوجد وصف"}
               />
             </div>
           ))}
