@@ -72,7 +72,7 @@
   }
   
   .message-content {
-    max-width: 70%;
+    /* max-width: 70%; */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     word-wrap: break-word; /* Ensure long words wrap */
   }

@@ -66,3 +66,38 @@ input{
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
     border-color: #666;
   }
+
+  .btn-custom-dark {
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #555;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  }
+  
+  .btn-custom-dark:hover {
+    background-color: #555;
+    color: #fff;
+  }
+  
+  .btn-custom-light {
+    background-color: #f8f9fa;
+    color: #212529;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  
+  .btn-custom-light:hover {
+    background-color: #e2e6ea;
+    color: #212529;
+  }
+  
+  .btn-custom-dark:disabled,
+  .btn-custom-light:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  

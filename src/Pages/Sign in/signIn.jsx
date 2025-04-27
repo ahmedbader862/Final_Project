@@ -14,12 +14,10 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faLock } from "@fortawesome/free-solid-svg-icons";
-import {
-  faGoogle as faGoogleBrand,
-  faFacebook as faFacebookBrand,
-} from "@fortawesome/free-brands-svg-icons";
+import { faGoogle as faGoogleBrand } from "@fortawesome/free-brands-svg-icons";
 import { ThemeContext } from "../../Context/ThemeContext";
 import "./Signin.css";
+import clsx from "clsx";
 
 function Signin() {
   const { theme } = useContext(ThemeContext);
@@ -146,100 +144,114 @@ function Signin() {
     }
   };
 
-  const bgColor = theme === "dark" ? "bg-custom-dark" : "bg-custom-light";
+  const bgColor = theme === "dark" ? "bg-dark-custom" : "bg-light-custom";
   const textColor = theme === "dark" ? "text-white" : "text-dark";
   const bgForm = theme === "dark" ? "bg-dark" : "bg-light";
-  const btnColor = theme === "dark" ? "btn-outline-light" : "btn-outline-dark";
   const placeholderClass = theme === "dark" ? "placeholder-dark" : "placeholder-light";
   const iconColorClass = theme === "dark" ? "text-light" : "text-dark";
 
   return (
-    <div className={`py-5 ${bgColor} sign-in min-vh-100`}>
+    <div className={clsx(`py-5 ${bgColor} sign-in min-vh-100`, { "rtl-text": currentLange === "Ar" })}>
       <div className="container">
         <div className="row justify-content-center align-items-center">
-          <div className="col-12 col-md-6 col-lg-5">
-            <div className={`p-4 rounded shadow-lg ${bgForm}`}>
-              <h2 className={`mb-4 text-center fw-bold ${textColor}`}>
-                {text.signIn || "Sign In"}
-              </h2>
+          <div className="col-12 col-lg-10">
+            <div className={`row mt-5 shadow-lg rounded overflow-hidden ${bgForm}`}>
+              {/* Left Side - Form */}
+              <div className="col-12 col-md-6 p-4">
+                <h2 className={`mb-4 text-center fw-bold ${textColor}`}>
+                  {text.signIn || "Sign In"}
+                </h2>
 
-              {/* Email */}
-              <div className="mb-3">
-                <label className={`mb-2 ${textColor}`}>
-                  {text.email || "Email"}
-                </label>
-                <div className="input-group">
-                  <span className={`input-group-text ${bgColor} ${textColor}`}>
-                    <FontAwesomeIcon icon={faEnvelope} className={iconColorClass} />
-                  </span>
-                  <input
-                    type="email"
-                    name="email"
-                    value={userUpData.email}
-                    onChange={handleData}
-                    placeholder={text.enterEmail || "Enter your email"}
-                    className={`form-control ${errorsMsgUp.emailError ? "is-invalid" : ""} ${theme === "dark" ? "input-dark" : "input-light"} ${placeholderClass}`}
-                  />
-                  {errorsMsgUp.emailError && (
-                    <div className="invalid-feedback">{errorsMsgUp.emailError}</div>
-                  )}
+                {/* Email */}
+                <div className="mb-3">
+                  <label className={`mb-2 ${textColor}`}>
+                    {text.email || "Email"}
+                  </label>
+                  <div className={clsx("input-group", { "flex-row-reverse": currentLange === "Ar" })}>
+                    <span className={`input-group-text ${bgColor} ${textColor}`}>
+                      <FontAwesomeIcon icon={faEnvelope} className={iconColorClass} />
+                    </span>
+                    <input
+                      type="email"
+                      name="email"
+                      value={userUpData.email}
+                      onChange={handleData}
+                      placeholder={text.enterEmail || "Enter your email"}
+                      className={`form-control ${errorsMsgUp.emailError ? "is-invalid" : ""} ${theme === "dark" ? "input-dark" : "input-light"} ${placeholderClass}`}
+                    />
+                    {errorsMsgUp.emailError && (
+                      <div className="invalid-feedback">{errorsMsgUp.emailError}</div>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              {/* Password */}
-              <div className="mb-3">
-                <label className={`mb-2 ${textColor}`}>
-                  {text.password || "Password"}
-                </label>
-                <div className="input-group">
-                  <span className={`input-group-text ${bgColor} ${textColor}`}>
-                    <FontAwesomeIcon icon={faLock} className={iconColorClass} />
-                  </span>
-                  <input
-                    type="password"
-                    name="password"
-                    value={userUpData.password}
-                    onChange={handleData}
-                    placeholder={text.enterPassword || "Enter your password"}
-                    className={`form-control ${errorsMsgUp.passwordError ? "is-invalid" : ""} ${theme === "dark" ? "input-dark" : "input-light"} ${placeholderClass}`}
-                  />
-                  {errorsMsgUp.passwordError && (
-                    <div className="invalid-feedback">{errorsMsgUp.passwordError}</div>
-                  )}
+                {/* Password */}
+                <div className="mb-3">
+                  <label className={`mb-2 ${textColor}`}>
+                    {text.password || "Password"}
+                  </label>
+                  <div className={clsx("input-group", { "flex-row-reverse": currentLange === "Ar" })}>
+                    <span className={`input-group-text ${bgColor} ${textColor}`}>
+                      <FontAwesomeIcon icon={faLock} className={iconColorClass} />
+                    </span>
+                    <input
+                      type="password"
+                      name="password"
+                      value={userUpData.password}
+                      onChange={handleData}
+                      placeholder={text.enterPassword || "Enter your password"}
+                      className={`form-control ${errorsMsgUp.passwordError ? "is-invalid" : ""} ${theme === "dark" ? "input-dark" : "input-light"} ${placeholderClass}`}
+                    />
+                    {errorsMsgUp.passwordError && (
+                      <div className="invalid-feedback">{errorsMsgUp.passwordError}</div>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              {/* Sign In Button */}
-              <button
-                onClick={handleSignin}
-                className={`btn ${btnColor} w-100 fw-semibold mb-3`}
-              >
-                {text.signInButton || "Sign In"}
-              </button>
+                {/* Sign In Button */}
+                <button
+                  onClick={handleSignin}
+                  className={clsx(`btn btn-outline-white w-100 fw-semibold mt-1 mb-2`, textColor)}
+                >
+                  {text.signInButton || "Sign In"}
+                </button>
 
-              {/* Divider */}
-              <div className="d-flex align-items-center my-4">
-                <hr className={`flex-grow-1 ${theme === "dark" ? "border-light" : "border-dark"}`} />
-                <span className={`px-2 ${textColor}`}>{text.or || "or"}</span>
-                <hr className={`flex-grow-1 ${theme === "dark" ? "border-light" : "border-dark"}`} />
-              </div>
+                {/* Divider */}
+                <div className="d-flex align-items-center my-4">
+                  <hr className={`flex-grow-1 ${theme === "dark" ? "border-light" : "border-dark"}`} />
+                  <span className={`px-2 ${textColor}`}>{text.or || "or"}</span>
+                  <hr className={`flex-grow-1 ${theme === "dark" ? "border-light" : "border-dark"}`} />
+                </div>
 
-              {/* Social Login */}
-              <div className="d-flex gap-2">
+                {/* Google Login */}
                 <button
                   onClick={logInGoogle}
-                  className="btn btn-outline-danger w-50 d-flex align-items-center justify-content-center gap-2"
+                  className={clsx("btn btn-outline-danger w-100 d-flex align-items-center gap-2", {
+                    "flex-row-reverse": currentLange === "Ar",
+                    "justify-content-center": currentLange !== "Ar",
+                    "justify-content-center-reverse": currentLange === "Ar"
+                  })}
                 >
                   <FontAwesomeIcon icon={faGoogleBrand} className={iconColorClass} />
                   {text.google || "Google"}
                 </button>
-                <button
-                  disabled
-                  className="btn btn-outline-primary w-50 d-flex align-items-center justify-content-center gap-2"
-                >
-                  <FontAwesomeIcon icon={faFacebookBrand} className={iconColorClass} />
-                  {text.facebook || "Facebook"}
-                </button>
+              </div>
+
+              {/* Right Side - Image with Overlay */}
+              <div className="col-12 col-md-6 p-0">
+                <div className="position-relative h-100">
+                  <img
+                    src="https://images.unsplash.com/photo-1600891964599-f61ba0e24092?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    alt={text.foodImageAlt || "Food"}
+                    className="w-100 h-100 object-fit-cover"
+                    style={{ objectFit: "cover" }}
+                  />
+                  <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-75"></div>
+                  <div className={clsx("position-absolute top-50 start-50 translate-middle text-center text-white p-4", { "rtl-text": currentLange === "Ar" })}>
+                    <h2 className="fw-bold mb-3">{text.signIn || "Sign In"}</h2>
+                    <p className="lead">{text.welcomeBack || "Welcome back! Please login to continue."}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

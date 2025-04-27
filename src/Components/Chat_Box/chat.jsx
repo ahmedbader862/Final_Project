@@ -70,7 +70,7 @@ function Chat(props) {
                       chatTexts.map((msg, index) => (
                         <div
                           key={index}
-                          className={`message mb-3 ${msg.sender === userState55.uid ? 'sent text-end' : 'received text-start'}`}
+                          className={`message w-100 mb-3 ${msg.sender === userState55.uid ? 'sent text-end' : 'received text-start'}`}
                         >
                           <div className={`message-content p-3 rounded ${msg.sender === userState55.uid ? msgSent : msgReceived}`}>
                             <p className="mb-1">{msg.message}</p>

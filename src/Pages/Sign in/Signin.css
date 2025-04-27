@@ -63,3 +63,7 @@
   .sign-in{
     margin-top: 55px !important;
   }
+
+  .object-fit-cover {
+    object-fit: cover;
+  }

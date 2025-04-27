@@ -25,6 +25,7 @@
     "firebase": "^11.4.0",
     "formik": "^2.4.6",
     "framer-motion": "^12.6.3",
+    "lucide-react": "^0.503.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.9",
@@ -48,6 +49,7 @@
     "slick-carousel": "^1.8.1",
     "sweetalert2": "^11.17.2",
     "swiper": "^11.2.5",
+    "ui": "^0.2.4",
     "uuid": "^11.1.0",
     "yup": "^1.6.1"
   },

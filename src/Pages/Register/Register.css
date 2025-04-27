@@ -1,6 +1,6 @@
 .form-container {
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    border-radius: 15px;
+    /* border-radius: 15px; */
     transition: transform 0.3s ease;
   }
   
@@ -60,3 +60,55 @@
       padding: 1.5rem !important;
     }
   }
+
+  /* Register.css */
+.bg-custom-dark {
+  background-color: #1a1a1a;
+}
+
+.bg-custom-light {
+  background-color: #f8f9fa;
+}
+
+
+
+.input-light {
+  background-color: #fff;
+  border-color: #ddd;
+  color: #333;
+}
+
+.placeholder-dark::placeholder {
+  color: #888;
+}
+
+.placeholder-light::placeholder {
+  color: #666;
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.form-control {
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.1);
+}
+
+.btn-outline-light,
+.btn-outline-dark {
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 767px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .p-md-5 {
+    padding: 2rem !important;
+  }
+}

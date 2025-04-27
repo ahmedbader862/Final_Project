@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { db, collection, query, where, onSnapshot, doc, deleteDoc } from '../../firebase/firebase';
 import { auth } from '../../firebase/firebase';
 import Swal from 'sweetalert2';
-import './Order.css';
 import { ThemeContext } from "../../Context/ThemeContext";
 import { useSelector } from "react-redux";
+import { Package, Clock, CheckCircle, ShoppingBag, CreditCard, Calendar, Truck, MapPin, DollarSign } from 'lucide-react';
+import './Order.css';
 
 const Orders = () => {
   const { theme } = useContext(ThemeContext);
@@ -18,7 +19,6 @@ const Orders = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 6;
 
-  // Access translations from Redux
   const currentLange = useSelector((state) => state.lange.langue);
   const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
 
@@ -29,6 +29,9 @@ const Orders = () => {
           icon: 'error',
           title: text?.authenticationRequired || 'Authentication Required',
           text: text?.pleaseSignIn || 'Please sign in to view your orders.',
+          background: theme === 'dark' ? '#212529' : '#dfdede',
+          color: theme === 'dark' ? 'white' : '#333',
+          confirmButtonColor: '#FF6B6B',
         });
         navigate('/signin');
         return;
@@ -47,13 +50,16 @@ const Orders = () => {
 
         setOrders(userOrders);
         applyFilters(userOrders, sortOrder, statusFilter, paymentFilter);
-        setCurrentPage(1); // Reset to first page when filters change
+        setCurrentPage(1);
       }, (error) => {
         console.error("Error fetching orders:", error);
         Swal.fire({
           icon: 'error',
           title: text?.error || 'Error',
           text: text?.failedFetchOrders || 'Failed to fetch orders. Please try again.',
+          background: theme === 'dark' ? '#212529' : '#dfdede',
+          color: theme === 'dark' ? 'white' : '#333',
+          confirmButtonColor: '#FF6B6B',
         });
       });
 
@@ -101,42 +107,10 @@ const Orders = () => {
     setCurrentPage(1);
   };
 
-  const handleDeleteOrder = async (orderId) => {
-    Swal.fire({
-      title: text?.deleteOrderConfirmTitle || 'Are you sure?',
-      text: text?.deleteOrderConfirmText?.replace("{orderId}", orderId) || `You are about to delete Order #${orderId}. This action cannot be undone.`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#B73E3E',
-      cancelButtonColor: '#4A919E',
-      confirmButtonText: text?.deleteOrderConfirmButton || 'Yes, delete it!'
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const orderRef = doc(db, "orders", orderId);
-          await deleteDoc(orderRef);
-          Swal.fire(
-            text?.deleteOrderSuccessTitle || 'Deleted!',
-            text?.deleteOrderSuccessMessage?.replace("{orderId}", orderId) || `Order #${orderId} has been deleted.`,
-            'success'
-          );
-        } catch (error) {
-          console.error("Error deleting order:", error);
-          Swal.fire(
-            text?.error || 'Error!',
-            text?.deleteOrderError || 'There was an error deleting the order.',
-            'error'
-          );
-        }
-      }
-    });
-  };
-
   const handleTrackOrder = (orderId, total) => {
     navigate('/track-order', { state: { orderId, total: parseFloat(total).toFixed(2) } });
   };
 
-  // Pagination logic
   const indexOfLastOrder = currentPage * ordersPerPage;
   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
   const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
@@ -174,59 +148,79 @@ const Orders = () => {
     return pageNumbers;
   };
 
-  const bgClass = theme === "dark" ? "bg-custom-dark" : "bg-light";
+  const bgClass = theme === "dark" ? "bg-dark-custom" : "bg-light-custom";
+  const cardClass = theme === "dark" ? "bg-dark-card text-white" : "bg-light-card text-dark";
   const textClass = theme === "dark" ? "text-white" : "text-dark";
-  const buttonClass = theme === "dark" ? "bg-dark text-white" : "bg-light text-dark";
+  const buttonClass = theme === "dark" ? "btn-dark-custom" : "btn-light-custom";
+
+  const extractIdPortion = (id) => {
+    if (!id || typeof id !== 'string') return id || 'N/A';
+    const hashIndex = id.indexOf('#');
+    if (hashIndex === -1) return id;
+    let firstUnderscore = id.indexOf('_', hashIndex);
+    if (firstUnderscore === -1) return id.slice(hashIndex);
+    let secondUnderscore = id.indexOf('_', firstUnderscore + 1);
+    if (secondUnderscore === -1) return id.slice(hashIndex);
+    return id.slice(hashIndex, secondUnderscore + 1);
+  };
+
+  const getStatusStyles = (status) => {
+    switch (status) {
+      case 'pending':
+        return { icon: <Clock className="icon-sm" />, bg: 'bg-warning', text: 'text-warning' };
+      case 'accepted':
+        return { icon: <CheckCircle className="icon-sm" />, bg: 'bg-success', text: 'text-success' };
+      default:
+        return { icon: <Package className="icon-sm" />, bg: 'bg-primary', text: 'text-primary' };
+    }
+  };
 
   return (
     <div className={`orders-container py-5 ${bgClass}`}>
       <div className="container">
-        <h2 className={`pt-5 pb-4 text-center ${textClass}`}>
+        <h2 className={`pt-4 pb-3 text-center h2 ${textClass}`}>
           {text?.myOrders || "My Orders"}
         </h2>
 
         <div className="d-flex flex-wrap gap-3 mb-4 justify-content-center">
-          {/* Sort Dropdown */}
           <div className="dropdown">
             <button
-              className={`btn dropdown-toggle ${theme === "dark" ? "btn-outline-light" : "btn-outline-dark"}`}
+              className={`btn ${buttonClass} dropdown-toggle`}
               type="button"
               data-bs-toggle="dropdown"
             >
               {text?.sort || "Sort"}: {sortOrder === "newest" ? (text?.sortNewest || "Newest First") : (text?.sortOldest || "Oldest First")}
             </button>
-            <ul className={`dropdown-menu ${theme === "dark" ? "dropdown-menu-dark" : ""}`}>
+            <ul className={`dropdown-menu ${theme === "dark" ? "dropdown-menu-dark" : "dropdown-menu-light"}`}>
               <li><button className="dropdown-item" onClick={() => handleSortChange("newest")}>{text?.sortNewest || "Newest First"}</button></li>
               <li><button className="dropdown-item" onClick={() => handleSortChange("oldest")}>{text?.sortOldest || "Oldest First"}</button></li>
             </ul>
           </div>
 
-          {/* Status Filter Dropdown */}
           <div className="dropdown">
             <button
-              className={`btn dropdown-toggle ${theme === "dark" ? "btn-outline-light" : "btn-outline-dark"}`}
+              className={`btn ${buttonClass} dropdown-toggle`}
               type="button"
               data-bs-toggle="dropdown"
             >
               {text?.status || "Status"}: {statusFilter === "all" ? (text?.statusAll || "All") : (text[`status${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}`] || statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1))}
             </button>
-            <ul className={`dropdown-menu ${theme === "dark" ? "dropdown-menu-dark" : ""}`}>
+            <ul className={`dropdown-menu ${theme === "dark" ? "dropdown-menu-dark" : "dropdown-menu-light"}`}>
               <li><button className="dropdown-item" onClick={() => handleStatusFilterChange("all")}>{text?.statusAll || "All"}</button></li>
               <li><button className="dropdown-item" onClick={() => handleStatusFilterChange("pending")}>{text?.statusPending || "Pending"}</button></li>
               <li><button className="dropdown-item" onClick={() => handleStatusFilterChange("accepted")}>{text?.statusAccepted || "Accepted"}</button></li>
             </ul>
           </div>
 
-          {/* Payment Filter Dropdown */}
           <div className="dropdown">
             <button
-              className={`btn dropdown-toggle ${theme === "dark" ? "btn-outline-light" : "btn-outline-dark"}`}
+              className={`btn ${buttonClass} dropdown-toggle`}
               type="button"
               data-bs-toggle="dropdown"
             >
               {text?.payment || "Payment"}: {paymentFilter === "all" ? (text?.paymentAll || "All") : paymentFilter === "cash_on_delivery" ? (text?.paymentCashOnDelivery || "Cash on Delivery") : (text?.paymentPaypal || "PayPal")}
             </button>
-            <ul className={`dropdown-menu ${theme === "dark" ? "dropdown-menu-dark" : ""}`}>
+            <ul className={`dropdown-menu ${theme === "dark" ? "dropdown-menu-dark" : "dropdown-menu-light"}`}>
               <li><button className="dropdown-item" onClick={() => handlePaymentFilterChange("all")}>{text?.paymentAll || "All"}</button></li>
               <li><button className="dropdown-item" onClick={() => handlePaymentFilterChange("cash_on_delivery")}>{text?.paymentCashOnDelivery || "Cash on Delivery"}</button></li>
               <li><button className="dropdown-item" onClick={() => handlePaymentFilterChange("paypal")}>{text?.paymentPaypal || "PayPal"}</button></li>
@@ -235,116 +229,157 @@ const Orders = () => {
         </div>
 
         {filteredOrders.length === 0 ? (
-          <p className={`${textClass} text-center`}>{text?.noOrdersMatchFilters || "No orders match the selected filters."}</p>
+          <div className={`card text-center ${cardClass}`}>
+            <div className="card-body">
+              <p className={textClass}>{text?.noOrdersMatchFilters || "No orders match the selected filters."}</p>
+            </div>
+          </div>
         ) : (
           <>
-            <div className="row justify-content-center g-4">
-              {currentOrders.map(order => (
-                <div className="col-12 col-md-6 col-lg-4" key={order.id}>
-                  <div className={`tracking-card h-100 ${theme === "dark" ? "bg-custom-dark text-white" : "bg-white text-dark"}`}>
-                    <div className="card-body">
-                      <h5 className={`card-title-order ${textClass}`}>
-                        {text?.order?.replace("{orderId}", order.id) || `Order #${order.id}`}
-                      </h5>
-                      <div className="card-text">
-                        <strong className="text-muted">{text?.items || "Items"}:</strong>
-                        <ul className="item-list">
-                          {Array.isArray(order.items) && order.items.map((item, index) => (
-                            <li key={index}>
-                              {item.title} (x{item.quantity}) - {item.total.toFixed(2)} LE
-                            </li>
-                          ))}
-                        </ul>
-                        <p className={`text-break ${textClass}`}>
-                          <strong>{order.paymentMethod === 'cash_on_delivery' ? (text?.totalDue || "Total Due") : (text?.totalPaid || "Total Paid")}:</strong> {parseFloat(order.total).toFixed(2)} LE<br />
-                          <strong>{text?.status || "Status"}:</strong> {text[`status${order.status.charAt(0).toUpperCase() + order.status.slice(1)}`] || order.status}<br />
-                          <strong>{text?.placed || "Placed"}:</strong> {
-                            order.timestamp
-                              ? new Date(order.timestamp.seconds ? order.timestamp.toDate() : order.timestamp).toLocaleString(currentLange === "Ar" ? 'ar-EG' : 'en-US', {
-                                  month: '2-digit',
-                                  day: '2-digit',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })
-                              : 'N/A'
-                          }<br />
-                          <strong>{text?.trackingStatus || "Tracking Status"}:</strong> {text[order.trackingStatus.split(" ").join("").toLowerCase()] || order.trackingStatus}
-                        </p>
-                        {order.shipping && (
-                          <div>
-                            <strong className="text-muted">{text?.shippingDetails || "Shipping Details"}:</strong>
-                            <p className={`ms-3 text-break ${textClass}`}>
-                              {text?.city || "City"}: {order.shipping.city}<br />
-                              {text?.phone || "Phone"}: {order.shipping.phone}<br />
-                              {text?.details || "Details"}: {order.shipping.details}
+            <div className="row g-4">
+              {currentOrders.map(order => {
+                const statusStyles = getStatusStyles(order.status);
+                return (
+                  <div key={order.id} className="col-12 col-md-6 col-lg-4">
+                    <div className={`card h-100 ${cardClass}`}>
+                      <div className="card-body d-flex flex-column">
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                          <h5 className={`card-title mb-0 ${textClass}`}>
+                            {text?.order?.replace("{orderId}", extractIdPortion(order.id)) || `Order ${extractIdPortion(order.id)}`}
+                          </h5>
+                          <span className={`badge ${statusStyles.bg} text-white d-flex align-items-center gap-1`}>
+                            {statusStyles.icon}
+                            {text[`status${order.status.charAt(0).toUpperCase() + order.status.slice(1)}`] || order.status}
+                          </span>
+                        </div>
+                        <hr className="border-secondary border-opacity-20" />
+                        <div className="mb-3">
+                          <h6 className={`card-subtitle mb-2 d-flex align-items-center gap-1 ${textClass}`}>
+                            <ShoppingBag className="icon-sm" />
+                            {text?.items || "Items"}
+                          </h6>
+                          <ul className="list-unstyled">
+                            {Array.isArray(order.items) && order.items.map((item, index) => (
+                              <li key={index} className="d-flex justify-content-between">
+                                <span className="text-truncate">{item.title}</span>
+                                <span>x{item.quantity}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <hr className="border-secondary border-opacity-20" />
+                        <div className="mb-3">
+                          <div className="payment-info mb-3 d-flex flex-row justify-content-between align-items-center">
+                            <h6 className={`card-subtitle mb-0 d-flex align-items-center gap-1 ${textClass}`}>
+                              <CreditCard className="icon-sm" />
+                              {text?.payment || "Payment"}
+                            </h6>
+                            <p className={`mb-0 ${textClass}`}>
+                              {order.paymentMethod === 'cash_on_delivery' ? (text?.paymentCashOnDelivery || "Cash on Delivery") : (text?.paymentPaypal || "PayPal")}
                             </p>
                           </div>
-                        )}
-                        <div className="d-flex flex-wrap gap-2 mt-3">
-                          <button 
-                            className="btn btn-primary-custom btn-sm"
-                            onClick={() => handleTrackOrder(order.id, order.total)}
-                          >
-                            <i className="bi bi-truck me-2"></i>{text?.trackOrder || "Track Order"}
-                          </button>
-                          {/* <button 
-                            className="btn btn-danger-custom btn-sm"
-                            onClick={() => handleDeleteOrder(order.id)}
-                          >
-                            <i className="bi bi-trash me-2"></i>{text?.delete || "Delete"}
-                          </button> */}
+                          <div className="date-info mb-3 d-flex flex-row justify-content-between align-items-center">
+                            <h6 className={`card-subtitle mb-0 d-flex align-items-center gap-1 ${textClass}`}>
+                              <Calendar className="icon-sm" />
+                              {text?.placed || "Placed"}
+                            </h6>
+                            <p className={`mb-0 ${textClass}`}>
+                              {order.timestamp
+                                ? new Date(order.timestamp.seconds ? order.timestamp.toDate() : order.timestamp).toLocaleString(currentLange === "Ar" ? 'ar-EG' : 'en-US', {
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })
+                                : 'N/A'}
+                            </p>
+                          </div>
+                          <div className="shipping-info mb-3 d-flex flex-row justify-content-between align-items-center">
+                            <h6 className={`card-subtitle mb-0 d-flex align-items-center gap-1 ${textClass}`}>
+                              <Truck className="icon-sm" />
+                              {text?.trackingStatus || "Tracking Status"}
+                            </h6>
+                            <p className={`mb-0 ${textClass}`}>
+                              {text[order.trackingStatus.split(" ").join("").toLowerCase()] || order.trackingStatus}
+                            </p>
+                          </div>
                         </div>
+                        <div className="mb-3">
+                          <h6 className={`card-subtitle mb-2 d-flex align-items-center gap-1 ${textClass}`}>
+                            <MapPin className="icon-sm" />
+                            {text?.shippingDetails || "Shipping Details"}
+                          </h6>
+                          {order.shipping ? (
+                            <div className={textClass}>
+                              <p className="mb-1"><strong>{text?.city || "City"}:</strong> {order.shipping.city}</p>
+                              <p className="mb-1"><strong>{text?.phone || "Phone"}:</strong> {order.shipping.phone}</p>
+                              <p className="mb-0"><strong>{text?.details || "Details"}:</strong> {order.shipping.details}</p>
+                            </div>
+                          ) : (
+                            <p className={`mb-0 ${textClass}`}>N/A</p>
+                          )}
+                        </div>
+                        <hr className="border-secondary border-opacity-20" />
+                        <div className="mb-3 d-flex flex-row justify-content-between align-items-center">
+                          <h6 className={`card-subtitle mb-0 d-flex align-items-center gap-1 ${textClass}`}>
+                            <DollarSign className="icon-sm" />
+                            {order.paymentMethod === 'cash_on_delivery' ? (text?.totalDue || "Total Due") : (text?.totalPaid || "Total Paid")}
+                          </h6>
+                          <p className={`mb-0 text-lg fw-bold text-accent`}>
+                            {parseFloat(order.total).toFixed(2)} LE
+                          </p>
+                        </div>
+                        <button
+                          className="btn btn-accent w-100 mt-auto d-flex align-items-center justify-content-center gap-2"
+                          onClick={() => handleTrackOrder(order.id, order.total)}
+                        >
+                          <Truck className="icon-sm" />
+                          {text?.trackOrder || "Track Order"}
+                        </button>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
-            {/* Pagination */}
-            <div className="d-flex justify-content-center mt-5">
-              <nav>
-                <ul className="pagination">
-                  <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                    <button 
-                      className={`page-link ${buttonClass}`} 
-                      onClick={handlePrevious}
-                      disabled={currentPage === 1}
-                      style={{ borderRadius: '50px', margin: '0 5px' }}
-                    >
-                      {text?.previous || "Previous"}
-                    </button>
-                  </li>
-                  {getPageNumbers().map(number => (
-                    <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
-                      <button 
-                        className={`page-link ${buttonClass}`} 
-                        onClick={() => handlePageChange(number)}
-                        style={{ 
-                          borderRadius: '50px', 
-                          margin: '0 5px',
-                          backgroundColor: currentPage === number ? (theme === "dark" ? '#555' : '#ddd') : '',
-                          border: 'none'
-                        }}
+            {totalPages > 1 && (
+              <div className="d-flex justify-content-center mt-4">
+                <nav aria-label="Page navigation">
+                  <ul className="pagination">
+                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                      <button
+                        className={`page-link ${buttonClass}`}
+                        onClick={handlePrevious}
+                        disabled={currentPage === 1}
                       >
-                        {number}
+                        {text?.previous || "Previous"}
                       </button>
                     </li>
-                  ))}
-                  <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                    <button 
-                      className={`page-link ${buttonClass}`} 
-                      onClick={handleNext}
-                      disabled={currentPage === totalPages}
-                      style={{ borderRadius: '50px', margin: '0 5px' }}
-                    >
-                      {text?.next || "Next"}
-                    </button>
-                  </li>
-                </ul>
-              </nav>
-            </div>
+                    {getPageNumbers().map(number => (
+                      <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
+                        <button
+                          className={`page-link ${buttonClass}`}
+                          onClick={() => handlePageChange(number)}
+                        >
+                          {number}
+                        </button>
+                      </li>
+                    ))}
+                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                      <button
+                        className={`page-link ${buttonClass}`}
+                        onClick={handleNext}
+                        disabled={currentPage === totalPages}
+                      >
+                        {text?.next || "Next"}
+                      </button>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            )}
           </>
         )}
       </div>

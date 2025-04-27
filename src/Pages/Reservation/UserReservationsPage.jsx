@@ -4,7 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { db, auth } from "../../firebase/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { ThemeContext } from "../../Context/ThemeContext";
+import "./UserReservationsPage.css";
 import { Card, Row, Col, Alert, Button } from "react-bootstrap";
+import clsx from "clsx";
 
 const UserReservationsPage = () => {
   const [reservations, setReservations] = useState([]);
@@ -17,11 +19,12 @@ const UserReservationsPage = () => {
   const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
   const navigate = useNavigate();
 
-  const bgColor = theme === "dark" ? "bg-custom-dark" : "bg-light";
+  const bgColor = theme === "dark" ? "bg-dark-custom" : "bg-light-custom";
   const textColor = theme === "dark" ? "text-white" : "text-dark";
-  const cardBg = theme === "dark" ? "bg-dark text-white" : "bg-light text-dark";
-  const btnClass = theme === "dark" ? "btn-outline-light" : "btn-outline-dark";
-  const pageBtnClass = theme === "dark" ? "bg-dark text-white" : "bg-light text-dark";
+  const cardClass = theme === "dark" ? "card-dark" : "card-light";
+  const btnClass = theme === "dark" ? "btn-custom-dark" : "btn-custom-light";
+  const pageBtnClass = theme === "dark" ? "page-btn-dark" : "page-btn-light";
+  const pageNavBtnClass = theme === "dark" ? "page-nav-btn-dark" : "page-nav-btn-light";
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -53,13 +56,13 @@ const UserReservationsPage = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case "pending":
-        return "#D4A017";
+        return "var(--accent)"; // #FF6B6B
       case "accepted":
-        return "#4A919E";
+        return "var(--primary)"; // #007bff
       case "rejected":
-        return "#B73E3E";
+        return "var(--danger)"; // #B73E3E
       default:
-        return "#ffffff";
+        return "var(--text-light)";
     }
   };
 
@@ -115,7 +118,7 @@ const UserReservationsPage = () => {
   };
 
   return (
-    <div className={` ${bgColor} ${textColor} py-5 rounded mt-5`}>
+    <div className={clsx("py-5 rounded mt-5", bgColor, textColor, { "rtl-text": currentLange === "Ar" })}>
       <div className="container">
         <h1 className="text-center mb-4">{text?.myReservationsTitle || "My Reservations"}</h1>
 
@@ -129,10 +132,10 @@ const UserReservationsPage = () => {
           <>
             <Row>
               {currentReservations.map((reservation) => (
-                <Col md={6} lg={4} className="mb-4" key={reservation.id}>
-                  <Card className={`${cardBg} border-0 shadow`}>
+                <Col md={6} lg={6} className="mb-4" key={reservation.id}>
+                  <Card className={clsx("border-0 shadow-sm", cardClass)}>
                     <Card.Body>
-                      <Card.Title className="d-flex justify-content-between align-items-center">
+                      <Card.Title className={clsx("d-flex justify-content-between", { "flex-row-reverse": currentLange === "Ar" })}>
                         <span>
                           {text?.tableIdLabel || "Table ID"}: {reservation.reservationId || reservation.id || (text?.unknown || "Unknown")}
                         </span>
@@ -141,13 +144,15 @@ const UserReservationsPage = () => {
                             color: getStatusColor(reservation.status),
                             fontWeight: "bold",
                             textTransform: "uppercase",
+                            fontSize: "0.9rem",
                           }}
                         >
                           {text[`status${reservation.status.charAt(0).toUpperCase() + reservation.status.slice(1)}`] || reservation.status || "pending"}
                         </span>
                       </Card.Title>
-                      <Card.Text>
+                      <Card.Text className="muted-text">
                         <strong>{text?.tableIdLabel || "Table ID"}:</strong> {reservation.tableId || "N/A"} <br />
+                        <hr className={theme === "dark" ? "hr-dark" : "hr-light"} />
                         <strong>{text?.nameLabel || "Name"}:</strong> {reservation.name || "N/A"} <br />
                         <strong>{text?.dateLabel || "Date"}:</strong>{" "}
                         {reservation.date
@@ -165,7 +170,9 @@ const UserReservationsPage = () => {
                         <strong>{text?.timeArrivingLabel || "Time Arriving"}:</strong> {reservation.timeArriving || "N/A"} <br />
                         <strong>{text?.timeLeavingLabel || "Time Leaving"}:</strong> {reservation.timeLeaving || "N/A"} <br />
                         <strong>{text?.phoneLabel || "Phone"}:</strong> {reservation.phone || "N/A"} <br />
-                        <em>{getStatusMessage(reservation.status || "pending")}</em>
+                        <div className="text-center mt-3">
+                          <em>{getStatusMessage(reservation.status || "pending")}</em>
+                        </div>
                       </Card.Text>
                     </Card.Body>
                   </Card>
@@ -173,41 +180,33 @@ const UserReservationsPage = () => {
               ))}
             </Row>
             {/* Pagination */}
-            <div className="d-flex justify-content-center mt-5">
+            <div className={clsx("d-flex justify-content-center mt-5", { "flex-row-reverse": currentLange === "Ar" })}>
               <nav>
                 <ul className="pagination">
-                  <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                  <li className={clsx("page-item", { disabled: currentPage === 1 })}>
                     <button 
-                      className={`page-link ${pageBtnClass}`} 
+                      className={clsx("page-link", pageNavBtnClass)} 
                       onClick={handlePrevious}
                       disabled={currentPage === 1}
-                      style={{ borderRadius: '50px', margin: '0 5px' }}
                     >
                       {text?.previous || "Previous"}
                     </button>
                   </li>
                   {getPageNumbers().map(number => (
-                    <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
+                    <li key={number} className={clsx("page-item", { active: currentPage === number })}>
                       <button 
-                        className={`page-link ${pageBtnClass}`} 
+                        className={clsx("page-link", pageBtnClass, { "page-active": currentPage === number })} 
                         onClick={() => handlePageChange(number)}
-                        style={{ 
-                          borderRadius: '50px', 
-                          margin: '0 5px',
-                          backgroundColor: currentPage === number ? (theme === "dark" ? '#555' : '#ddd') : '',
-                          border: 'none'
-                        }}
                       >
                         {number}
                       </button>
                     </li>
                   ))}
-                  <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                  <li className={clsx("page-item", { disabled: currentPage === totalPages })}>
                     <button 
-                      className={`page-link ${pageBtnClass}`} 
+                      className={clsx("page-link", pageNavBtnClass)} 
                       onClick={handleNext}
                       disabled={currentPage === totalPages}
-                      style={{ borderRadius: '50px', margin: '0 5px' }}
                     >
                       {text?.next || "Next"}
                     </button>
@@ -215,9 +214,17 @@ const UserReservationsPage = () => {
                 </ul>
               </nav>
             </div>
+            {/* Admin Approval Message at Page End */}
+            <div className="text-center mt-4">
+              {currentReservations.map((reservation) => (
+                <p key={reservation.id} className="status-message">
+                  {getStatusMessage(reservation.status || "pending")}
+                </p>
+              ))}
+            </div>
             <div className="text-center mt-4">
               <Button
-                className={btnClass}
+                className={clsx(btnClass)}
                 onClick={() => navigate("/reservation")}
               >
                 {text?.makeNewReservation || "Make a New Reservation"}
@@ -228,7 +235,7 @@ const UserReservationsPage = () => {
           <div className="text-center">
             <p>{text?.noReservations || "No reservations found."}</p>
             <Button
-              className={btnClass}
+              className={clsx(btnClass)}
               onClick={() => navigate("/reservation")}
             >
               {text?.makeReservation || "Make a Reservation"}
