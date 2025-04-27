@@ -556,6 +556,8 @@ const AdminOrdersPage = () => {
 const AdminReservationsPage = () => {
   const [reservations, setReservations] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortOrder, setSortOrder] = useState("newest");
+  const [statusFilter, setStatusFilter] = useState("all");
   const reservationsPerPage = 6;
   const { theme } = useContext(ThemeContext);
   const textColor = theme === "dark" ? "text-white" : "text-dark";
@@ -566,7 +568,26 @@ const AdminReservationsPage = () => {
     const unsubscribe = onSnapshot(
       collection(db, "reservations"),
       (snapshot) => {
-        const fetchedReservations = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const fetchedReservations = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          let parsedDate = null;
+          if (data.date) {
+            if (data.date.toDate) {
+              parsedDate = data.date.toDate();
+            } else {
+              parsedDate = new Date(data.date);
+              if (isNaN(parsedDate.getTime())) {
+                parsedDate = null;
+              }
+            }
+          }
+          return {
+            id: doc.id,
+            ...data,
+            date: parsedDate,
+          };
+        });
+        console.log("Fetched reservations:", fetchedReservations);
         setReservations(fetchedReservations);
         setCurrentPage(1);
       },
@@ -575,7 +596,7 @@ const AdminReservationsPage = () => {
         Swal.fire(
           text?.refreshErrorTitle || (currentLange === "Ar" ? "خطأ!" : "Error!"),
           text?.refreshErrorMessage?.replace("{error}", error.message) ||
-          (currentLange === "Ar" ? `فشل في جلب الحجوزات: ${error.message}` : `Failed to fetch reservations: ${error.message}`),
+            (currentLange === "Ar" ? `فشل في جلب الحجوزات: ${error.message}` : `Failed to fetch reservations: ${error.message}`),
           "error"
         );
       }
@@ -584,7 +605,7 @@ const AdminReservationsPage = () => {
   }, [text, currentLange]);
 
   const getStatusColor = (status) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case "pending":
         return "#D4A017";
       case "accepted":
@@ -618,14 +639,14 @@ const AdminReservationsPage = () => {
         text?.reservationStatusSuccess
           ?.replace("{reservationId}", docId)
           ?.replace("{status}", newStatus) ||
-        (currentLange === "Ar" ? `تم تحديث الحجز #${docId} إلى ${newStatus}` : `Reservation #${docId} ${newStatus}`),
+          (currentLange === "Ar" ? `تم تحديث الحجز #${docId} إلى ${newStatus}` : `Reservation #${docId} ${newStatus}`),
         "success"
       );
     } catch (error) {
       Swal.fire(
         text?.refreshErrorTitle || (currentLange === "Ar" ? "خطأ!" : "Error!"),
         text?.reservationStatusError?.replace("{error}", error.message) ||
-        (currentLange === "Ar" ? `فشل في تحديث الحجز: ${error.message}` : `Failed to update reservation: ${error.message}`),
+          (currentLange === "Ar" ? `فشل في تحديث الحجز: ${error.message}` : `Failed to update reservation: ${error.message}`),
         "error"
       );
     }
@@ -635,7 +656,7 @@ const AdminReservationsPage = () => {
     Swal.fire({
       title: text?.deleteReservationConfirmTitle || (currentLange === "Ar" ? "هل أنت متأكد؟" : "Are you sure?"),
       text: text?.deleteReservationConfirmText?.replace("{reservationId}", reservationId) ||
-            (currentLange === "Ar" ? `حذف الحجز #${reservationId}؟` : `Delete Reservation #${reservationId}?`),
+        (currentLange === "Ar" ? `حذف الحجز #${reservationId}؟` : `Delete Reservation #${reservationId}?`),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -646,38 +667,29 @@ const AdminReservationsPage = () => {
         Swal.fire(
           text?.deleteReservationSuccessTitle || (currentLange === "Ar" ? "تم الحذف!" : "Deleted!"),
           text?.deleteReservationSuccessMessage?.replace("{reservationId}", reservationId) ||
-          (currentLange === "Ar" ? `تم حذف الحجز #${reservationId}` : `Reservation #${reservationId} deleted`),
+            (currentLange === "Ar" ? `تم حذف الحجز #${reservationId}` : `Reservation #${reservationId} deleted`),
           "success"
         );
       }
     });
 
-  const handleRefresh = async () => {
-    try {
-      const snapshot = await getDocs(collection(db, "reservations"));
-      const fetchedReservations = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setReservations(fetchedReservations);
-      setCurrentPage(1);
-      Swal.fire(
-        text?.refreshSuccessTitle || (currentLange === "Ar" ? "نجاح!" : "Success!"),
-        text?.refreshSuccessMessage || (currentLange === "Ar" ? "تم تحديث الحجوزات بنجاح" : "Reservations refreshed successfully"),
-        "success"
-      );
-    } catch (error) {
-      console.error("Error refreshing reservations:", error);
-      Swal.fire(
-        text?.refreshErrorTitle || (currentLange === "Ar" ? "خطأ!" : "Error!"),
-        text?.refreshErrorMessage?.replace("{error}", error.message) ||
-        (currentLange === "Ar" ? `فشل في جلب الحجوزات: ${error.message}` : `Failed to fetch reservations: ${error.message}`),
-        "error"
-      );
-    }
-  };
+  const filteredReservations = reservations
+    .filter((reservation) => {
+      if (statusFilter === "all") return true;
+      return reservation.status?.toLowerCase() === statusFilter.toLowerCase();
+    })
+    .sort((a, b) => {
+      const dateA = a.date ? a.date.getTime() : 0;
+      const dateB = b.date ? b.date.getTime() : 0;
+      return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+    });
+
+  console.log("Filtered and sorted reservations:", filteredReservations);
 
   const indexOfLastReservation = currentPage * reservationsPerPage;
   const indexOfFirstReservation = indexOfLastReservation - reservationsPerPage;
-  const currentReservations = reservations.slice(indexOfFirstReservation, indexOfLastReservation);
-  const totalPages = Math.ceil(reservations.length / reservationsPerPage);
+  const currentReservations = filteredReservations.slice(indexOfFirstReservation, indexOfLastReservation);
+  const totalPages = Math.ceil(filteredReservations.length / reservationsPerPage);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -717,12 +729,59 @@ const AdminReservationsPage = () => {
         <h2 className={textColor}>
           {text?.reservationsManagement || (currentLange === "Ar" ? "إدارة الحجوزات" : "Reservations Management")}
         </h2>
-        <Button variant="primary" onClick={handleRefresh}>
-          {text?.refreshReservations || (currentLange === "Ar" ? "تحديث الحجوزات" : "Refresh Reservations")}
-        </Button>
+        <div className="d-flex gap-2 align-items-center flex-wrap">
+          <div>
+            <label className={`me-2 ${textColor}`}>
+              {text?.sortBy || (currentLange === "Ar" ? "ترتيب حسب:" : "Sort by:")}
+            </label>
+            <select
+              value={sortOrder}
+              onChange={(e) => {
+                setSortOrder(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="form-select d-inline-block"
+              style={{ width: "auto", backgroundColor: theme === "dark" ? "#333" : "#fff", color: theme === "dark" ? "#fff" : "#000" }}
+            >
+              <option value="newest">
+                {text?.newest || (currentLange === "Ar" ? "الأحدث" : "Newest")}
+              </option>
+              <option value="oldest">
+                {text?.oldest || (currentLange === "Ar" ? "الأقدم" : "Oldest")}
+              </option>
+            </select>
+          </div>
+          <div>
+            <label className={`me-2 ${textColor}`}>
+              {text?.filterByStatus || (currentLange === "Ar" ? "تصفية حسب الحالة:" : "Filter by Status:")}
+            </label>
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="form-select d-inline-block"
+              style={{ width: "auto", backgroundColor: theme === "dark" ? "#333" : "#fff", color: theme === "dark" ? "#fff" : "#000" }}
+            >
+              <option value="all">
+                {text?.all || (currentLange === "Ar" ? "الكل" : "All")}
+              </option>
+              <option value="pending">
+                {text?.pending || (currentLange === "Ar" ? "معلق" : "Pending")}
+              </option>
+              <option value="accepted">
+                {text?.accepted || (currentLange === "Ar" ? "مقبول" : "Accepted")}
+              </option>
+              <option value="rejected">
+                {text?.rejected || (currentLange === "Ar" ? "مرفوض" : "Rejected")}
+              </option>
+            </select>
+          </div>
+        </div>
       </div>
 
-      {reservations.length > 0 ? (
+      {filteredReservations.length > 0 ? (
         <>
           <Row>
             {currentReservations.map((reservation) => (
@@ -732,7 +791,7 @@ const AdminReservationsPage = () => {
                     <Card.Title className="d-flex justify-content-between align-items-center">
                       <span>
                         {text?.reservationTitle?.replace("{reservationId}", reservation.reservationId || reservation.id || "Unknown") ||
-                        (currentLange === "Ar" ? `الحجز #${reservation.reservationId || reservation.id || "غير معروف"}` : `Reservation #${reservation.reservationId || reservation.id || "Unknown"}`)}
+                          (currentLange === "Ar" ? `الحجز #${reservation.reservationId || reservation.id || "غير معروف"}` : `Reservation #${reservation.reservationId || reservation.id || "Unknown"}`)}
                       </span>
                       <span
                         style={{
@@ -749,7 +808,7 @@ const AdminReservationsPage = () => {
                       <strong>{text?.name || (currentLange === "Ar" ? "الاسم:" : "Name:")}</strong> {reservation.name || "N/A"} <br />
                       <strong>{text?.date || (currentLange === "Ar" ? "التاريخ:" : "Date:")}</strong>{" "}
                       {reservation.date
-                        ? new Date(reservation.date).toLocaleString()
+                        ? reservation.date.toLocaleString()
                         : "N/A"}{" "}
                       <br />
                       <strong>{text?.numPersons || (currentLange === "Ar" ? "عدد الأشخاص:" : "Number of Persons:")}</strong>{" "}
@@ -763,7 +822,7 @@ const AdminReservationsPage = () => {
                         variant="success"
                         size="sm"
                         onClick={() => updateStatus(reservation.id, "accepted")}
-                        disabled={reservation.status === "accepted"}
+                        disabled={reservation.status?.toLowerCase() === "accepted"}
                       >
                         {text?.accept || (currentLange === "Ar" ? "قبول" : "Accept")}
                       </Button>
@@ -771,7 +830,7 @@ const AdminReservationsPage = () => {
                         variant="danger"
                         size="sm"
                         onClick={() => updateStatus(reservation.id, "rejected")}
-                        disabled={reservation.status === "rejected"}
+                        disabled={reservation.status?.toLowerCase() === "rejected"}
                       >
                         {text?.reject || (currentLange === "Ar" ? "رفض" : "Reject")}
                       </Button>
