@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 import './Chat_AI.css';
-import axios from "axios";
+// import axios from "axios";
 
 
 function Chat_AI() {

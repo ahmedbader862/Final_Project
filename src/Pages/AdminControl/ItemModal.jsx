@@ -21,20 +21,20 @@ const ItemModal = ({
 
   const validationSchema = Yup.object({
     title: Yup.string()
-      .required(text.titleRequired)
-      .min(3, text.titleMin),
-    title_ar: Yup.string().min(3, text.titleArMin),
-    name_en: Yup.string().min(3, text.nameEnMin),
-    name_ar: Yup.string().min(3, text.nameArMin),
-    description: Yup.string().max(500, text.descriptionMax),
-    desc_ar: Yup.string().max(500, text.descArMax),
-    category: Yup.string().required(text.categoryRequired),
-    category_ar: Yup.string().required(text.categoryArRequired),
+      .required(text.titleRequired || 'Title is required')
+      .min(3, text.titleMin || 'Title must be at least 3 characters'),
+    title_ar: Yup.string().min(3, text.titleArMin || 'Arabic title must be at least 3 characters'),
+    name_en: Yup.string().min(3, text.nameEnMin || 'English name must be at least 3 characters'),
+    name_ar: Yup.string().min(3, text.nameArMin || 'Arabic name must be at least 3 characters'),
+    description: Yup.string().max(500, text.descriptionMax || 'Description must be 500 characters or less'),
+    desc_ar: Yup.string().max(500, text.descArMax || 'Arabic description must be 500 characters or less'),
+    category: Yup.string().required(text.categoryRequired || 'Category is required'),
+    category_ar: Yup.string().required(text.categoryArRequired || 'Arabic category is required'),
     price: Yup.number()
-      .required(text.priceRequired)
-      .positive(text.pricePositive)
-      .min(0.01, text.priceMin)
-      .max(10000, text.priceMax),
+      .required(text.priceRequired || 'Price is required')
+      .positive(text.pricePositive || 'Price must be positive')
+      .min(0.01, text.priceMin || 'Price must be at least 0.01')
+      .max(10000, text.priceMax || 'Price must be at most 10000'),
   });
 
   const formik = useFormik({
@@ -53,6 +53,7 @@ const ItemModal = ({
     validationSchema,
     enableReinitialize: true,
     onSubmit: (values) => {
+      console.log('ItemModal submitting values:', values);
       if (showModal === 'addCategory') {
         handleAddCategory();
       } else {
@@ -87,6 +88,7 @@ const ItemModal = ({
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
+    console.log('Selected image file:', file);
     formik.setFieldValue('imageFile', file);
     setFormData({
       ...formData,
@@ -117,42 +119,42 @@ const ItemModal = ({
     >
       <Modal.Header closeButton className="bg-dark text-white border-0">
         <Modal.Title>
-          {isAdd && text.addNewItem}
-          {isEdit && text.editItem}
-          {isDelete && text.confirmDelete}
-          {isAddCategory && text.addCategory}
+          {isAdd && (text.addNewItem || 'Add New Item')}
+          {isEdit && (text.editItem || 'Edit Item')}
+          {isDelete && (text.confirmDelete || 'Confirm Delete')}
+          {isAddCategory && (text.addCategory || 'Add Category')}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className="bg-dark text-white">
         <Form onSubmit={(e) => e.preventDefault()}>
           {isDelete ? (
             <p>
-              {text.confirmDelete}: <strong>{selectedItem?.title}</strong>?
+              {text.confirmDelete || 'Are you sure you want to delete'}: <strong>{selectedItem?.title || 'this item'}</strong>?
             </p>
           ) : (
             <>
               {isAddCategory ? (
                 <>
                   <Form.Group className="mb-3">
-                    <Form.Label>{text.categoryNameEn}</Form.Label>
+                    <Form.Label>{text.categoryNameEn || 'Category Name (English)'}</Form.Label>
                     <Form.Control
                       type="text"
                       name="title"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      placeholder={text.categoryNameEn}
+                      placeholder={text.categoryNameEn || 'Enter category name'}
                       required
                       className="bg-dark text-white border-secondary"
                     />
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>{text.categoryNameAr}</Form.Label>
+                    <Form.Label>{text.categoryNameAr || 'Category Name (Arabic)'}</Form.Label>
                     <Form.Control
                       type="text"
                       name="category_ar"
                       value={formData.category_ar}
                       onChange={(e) => setFormData({ ...formData, category_ar: e.target.value })}
-                      placeholder={text.categoryNameAr}
+                      placeholder={text.categoryNameAr || 'Enter Arabic category name'}
                       className="bg-dark text-white border-secondary"
                       style={{ direction: 'rtl', textAlign: 'right' }}
                     />
@@ -161,7 +163,7 @@ const ItemModal = ({
               ) : (
                 <>
                   <Form.Group className="mb-3">
-                    <Form.Label>{text.categoryEn}</Form.Label>
+                    <Form.Label>{text.categoryEn || 'Category (English)'}</Form.Label>
                     <Form.Control
                       type="text"
                       name="category"
@@ -178,7 +180,7 @@ const ItemModal = ({
                     </Form.Control.Feedback>
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>{text.categoryAr}</Form.Label>
+                    <Form.Label>{text.categoryAr || 'Category (Arabic)'}</Form.Label>
                     <Form.Control
                       type="text"
                       name="category_ar"
@@ -196,7 +198,7 @@ const ItemModal = ({
                     </Form.Control.Feedback>
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>{text.titleEn}</Form.Label>
+                    <Form.Label>{text.titleEn || 'Title (English)'}</Form.Label>
                     <Form.Control
                       type="text"
                       name="title"
@@ -212,7 +214,7 @@ const ItemModal = ({
                     </Form.Control.Feedback>
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>{text.titleAr}</Form.Label>
+                    <Form.Label>{text.titleAr || 'Title (Arabic)'}</Form.Label>
                     <Form.Control
                       type="text"
                       name="title_ar"
@@ -228,7 +230,7 @@ const ItemModal = ({
                     </Form.Control.Feedback>
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>{text.nameEn}</Form.Label>
+                    <Form.Label>{text.nameEn || 'Name (English)'}</Form.Label>
                     <Form.Control
                       type="text"
                       name="name_en"
@@ -243,7 +245,7 @@ const ItemModal = ({
                     </Form.Control.Feedback>
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>{text.nameAr}</Form.Label>
+                    <Form.Label>{text.nameAr || 'Name (Arabic)'}</Form.Label>
                     <Form.Control
                       type="text"
                       name="name_ar"
@@ -259,7 +261,7 @@ const ItemModal = ({
                     </Form.Control.Feedback>
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>{text.descriptionEn}</Form.Label>
+                    <Form.Label>{text.descriptionEn || 'Description (English)'}</Form.Label>
                     <Form.Control
                       as="textarea"
                       rows={3}
@@ -275,7 +277,7 @@ const ItemModal = ({
                     </Form.Control.Feedback>
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>{text.descriptionAr}</Form.Label>
+                    <Form.Label>{text.descriptionAr || 'Description (Arabic)'}</Form.Label>
                     <Form.Control
                       as="textarea"
                       rows={3}
@@ -292,7 +294,7 @@ const ItemModal = ({
                     </Form.Control.Feedback>
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>{text.price}</Form.Label>
+                    <Form.Label>{text.price || 'Price'}</Form.Label>
                     <Form.Control
                       type="number"
                       step="0.01"
@@ -309,7 +311,7 @@ const ItemModal = ({
                     </Form.Control.Feedback>
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>{text.uploadImage}</Form.Label>
+                    <Form.Label>{text.uploadImage || 'Upload Image'}</Form.Label>
                     <Form.Control
                       type="file"
                       accept="image/*"
@@ -338,16 +340,16 @@ const ItemModal = ({
           <div className="d-flex gap-2 mt-4">
             {(isAdd || isEdit || isAddCategory) && (
               <Button variant="primary" type="submit" onClick={formik.handleSubmit}>
-                {isAddCategory ? text.addCategory : isAdd ? text.add : text.save}
+                {isAddCategory ? (text.addCategory || 'Add Category') : isAdd ? (text.add || 'Add') : (text.save || 'Save')}
               </Button>
             )}
             {isDelete && (
               <Button variant="danger" onClick={handleDelete}>
-                {text.delete}
+                {text.delete || 'Delete'}
               </Button>
             )}
             <Button variant="secondary" onClick={() => setShowModal(null)}>
-              {text.cancel}
+              {text.cancel || 'Cancel'}
             </Button>
           </div>
         </Form>

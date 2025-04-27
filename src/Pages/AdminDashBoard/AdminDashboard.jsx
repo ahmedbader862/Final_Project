@@ -848,40 +848,49 @@ const AdminPanel = () => {
   const [menuItems, setMenuItems] = useState([]);
   const [showModal, setShowModal] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [formData, setFormData] = useState({ 
-    title: "", 
-    title_ar: "", 
-    name_en: "", 
-    name_ar: "", 
-    description: "", 
-    desc_ar: "", 
-    category: "", 
-    category_ar: "", 
-    price: "", 
-    image: "", 
-    imageFile: null 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const [formData, setFormData] = useState({
+    title: '',
+    title_ar: '',
+    name_en: '',
+    name_ar: '',
+    description: '',
+    desc_ar: '',
+    category: '',
+    category_ar: '',
+    price: '',
+    image: '',
+    imageFile: null,
   });
   const { theme } = useContext(ThemeContext);
-  const textColor = theme === "dark" ? "text-white" : "text-dark";
+  const textColor = theme === 'dark' ? 'text-white' : 'text-dark';
   const currentLange = useSelector((state) => state.lange.langue);
   const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => setUser(user));
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      console.log('Auth state changed:', user ? user.email : 'No user');
+      setUser(user);
+    });
     return unsubscribe;
   }, []);
 
   useEffect(() => {
     if (!user) return;
-    getDocs(collection(db, "menu"))
+    getDocs(collection(db, 'menu'))
       .then((snapshot) => {
         const loadedCategories = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        console.log('Loaded categories:', loadedCategories);
         setCategories(loadedCategories);
-        setSelectedCategory(loadedCategories[0]?.id);
+        setSelectedCategory(loadedCategories[0]?.id || null);
       })
       .catch((error) => {
-        console.error("Error loading categories:", error);
-        toast.error(text?.failedLoadCategories || (currentLange === "Ar" ? "فشل في تحميل الفئات" : "Failed to load categories"));
+        console.error('Error loading categories:', error);
+        toast.error(
+          text?.failedLoadCategories || (currentLange === 'Ar' ? 'فشل في تحميل الفئات' : 'Failed to load categories')
+        );
       });
   }, [user, text, currentLange]);
 
@@ -891,11 +900,14 @@ const AdminPanel = () => {
       collection(db, `menu/${selectedCategory}/items`),
       (snapshot) => {
         const items = snapshot.docs.map((doc) => ({ docId: doc.id, ...doc.data() }));
+        console.log(`Menu items updated for category ${selectedCategory}:`, items);
         setMenuItems(items);
       },
       (error) => {
-        console.error("Error fetching menu items:", error);
-        toast.error(text?.failedLoadMenuItems || (currentLange === "Ar" ? "فشل في تحميل عناصر القائمة" : "Failed to load menu items"));
+        console.error('Error fetching menu items:', error);
+        toast.error(
+          text?.failedLoadMenuItems || (currentLange === 'Ar' ? 'فشل في تحميل عناصر القائمة' : 'Failed to load menu items')
+        );
       }
     );
     return unsubscribe;
@@ -904,143 +916,182 @@ const AdminPanel = () => {
   const uploadImageToStorage = async (file) => {
     if (!file) return null;
     try {
-      const sanitizedFileName = file.name.replace(/\s+/g, "_");
+      const sanitizedFileName = file.name.replace(/\s+/g, '_');
       const storageRef = ref(storage, `menu/${selectedCategory}/items/image/${Date.now()}_${sanitizedFileName}`);
+      console.log('Uploading image to:', storageRef.fullPath);
       await uploadBytes(storageRef, file);
-      return await getDownloadURL(storageRef);
+      const imageUrl = await getDownloadURL(storageRef);
+      console.log('Image uploaded, URL:', imageUrl);
+      return imageUrl;
     } catch (error) {
-      console.error("Error uploading image:", error);
+      console.error('Error uploading image:', error);
       toast.error(
-        text?.failedUploadImage?.replace("{error}", error.message) ||
-        (currentLange === "Ar" ? `فشل في رفع الصورة: ${error.message}` : `Failed to upload image: ${error.message}`)
+        text?.failedUploadImage?.replace('{error}', error.message) ||
+        (currentLange === 'Ar' ? `فشل في رفع الصورة: ${error.message}` : `Failed to upload image: ${error.message}`)
       );
       throw error;
     }
   };
 
   const handleSubmit = async (values) => {
+    if (!selectedCategory) {
+      toast.error('Please select a category first');
+      return;
+    }
+    console.log('handleSubmit called with values:', values, 'selectedCategory:', selectedCategory);
     let imageUrl = formData.image;
     try {
       if (values.imageFile) imageUrl = await uploadImageToStorage(values.imageFile);
       const itemData = {
-        title: values.title,
-        title_ar: values.title_ar,
-        name_en: values.name_en,
-        name_ar: values.name_ar,
-        description: values.description,
-        desc_ar: values.desc_ar,
+        title: values.title || '',
+        title_ar: values.title_ar || '',
+        name_en: values.name_en || '',
+        name_ar: values.name_ar || '',
+        description: values.description || '',
+        desc_ar: values.desc_ar || '',
         category: selectedCategory,
-        category_ar: categories.find(cat => cat.id === selectedCategory)?.category_ar || values.category_ar,
-        price: parseFloat(values.price),
-        image: imageUrl || "",
+        category_ar: categories.find(cat => cat.id === selectedCategory)?.category_ar || values.category_ar || '',
+        price: parseFloat(values.price) || 0,
+        image: imageUrl || '',
       };
-      if (showModal === "add") {
-        await addDoc(collection(db, `menu/${selectedCategory}/items`), itemData);
-        toast.success(text?.itemAdded || (currentLange === "Ar" ? "تم إضافة العنصر!" : "Item added!"));
-      } else if (showModal === "edit") {
+      console.log('Saving item to:', `menu/${selectedCategory}/items`, 'Data:', itemData);
+      if (showModal === 'add') {
+        const docRef = await addDoc(collection(db, `menu/${selectedCategory}/items`), itemData);
+        console.log('Item added with ID:', docRef.id);
+        toast.success(text?.itemAdded || (currentLange === 'Ar' ? 'تم إضافة العنصر!' : 'Item added!'));
+      } else if (showModal === 'edit') {
         const docRef = doc(db, `menu/${selectedCategory}/items`, selectedItem.docId);
         await updateDoc(docRef, itemData);
-        toast.success(text?.itemUpdated || (currentLange === "Ar" ? "تم تحديث العنصر!" : "Item updated!"));
+        console.log('Item updated with ID:', selectedItem.docId);
+        toast.success(text?.itemUpdated || (currentLange === 'Ar' ? 'تم تحديث العنصر!' : 'Item updated!'));
       }
       setShowModal(null);
-      setFormData({ 
-        title: "", 
-        title_ar: "", 
-        name_en: "", 
-        name_ar: "", 
-        description: "", 
-        desc_ar: "", 
-        category: "", 
-        category_ar: "", 
-        price: "", 
-        image: "", 
-        imageFile: null 
+      setFormData({
+        title: '',
+        title_ar: '',
+        name_en: '',
+        name_ar: '',
+        description: '',
+        desc_ar: '',
+        category: '',
+        category_ar: '',
+        price: '',
+        image: '',
+        imageFile: null,
       });
     } catch (error) {
-      console.error("Error saving item:", error);
+      console.error('Error saving item:', error);
       toast.error(
-        text?.errorSavingItem?.replace("{error}", error.message) ||
-        (currentLange === "Ar" ? `خطأ في حفظ العنصر: ${error.message}` : `Error saving item: ${error.message}`)
+        text?.errorSavingItem?.replace('{error}', error.message) ||
+        (currentLange === 'Ar' ? `خطأ في حفظ العنصر: ${error.message}` : `Error saving item: ${error.message}`)
       );
     }
   };
 
   const handleDelete = async () => {
+    if (!selectedItem || !selectedCategory) return;
+    console.log('Deleting item:', selectedItem.docId, 'from category:', selectedCategory);
     try {
       const docRef = doc(db, `menu/${selectedCategory}/items`, selectedItem.docId);
       await deleteDoc(docRef);
-      toast.success(text?.itemDeleted || (currentLange === "Ar" ? "تم حذف العنصر!" : "Item deleted!"));
+      console.log('Item deleted:', selectedItem.docId);
+      toast.success(text?.itemDeleted || (currentLange === 'Ar' ? 'تم حذف العنصر!' : 'Item deleted!'));
       setShowModal(null);
     } catch (error) {
-      console.error("Error deleting item:", error);
+      console.error('Error deleting item:', error);
       toast.error(
-        text?.errorSavingItem?.replace("{error}", error.message) ||
-        (currentLange === "Ar" ? `خطأ في حذف العنصر: ${error.message}` : `Error deleting item: ${error.message}`)
+        text?.errorSavingItem?.replace('{error}', error.message) ||
+        (currentLange === 'Ar' ? `خطأ في حذف العنصر: ${error.message}` : `Error deleting item: ${error.message}`)
       );
     }
   };
 
   const handleAddCategory = async () => {
     const newCategory = formData.title;
-    if (!newCategory) return;
+    if (!newCategory) {
+      toast.error(text?.categoryNameRequired || (currentLange === 'Ar' ? 'اسم الفئة مطلوب' : 'Category name is required'));
+      return;
+    }
+    console.log('Adding category:', newCategory);
     try {
-      await setDoc(doc(db, "menu", newCategory), { 
+      await setDoc(doc(db, 'menu', newCategory), {
         name: newCategory,
-        category_ar: formData.category_ar || newCategory
+        category_ar: formData.category_ar || newCategory,
       });
-      toast.success(text?.categoryAdded || (currentLange === "Ar" ? "تم إضافة الفئة!" : "Category added!"));
+      console.log('Category added:', newCategory);
+      toast.success(text?.categoryAdded || (currentLange === 'Ar' ? 'تم إضافة الفئة!' : 'Category added!'));
       setShowModal(null);
-      setFormData({ 
-        title: "", 
-        title_ar: "", 
-        name_en: "", 
-        name_ar: "", 
-        description: "", 
-        desc_ar: "", 
-        category: "", 
-        category_ar: "", 
-        price: "", 
-        image: "", 
-        imageFile: null 
+      setFormData({
+        title: '',
+        title_ar: '',
+        name_en: '',
+        name_ar: '',
+        description: '',
+        desc_ar: '',
+        category: '',
+        category_ar: '',
+        price: '',
+        image: '',
+        imageFile: null,
       });
     } catch (error) {
-      console.error("Error adding category:", error);
-      toast.error(text?.errorAddingCategory || (currentLange === "Ar" ? "خطأ في إضافة الفئة" : "Error adding category"));
+      console.error('Error adding category:', error);
+      toast.error(
+        text?.errorAddingCategory || (currentLange === 'Ar' ? 'خطأ في إضافة الفئة' : 'Error adding category')
+      );
     }
   };
 
   const openEditModal = (item) => {
+    console.log('Opening edit modal for item:', item);
     setSelectedItem(item);
     setFormData({
-      title: item.title || "",
-      title_ar: item.title_ar || "",
-      name_en: item.name_en || "",
-      name_ar: item.name_ar || "",
-      description: item.description || "",
-      desc_ar: item.desc_ar || "",
+      title: item.title || '',
+      title_ar: item.title_ar || '',
+      name_en: item.name_en || '',
+      name_ar: item.name_ar || '',
+      description: item.description || '',
+      desc_ar: item.desc_ar || '',
       category: item.category || selectedCategory,
-      category_ar: item.category_ar || categories.find(cat => cat.id === selectedCategory)?.category_ar || "",
-      price: item.price || "",
-      image: item.image || "",
+      category_ar: item.category_ar || categories.find(cat => cat.id === selectedCategory)?.category_ar || '',
+      price: item.price || '',
+      image: item.image || '',
       imageFile: null,
     });
-    setShowModal("edit");
+    setShowModal('edit');
   };
 
-  if (!user) return (
-    <p className={`${textColor} text-center mt-5`}>
-      {text?.pleaseLogIn || (currentLange === "Ar" ? "يرجى تسجيل الدخول." : "Please log in.")}
-    </p>
-  );
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = menuItems.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(menuItems.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  if (!user) {
+    return (
+      <p className={`${textColor} text-center mt-5`}>
+        {text?.pleaseLogIn || (currentLange === 'Ar' ? 'يرجى تسجيل الدخول.' : 'Please log in.')}
+      </p>
+    );
+  }
+
+  if (!categories.length) {
+    return (
+      <p className={`${textColor} text-center mt-5`}>
+        {text?.loadingCategories || (currentLange === 'Ar' ? 'جارٍ تحميل الفئات...' : 'Loading categories...')}
+      </p>
+    );
+  }
 
   return (
     <Container fluid className="mt-5">
       <Row className="mb-4">
         <Col>
-          <CategorySelector 
-            categories={categories} 
-            selectedCategory={selectedCategory} 
-            setSelectedCategory={setSelectedCategory} 
+          <CategorySelector
+            categories={categories}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
             setShowModal={setShowModal}
             setFormData={setFormData}
           />
@@ -1048,31 +1099,36 @@ const AdminPanel = () => {
             <Button
               variant="primary"
               onClick={() => {
+                if (!selectedCategory) {
+                  toast.error('Please select a category first');
+                  return;
+                }
                 const selectedCat = categories.find(cat => cat.id === selectedCategory);
-                setFormData({ 
-                  title: "", 
-                  title_ar: "", 
-                  name_en: "", 
-                  name_ar: "", 
-                  description: "", 
-                  desc_ar: "", 
-                  category: selectedCategory || "", 
-                  category_ar: selectedCat?.category_ar || "", 
-                  price: "", 
-                  image: "", 
-                  imageFile: null 
+                console.log('Opening add item modal for category:', selectedCategory);
+                setFormData({
+                  title: '',
+                  title_ar: '',
+                  name_en: '',
+                  name_ar: '',
+                  description: '',
+                  desc_ar: '',
+                  category: selectedCategory || '',
+                  category_ar: selectedCat?.category_ar || '',
+                  price: '',
+                  image: '',
+                  imageFile: null,
                 });
-                setShowModal("add");
+                setShowModal('add');
               }}
             >
-              {text?.addItem || (currentLange === "Ar" ? "إضافة عنصر" : "Add Item")}
+              {text?.addItem || (currentLange === 'Ar' ? 'إضافة عنصر' : 'Add Item')}
             </Button>
           </div>
         </Col>
       </Row>
       <Row>
-        {menuItems.length > 0 ? (
-          menuItems.map((item) => (
+        {currentItems.length > 0 ? (
+          currentItems.map((item) => (
             <MenuItemCard
               key={item.docId}
               item={item}
@@ -1084,11 +1140,29 @@ const AdminPanel = () => {
         ) : (
           <Col>
             <p className={`${textColor} text-center`}>
-              {text?.noItemsInCategory || (currentLange === "Ar" ? "لا توجد عناصر في هذه الفئة." : "No items found in this category.")}
+              {text?.noItemsInCategory || (currentLange === 'Ar' ? 'لا توجد عناصر في هذه الفئة.' : 'No items found in this category.')}
             </p>
           </Col>
         )}
       </Row>
+      {menuItems.length > itemsPerPage && (
+        <div className="d-flex justify-content-between mt-4">
+          <Button
+            variant="primary"
+            onClick={() => paginate(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => paginate(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </Button>
+        </div>
+      )}
       <ItemModal
         showModal={showModal}
         setShowModal={setShowModal}

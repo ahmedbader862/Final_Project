@@ -192,12 +192,12 @@ const OrderTracking = () => {
                     </p>
                   </div>
                 )}
-                <button
+                {/* <button
                   className="btn btn-danger-custom btn-sm mt-3"
                   onClick={handleDeleteOrder}
                 >
                   <i className="bi bi-trash me-2"></i>Delete
-                </button>
+                </button> */}
               </div>
             </div>
           </div>
