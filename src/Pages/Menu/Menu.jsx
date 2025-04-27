@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { db, getDocs, collection, onSnapshot } from '../../firebase/firebase';
+import { db, collection, onSnapshot } from '../../firebase/firebase';
 import { useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
@@ -21,25 +21,35 @@ function Menu() {
   const [menuItems, setMenuItems] = useState({});
 
   useEffect(() => {
-    // Fetch categories dynamically
-    const fetchCategories = async () => {
-      try {
-        const snapshot = await getDocs(collection(db, 'menu'));
+    // Fetch categories dynamically with real-time updates
+    const unsubscribeCategories = onSnapshot(
+      collection(db, 'menu'),
+      (snapshot) => {
         const loadedCategories = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
         console.log('Fetched categories:', loadedCategories);
         setCategories(loadedCategories);
-      } catch (error) {
+      },
+      (error) => {
         console.error('Error fetching categories:', error);
         toast.error(
           text?.failedLoadCategories ||
-            (currentLange === 'Ar' ? 'فشل في تحميل الفئات' : 'Failed to load categories')
+            (currentLange === 'Ar' ? 'فشل في تحميل الفئات' : 'Failed to load categories'),
+          {
+            position: 'top-right',
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          }
         );
       }
-    };
-    fetchCategories();
+    );
+
+    return () => unsubscribeCategories();
   }, [text, currentLange]);
 
   useEffect(() => {
@@ -53,14 +63,10 @@ function Menu() {
             const itemData = doc.data();
             return {
               id: doc.id,
-              title:
-                currentLange === 'Ar'
-                  ? itemData.title_ar || 'عنوان غير متوفر'
-                  : itemData.title || 'Title not available',
-              description:
-                currentLange === 'Ar'
-                  ? itemData.desc_ar || 'الوصف غير متوفر'
-                  : itemData.description || 'Description not available',
+              title: itemData.title || 'Title not available',
+              title_ar: itemData.title_ar || itemData.name_ar || 'عنوان غير متوفر',
+              description: itemData.description || 'Description not available',
+              desc_ar: itemData.desc_ar || 'الوصف غير متوفر',
               image: itemData.image || 'default-image.jpg',
               price: itemData.price || 'Price not available',
             };
@@ -77,7 +83,15 @@ function Menu() {
             text?.failedLoadMenuItems ||
               (currentLange === 'Ar'
                 ? 'فشل في تحميل عناصر القائمة'
-                : 'Failed to load menu items')
+                : 'Failed to load menu items'),
+            {
+              position: 'top-right',
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+            }
           );
         }
       );
@@ -87,9 +101,9 @@ function Menu() {
   }, [categories, text, currentLange]);
 
   const handleAddToCart = (item) => {
-    const displayTitle = currentLange === "ar" ? item.title_ar : item.title;
+    const displayTitle = currentLange === 'Ar' ? item.title_ar : item.title;
     toast.success(`${displayTitle} أضيف إلى العربة!`, {
-      position: "top-right",
+      position: 'top-right',
       autoClose: 2000,
       hideProgressBar: false,
       closeOnClick: true,
@@ -99,9 +113,9 @@ function Menu() {
   };
 
   const handleAddToWishlist = (item) => {
-    const displayTitle = currentLange === "ar" ? item.title_ar : item.title;
+    const displayTitle = currentLange === 'Ar' ? item.title_ar : item.title;
     toast.info(`${displayTitle} أضيف إلى قائمة الرغبات!`, {
-      position: "top-right",
+      position: 'top-right',
       autoClose: 2000,
       hideProgressBar: false,
       closeOnClick: true,
@@ -110,6 +124,8 @@ function Menu() {
     });
   };
 
+  const textColor = theme === 'dark' ? 'text-white' : 'text-dark';
+  const backgroundColor = theme === 'dark' ? 'bg-custom-dark' : 'bg-custom-light';
 
   const handleNavigate = (category) => {
     navigate(`/Dishes/${category}`);
@@ -166,9 +182,6 @@ function Menu() {
       )}
     </div>
   );
-
-  const textColor = theme === 'dark' ? 'text-white' : 'text-dark';
-  const backgroundColor = theme === 'dark' ? 'bg-custom-dark' : 'bg-custom-light';
 
   return (
     <div className={`menu-container ${backgroundColor} ${textColor} mt-5`}>

@@ -848,6 +848,9 @@ const AdminPanel = () => {
   const [menuItems, setMenuItems] = useState([]);
   const [showModal, setShowModal] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
   const [formData, setFormData] = useState({
     title: '',
     title_ar: '',
@@ -1058,6 +1061,13 @@ const AdminPanel = () => {
     setShowModal('edit');
   };
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = menuItems.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(menuItems.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   if (!user) {
     return (
       <p className={`${textColor} text-center mt-5`}>
@@ -1117,8 +1127,8 @@ const AdminPanel = () => {
         </Col>
       </Row>
       <Row>
-        {menuItems.length > 0 ? (
-          menuItems.map((item) => (
+        {currentItems.length > 0 ? (
+          currentItems.map((item) => (
             <MenuItemCard
               key={item.docId}
               item={item}
@@ -1135,6 +1145,24 @@ const AdminPanel = () => {
           </Col>
         )}
       </Row>
+      {menuItems.length > itemsPerPage && (
+        <div className="d-flex justify-content-between mt-4">
+          <Button
+            variant="primary"
+            onClick={() => paginate(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => paginate(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </Button>
+        </div>
+      )}
       <ItemModal
         showModal={showModal}
         setShowModal={setShowModal}

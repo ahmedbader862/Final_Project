@@ -56,14 +56,22 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(""); // Clear previous errors
+
     if (!selectedTable) {
-      setError("Please select a table.");
+      setError("pleaseSelectTable");
       return;
     }
 
     const user = auth.currentUser;
     if (!user) {
-      setError("You must be logged in to make a reservation.");
+      setError("mustBeLoggedIn");
+      return;
+    }
+
+    // Validate time range
+    if (timeArriving && timeLeaving && timeLeaving <= timeArriving) {
+      setError("invalidTimeRange");
       return;
     }
 
@@ -75,7 +83,7 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
     );
     const querySnapshot = await getDocs(q);
     if (!querySnapshot.empty) {
-      setError("This table is already reserved.");
+      setError("tableAlreadyReserved");
       return;
     }
 
@@ -86,7 +94,7 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
       // Create the document with the custom ID
       const reservationDocRef = doc(reservationsRef, newReservationId);
       const reservationData = {
-        reservationId: newReservationId, // Store the custom ID in the document
+        reservationId: newReservationId,
         tableId: selectedTable,
         name,
         date,
@@ -114,7 +122,7 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
       setSelectedTable(null);
       setError("");
     } catch (error) {
-      setError("Failed to make reservation: " + error.message);
+      setError("failedToReserve");
     }
   };
 
@@ -129,55 +137,102 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
       )}
       {error && (
         <Alert variant="danger" onClose={() => setError("")} dismissible>
-          {text[error] || error}
+          {text[error] || 
+            (error === "invalidTimeRange" 
+              ? (currentLange === "Ar" ? "وقت المغادرة يجب أن يكون بعد وقت الوصول" : "Leaving time must be after arriving time")
+              : error === "failedToReserve"
+              ? (currentLange === "Ar" ? "فشل في إجراء الحجز" : "Failed to make reservation")
+              : error === "pleaseSelectTable"
+              ? (currentLange === "Ar" ? "يرجى اختيار طاولة" : "Please select a table")
+              : error === "mustBeLoggedIn"
+              ? (currentLange === "Ar" ? "يجب تسجيل الدخول لإجراء الحجز" : "You must be logged in to make a reservation")
+              : error === "tableAlreadyReserved"
+              ? (currentLange === "Ar" ? "هذه الطاولة محجوزة بالفعل" : "This table is already reserved")
+              : error)}
         </Alert>
       )}
       <form className="d-flex flex-column gap-2" onSubmit={handleSubmit}>
-        <input
-          className={`form-control name ${inputBg}`}
-          type="text"
-          placeholder={text?.name || (currentLange === "Ar" ? "الاسم" : "Name")}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <input
-          className={`form-control ${inputBg}`}
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          required
-        />
-        <select
-          className={`form-control ${inputBg}`}
-          value={numPersons}
-          onChange={(e) => setNumPersons(Number(e.target.value))}
-        >
-          <option value={4}>4 {text?.persons || (currentLange === "Ar" ? "أشخاص" : "Persons")}</option>
-          <option value={6}>6 {text?.persons || (currentLange === "Ar" ? "أشخاص" : "Persons")}</option>
-        </select>
-        <input
-          className={`form-control ${inputBg}`}
-          type="time"
-          value={timeArriving}
-          onChange={(e) => setTimeArriving(e.target.value)}
-          required
-        />
-        <input
-          className={`form-control ${inputBg}`}
-          type="time"
-          value={timeLeaving}
-          onChange={(e) => setTimeLeaving(e.target.value)}
-          required
-        />
-        <input
-          className={`form-control ${inputBg}`}
-          type="tel"
-          placeholder={text?.phone || (currentLange === "Ar" ? "رقم الهاتف" : "Phone Number")}
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          required
-        />
+        <div className="form-group">
+          <label htmlFor="name" className={textColor}>
+            {text?.name || (currentLange === "Ar" ? "الاسم" : "Name")}
+          </label>
+          <input
+            id="name"
+            className={`form-control ${inputBg}`}
+            type="text"
+            placeholder={text?.name || (currentLange === "Ar" ? "الاسم" : "Name")}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="date" className={textColor}>
+            {text?.date || (currentLange === "Ar" ? "التاريخ" : "Date")}
+          </label>
+          <input
+            id="date"
+            className={`form-control ${inputBg}`}
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="numPersons" className={textColor}>
+            {text?.numberOfPersons || (currentLange === "Ar" ? "عدد الأشخاص" : "Number of Persons")}
+          </label>
+          <select
+            id="numPersons"
+            className={`form-control ${inputBg}`}
+            value={numPersons}
+            onChange={(e) => setNumPersons(Number(e.target.value))}
+          >
+            <option value={4}>4 {text?.persons || (currentLange === "Ar" ? "أشخاص" : "Persons")}</option>
+            <option value={6}>6 {text?.persons || (currentLange === "Ar" ? "أشخاص" : "Persons")}</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label htmlFor="timeArriving" className={textColor}>
+            {text?.timeArriving || (currentLange === "Ar" ? "وقت الوصول" : "Arriving Time")}
+          </label>
+          <input
+            id="timeArriving"
+            className={`form-control ${inputBg}`}
+            type="time"
+            value={timeArriving}
+            onChange={(e) => setTimeArriving(e.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="timeLeaving" className={textColor}>
+            {text?.timeLeaving || (currentLange === "Ar" ? "وقت المغادرة" : "Leaving Time")}
+          </label>
+          <input
+            id="timeLeaving"
+            className={`form-control ${inputBg}`}
+            type="time"
+            value={timeLeaving}
+            onChange={(e) => setTimeLeaving(e.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="phone" className={textColor}>
+            {text?.phone || (currentLange === "Ar" ? "رقم الهاتف" : "Phone Number")}
+          </label>
+          <input
+            id="phone"
+            className={`form-control ${inputBg}`}
+            type="tel"
+            placeholder={text?.phone || (currentLange === "Ar" ? "رقم الهاتف" : "Phone Number")}
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
+          />
+        </div>
         <button className={`btn mt-4 ${btnClass}`} type="submit">
           {text?.reserve || (currentLange === "Ar" ? "حجز" : "Reserve")}
         </button>

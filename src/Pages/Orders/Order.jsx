@@ -288,12 +288,12 @@ const Orders = () => {
                           >
                             <i className="bi bi-truck me-2"></i>{text?.trackOrder || "Track Order"}
                           </button>
-                          <button 
+                          {/* <button 
                             className="btn btn-danger-custom btn-sm"
                             onClick={() => handleDeleteOrder(order.id)}
                           >
                             <i className="bi bi-trash me-2"></i>{text?.delete || "Delete"}
-                          </button>
+                          </button> */}
                         </div>
                       </div>
                     </div>

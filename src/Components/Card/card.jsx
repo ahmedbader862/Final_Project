@@ -13,6 +13,7 @@ function Carde({ title, poster_path, description, price, title_ar, desc_ar }) {
   const { theme } = useContext(ThemeContext);
   const [showModal, setShowModal] = useState(false);
   const [isInWishlistFirestore, setIsInWishlistFirestore] = useState(false);
+  const [isInCart, setIsInCart] = useState(false);
 
   const wishlist = useSelector((state) => state.wishlist?.wishlist || []);
   const user = useSelector((state) => state.UserData?.UserState || null);
@@ -24,11 +25,11 @@ function Carde({ title, poster_path, description, price, title_ar, desc_ar }) {
   const safePosterPath = poster_path || "default-image.jpg";
   const safePrice = price || "Price not available";
 
-  // تحديد العنوان والوصف بناءً على اللغة الحالية
+  // Determine title and description based on language
   const displayTitle = currentLange === "Ar" ? (title_ar || "عنوان غير متوفر") : (title || "Title not available");
   const displayDescription = currentLange === "Ar" ? (desc_ar || "لا يوجد وصف") : (description || "No description");
 
-  // Fetch Firestore wishlist state
+  // Fetch Firestore wishlist and cart state
   useEffect(() => {
     if (userState55 && userState55.uid && userState55 !== "who know") {
       const unsub = onSnapshot(
@@ -38,8 +39,14 @@ function Carde({ title, poster_path, description, price, title_ar, desc_ar }) {
             const allDishes = docSnap.data().allDishes || [];
             const exists = allDishes.some((dish) => dish.title === title);
             setIsInWishlistFirestore(exists);
+
+            // Check cart items
+            const cartItems = docSnap.data().cartItems || [];
+            const inCart = cartItems.some((item) => item.title === title);
+            setIsInCart(inCart);
           } else {
             setIsInWishlistFirestore(false);
+            setIsInCart(false);
           }
         },
         (error) => console.error("Firestore listener error:", error)
@@ -121,7 +128,7 @@ function Carde({ title, poster_path, description, price, title_ar, desc_ar }) {
     }
   };
 
-  const addToCartFirestore = async () => {
+  const toggleCartFirestore = async () => {
     if (!user?.uid) {
       return toast.error("يرجى تسجيل الدخول لإضافة عناصر إلى العربة", {
         position: "top-right",
@@ -132,36 +139,43 @@ function Carde({ title, poster_path, description, price, title_ar, desc_ar }) {
     try {
       const docRef = doc(db, "users2", user.uid);
       const docSnap = await getDoc(docRef);
-      const itemPrice = safePrice === "Price not available" ? 0 : parseFloat(safePrice);
       const cart = docSnap.exists() ? docSnap.data().cartItems || [] : [];
-
       const itemIndex = cart.findIndex((item) => item.title === title);
-      const updatedCart =
-        itemIndex >= 0
-          ? cart.map((item, i) =>
-              i === itemIndex ? { ...item, quantity: item.quantity + 1 } : item
-            )
-          : [
-              ...cart,
-              {
-                title: title,
-                title_ar: title_ar || "عنوان غير متوفر",
-                poster_path: safePosterPath,
-                price: itemPrice,
-                quantity: 1,
-                description: description,
-                desc_ar: desc_ar || "الوصف غير متوفر",
-              },
-            ];
 
-      await setDoc(docRef, { cartItems: updatedCart }, { merge: true });
-      toast.success(`${displayTitle} أضيف إلى العربة!`, {
-        position: "top-right",
-        autoClose: 2000,
-      });
+      if (itemIndex >= 0) {
+        // Item exists in cart, remove it
+        const updatedCart = cart.filter((item) => item.title !== title);
+        await setDoc(docRef, { cartItems: updatedCart }, { merge: true });
+        setIsInCart(false);
+        toast.info(`${displayTitle} تمت إزالته من العربة!`, {
+          position: "top-right",
+          autoClose: 2000,
+        });
+      } else {
+        // Item not in cart, add it
+        const itemPrice = safePrice === "Price not available" ? 0 : parseFloat(safePrice);
+        const updatedCart = [
+          ...cart,
+          {
+            title: title,
+            title_ar: title_ar || "عنوان غير متوفر",
+            poster_path: safePosterPath,
+            price: itemPrice,
+            quantity: 1,
+            description: description,
+            desc_ar: desc_ar || "الوصف غير متوفر",
+          },
+        ];
+        await setDoc(docRef, { cartItems: updatedCart }, { merge: true });
+        setIsInCart(true);
+        toast.success(`${displayTitle} أضيف إلى العربة!`, {
+          position: "top-right",
+          autoClose: 2000,
+        });
+      }
     } catch (error) {
-      console.error("Error adding to cart:", error);
-      toast.error("خطأ في إضافة العنصر إلى العربة", {
+      console.error("Error toggling cart:", error);
+      toast.error("خطأ في تحديث العربة", {
         position: "top-right",
         autoClose: 2000,
       });
@@ -225,13 +239,13 @@ function Carde({ title, poster_path, description, price, title_ar, desc_ar }) {
               {safePrice} {currentLange === "Ar" ? "جنيه" : "LE"}
             </span>
             <button
-              className={`add-btn ${theme === "dark" ? "add-btn-dark" : "add-btn"}`}
+              className={`add-btn ${theme === "dark" ? "add-btn-dark" : "add-btn"} ${isInCart ? "added" : ""}`}
               onClick={(e) => {
                 e.stopPropagation();
-                addToCartFirestore();
+                toggleCartFirestore();
               }}
             >
-              <i className={`fas fa-plus ${iconColor}`}></i>
+              <i className={`fas ${isInCart ? "fa-check" : "fa-plus"} ${iconColor}`}></i>
             </button>
           </div>
         </div>
@@ -259,9 +273,9 @@ function Carde({ title, poster_path, description, price, title_ar, desc_ar }) {
           </p>
           <button
             className={`btn ${theme === "dark" ? "btn-outline-light" : "btn-outline-dark"} me-2`}
-            onClick={addToCartFirestore}
+            onClick={toggleCartFirestore}
           >
-            إضافة إلى العربة
+            {isInCart ? "إزالة من العربة" : "إضافة إلى العربة"}
           </button>
           <button
             className={`btn ${theme === "dark" ? "btn-outline-light" : "btn-outline-dark"}`}

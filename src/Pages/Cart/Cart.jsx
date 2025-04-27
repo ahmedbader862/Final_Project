@@ -13,8 +13,6 @@ import { ThemeContext } from '../../Context/ThemeContext';
 export default function Cart() {
   const { theme } = useContext(ThemeContext);
   const userState55 = useSelector((state) => state.UserData['UserState']);
-  const currentLange = useSelector((state) => state.lange.langue);
-  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
   const [cartItems, setCartItems] = useState([]);
   const [couponCode, setCouponCode] = useState('');
   const [discountApplied, setDiscountApplied] = useState(false);
@@ -49,8 +47,8 @@ export default function Cart() {
       setDiscountApplied(false);
       Swal.fire({
         icon: 'error',
-        title: text?.invalidCoupon || "Invalid Coupon",
-        text: text?.invalidCouponMessage || "The coupon code you entered is invalid.",
+        title: "Invalid Coupon",
+        text: "The coupon code you entered is invalid.",
         confirmButtonColor: '#3085d6',
       });
     }
@@ -85,21 +83,21 @@ export default function Cart() {
 
   const handleRemoveItem = (item) => {
     Swal.fire({
-      title: text?.removeItem || "Remove Item",
-      text: (text?.removeItemConfirm || 'Are you sure you want to remove "{title}" from your cart?').replace("{title}", item.title),
+      title: "Remove Item",
+      text: `Are you sure you want to remove "${item.title}" from your cart?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
-      confirmButtonText: text?.confirmRemove || "Yes, remove it!",
+      confirmButtonText: "Yes, remove it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
         const updated = cartItems.filter(cartItem => cartItem.title !== item.title);
         await updateCart(updated);
         Swal.fire({
           icon: 'success',
-          title: text?.removed || "Removed!",
-          text: (text?.removedMessage || '"{title}" has been removed from your cart.').replace("{title}", item.title),
+          title: "Removed!",
+          text: `"${item.title}" has been removed from your cart.`,
           showConfirmButton: false,
           timer: 1500,
         });
@@ -111,8 +109,8 @@ export default function Cart() {
     if (cartItems.length === 0) {
       return Swal.fire({
         icon: 'warning',
-        title: text?.emptyCart || "Empty Cart",
-        text: text?.emptyCartMessage || "Your cart is empty. Add items to proceed.",
+        title: "Empty Cart",
+        text: "Your cart is empty. Add items to proceed.",
         confirmButtonColor: '#3085d6',
       });
     }
@@ -136,7 +134,7 @@ export default function Cart() {
         <div className="row justify-content-center">
           <div className="col-12 col-md-10">
             <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-              <h3 className="fw-bold mb-3">{text?.yourCart || "Your Cart"}</h3>
+              <h3 className="fw-bold mb-3">Your Cart</h3>
             </div>
 
             {cartItems.length > 0 ? (
@@ -171,7 +169,7 @@ export default function Cart() {
                 <OrderButton handleOrderNow={handleOrderNow} theme={theme} />
               </>
             ) : (
-              <p className="text-center mt-4">{text?.cartEmpty || "Your cart is empty."}</p>
+              <p className="text-center mt-4">Your cart is empty.</p>
             )}
           </div>
         </div>
