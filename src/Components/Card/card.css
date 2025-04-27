@@ -185,3 +185,30 @@
     background-color: #212529 !important;
     color: #ffffff !important;
 }
+
+
+
+
+.card-container {
+    min-height: 380px; /* ثبت ارتفاع الكارد */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .food-title {
+    min-height: 48px; /* ثبت ارتفاع عنوان الأكلة */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .food-description {
+    min-height: 64px; /* ثبت ارتفاع وصف الأكلة */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* اظهر سطرين بس */
+    -webkit-box-orient: vertical;
+  }
+  

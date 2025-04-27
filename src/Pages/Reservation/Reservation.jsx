@@ -10,7 +10,7 @@ const ReservationPage = () => {
   const currentLange = useSelector((state) => state.lange.langue);
   const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
 
-  const bgColor = theme === "dark" ? "bg-custom-dark" : "bg-light";
+  const bgColor = theme === "dark" ? "bg-custom-dark" : "bg-custom-light";
   const textColor = theme === "dark" ? "text-white" : "text-dark";
 
   return (
@@ -27,7 +27,7 @@ const ReservationPage = () => {
           </div>
 
           <div className="col-md-6">
-            {/* <h2 className="text-center">{text.reservationForm}</h2> */}
+            <h2 className="text-center ${textColor}">Fill the form</h2>
             <ReservationForm
               selectedTable={selectedTable}
               setSelectedTable={setSelectedTable}

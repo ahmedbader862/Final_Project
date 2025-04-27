@@ -7,7 +7,7 @@ function Contact() {
     const { theme } = useContext(ThemeContext);
 
     // تحديد الألوان بناءً على الـ theme
-    const backgroundColor = theme === "dark" ? "#151518" : "#f8f9fa"; // اللون الخلفي في الـ dark و الـ light mode
+    const backgroundColor = theme === "dark" ? "#151518" : "#dfdede"; // اللون الخلفي في الـ dark و الـ light mode
     const textColor = theme === "dark" ? "white" : "black"; // لون النصوص في الـ dark و الـ light mode
     const iconBackgroundColor = theme === "dark" ? "#ff6b6b" : "#ff5733"; // لون خلفية الأيقونات في الـ dark و الـ light mode
     const infoBackgroundColor = theme === "dark" ? "#26262D" : "#f1f1f1"; // لون الخلفية للمعلومات في الـ dark و الـ light mode

@@ -218,14 +218,14 @@ function Register() {
 
               {/* Name Field */}
               <div className="mb-3">
-                <label className={`form-label ${textColor}`}>{text.name || "Name"}</label>
+                <label className={` ${textColor}`}>{text.name || "Name"}</label>
                 <div className="input-group">
                   <span className={`input-group-text ${bgColor} ${textColor}`}>
                     <FontAwesomeIcon icon={faUser} className={iconColorClass} />
                   </span>
                   <input
                     type="text"
-                    className={`form-control rounded-end ${errorsMsgUp.nameError ? "is-invalid" : ""} ${textColor} ${placeholderClass}`}
+                    className={`form-control rounded-end ${errorsMsgUp.nameError ? "is-invalid" : ""} ${theme === "dark" ? "input-dark" : "input-light"} ${placeholderClass}`}
                     name="name"
                     value={userUpData.name}
                     onChange={handleData}
@@ -239,14 +239,14 @@ function Register() {
 
               {/* Email Field */}
               <div className="mb-3">
-                <label className={`form-label ${textColor}`}>{text.email || "Email"}</label>
+                <label className={` ${textColor}`}>{text.email || "Email"}</label>
                 <div className="input-group">
                   <span className={`input-group-text ${bgColor} ${textColor}`}>
                     <FontAwesomeIcon icon={faEnvelope} className={iconColorClass} />
                   </span>
                   <input
                     type="email"
-                    className={`form-control rounded-end ${errorsMsgUp.emailError ? "is-invalid" : ""} ${textColor} ${placeholderClass}`}
+                    className={`form-control rounded-end ${errorsMsgUp.emailError ? "is-invalid" : ""} ${theme === "dark" ? "input-dark" : "input-light"} ${placeholderClass}`}
                     name="email"
                     value={userUpData.email}
                     onChange={handleData}
@@ -260,14 +260,14 @@ function Register() {
 
               {/* Username Field */}
               <div className="mb-3">
-                <label className={`form-label ${textColor}`}>{text.username || "Username"}</label>
+                <label className={` ${textColor}`}>{text.username || "Username"}</label>
                 <div className="input-group">
                   <span className={`input-group-text ${bgColor} ${textColor}`}>
                     <FontAwesomeIcon icon={faAt} className={iconColorClass} />
                   </span>
                   <input
                     type="text"
-                    className={`form-control rounded-end ${errorsMsgUp.usrNameError ? "is-invalid" : ""} ${textColor} ${placeholderClass}`}
+                    className={`form-control rounded-end ${errorsMsgUp.usrNameError ? "is-invalid" : ""} ${theme === "dark" ? "input-dark" : "input-light"} ${placeholderClass}`}
                     name="usrName"
                     value={userUpData.usrName}
                     onChange={handleData}
@@ -281,14 +281,14 @@ function Register() {
 
               {/* Password Field */}
               <div className="mb-3">
-                <label className={`form-label ${textColor}`}>{text.password || "Password"}</label>
+                <label className={` ${textColor}`}>{text.password || "Password"}</label>
                 <div className="input-group">
                   <span className={`input-group-text ${bgColor} ${textColor}`}>
                     <FontAwesomeIcon icon={faLock} className={iconColorClass} />
                   </span>
                   <input
                     type="password"
-                    className={`form-control rounded-end ${errorsMsgUp.passwordError ? "is-invalid" : ""} ${textColor} ${placeholderClass}`}
+                    className={`form-control rounded-end ${errorsMsgUp.passwordError ? "is-invalid" : ""} ${theme === "dark" ? "input-dark" : "input-light"} ${placeholderClass}`}
                     name="password"
                     value={userUpData.password}
                     onChange={handleData}
@@ -302,14 +302,14 @@ function Register() {
 
               {/* Confirm Password Field */}
               <div className="mb-4">
-                <label className={`form-label ${textColor}`}>{text.confirmPassword || "Confirm Password"}</label>
+                <label className={` ${textColor}`}>{text.confirmPassword || "Confirm Password"}</label>
                 <div className="input-group">
                   <span className={`input-group-text ${bgColor} ${textColor}`}>
                     <FontAwesomeIcon icon={faLock} className={iconColorClass} />
                   </span>
                   <input
                     type="password"
-                    className={`form-control rounded-end ${errorsMsgUp.confPasswordError ? "is-invalid" : ""} ${textColor} ${placeholderClass}`}
+                    className={`form-control rounded-end ${errorsMsgUp.confPasswordError ? "is-invalid" : ""} ${theme === "dark" ? "input-dark" : "input-light"} ${placeholderClass}`}
                     name="confPassword"
                     value={userUpData.confPassword}
                     onChange={handleData}

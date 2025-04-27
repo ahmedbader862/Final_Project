@@ -38,9 +38,9 @@ const TableSelection = ({ selectedTable, setSelectedTable }) => {
               onMouseEnter={() => setHoveredTable(table.id)}
               onMouseLeave={() => setHoveredTable(null)}
             />
-            <p className={h2Color}>
-              {text.tableFor} {table.seats} {text.persons}
-            </p>
+            <p className="text-white text-center ">
+            {text?.tableFor || (currentLange === "Ar" ? "طاولة لـ" : "Table for")} {table.seats} {text?.persons || (currentLange === "Ar" ? "أشخاص" : "Persons")}
+            </p>           
           </div>
         ))}
       </div>

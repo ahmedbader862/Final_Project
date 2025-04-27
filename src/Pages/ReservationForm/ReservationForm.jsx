@@ -119,7 +119,7 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
   };
 
   return (
-    <div className="py-5">
+    <div className="py-2">
       <h2 className={`text-center mb-3 ${textColor}`}>{text.reservationFormTitle}</h2>
       {selectedTable && <p className={textColor}>{text.selectedTable}: {selectedTable}</p>}
       {successMessage && (
@@ -133,55 +133,90 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
         </Alert>
       )}
       <form className="d-flex flex-column gap-2" onSubmit={handleSubmit}>
-        <input
-          className={`form-control name ${inputBg}`}
-          type="text"
-          placeholder={text?.name || (currentLange === "Ar" ? "الاسم" : "Name")}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <input
-          className={`form-control ${inputBg}`}
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          required
-        />
-        <select
-          className={`form-control ${inputBg}`}
-          value={numPersons}
-          onChange={(e) => setNumPersons(Number(e.target.value))}
-        >
-          <option value={4}>4 {text?.persons || (currentLange === "Ar" ? "أشخاص" : "Persons")}</option>
-          <option value={6}>6 {text?.persons || (currentLange === "Ar" ? "أشخاص" : "Persons")}</option>
-        </select>
-        <input
-          className={`form-control ${inputBg}`}
-          type="time"
-          value={timeArriving}
-          onChange={(e) => setTimeArriving(e.target.value)}
-          required
-        />
-        <input
-          className={`form-control ${inputBg}`}
-          type="time"
-          value={timeLeaving}
-          onChange={(e) => setTimeLeaving(e.target.value)}
-          required
-        />
-        <input
-          className={`form-control ${inputBg}`}
-          type="tel"
-          placeholder={text?.phone || (currentLange === "Ar" ? "رقم الهاتف" : "Phone Number")}
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          required
-        />
-        <button className={`btn mt-4 ${btnClass}`} type="submit">
-          {text?.reserve || (currentLange === "Ar" ? "حجز" : "Reserve")}
-        </button>
-      </form>
+  <div className="d-flex flex-column">
+    <label className={textColor}>
+      {text?.name || (currentLange === "Ar" ? "الاسم" : "Name")}
+    </label>
+    <input
+      className={`form-control ${inputBg}`}
+      type="text"
+      value={name}
+      onChange={(e) => setName(e.target.value)}
+      required
+    />
+  </div>
+
+  <div className="d-flex flex-column">
+    <label className={textColor}>
+      {text?.date || (currentLange === "Ar" ? "التاريخ" : "Date")}
+    </label>
+    <input
+      className={`form-control ${inputBg}`}
+      type="date"
+      value={date}
+      onChange={(e) => setDate(e.target.value)}
+      required
+    />
+  </div>
+
+  <div className="d-flex flex-column">
+    <label className={textColor}>
+      {text?.numPersons || (currentLange === "Ar" ? "عدد الأشخاص" : "Number of Persons")}
+    </label>
+    <select
+      className={`form-control ${inputBg}`}
+      value={numPersons}
+      onChange={(e) => setNumPersons(Number(e.target.value))}
+    >
+      <option value={4}>4 {text?.persons || (currentLange === "Ar" ? "أشخاص" : "Persons")}</option>
+      <option value={6}>6 {text?.persons || (currentLange === "Ar" ? "أشخاص" : "Persons")}</option>
+    </select>
+  </div>
+
+  <div className="d-flex flex-column">
+    <label className={textColor}>
+      {text?.timeArriving || (currentLange === "Ar" ? "وقت الوصول" : "Time of Arrival")}
+    </label>
+    <input
+      className={`form-control ${inputBg}`}
+      type="time"
+      value={timeArriving}
+      onChange={(e) => setTimeArriving(e.target.value)}
+      required
+    />
+  </div>
+
+  <div className="d-flex flex-column">
+    <label className={textColor}>
+      {text?.timeLeaving || (currentLange === "Ar" ? "وقت المغادرة" : "Time of Leaving")}
+    </label>
+    <input
+      className={`form-control ${inputBg}`}
+      type="time"
+      value={timeLeaving}
+      onChange={(e) => setTimeLeaving(e.target.value)}
+      required
+    />
+  </div>
+
+  <div className="d-flex flex-column">
+    <label className={textColor}>
+      {text?.phone || (currentLange === "Ar" ? "رقم الهاتف" : "Phone Number")}
+    </label>
+    <input
+      className={`form-control ${inputBg}`}
+      type="tel"
+      value={phone}
+      onChange={(e) => setPhone(e.target.value)}
+      required
+    />
+  </div>
+
+  <button className={`btn mt-4 ${btnClass}`} type="submit">
+    {text?.reserve || (currentLange === "Ar" ? "حجز" : "Reserve")}
+  </button>
+</form>
+
     </div>
   );
 };

@@ -165,7 +165,7 @@ function Signin() {
 
               {/* Email */}
               <div className="mb-3">
-                <label className={`form-label ${textColor}`}>
+                <label className={`mb-2 ${textColor}`}>
                   {text.email || "Email"}
                 </label>
                 <div className="input-group">
@@ -178,7 +178,7 @@ function Signin() {
                     value={userUpData.email}
                     onChange={handleData}
                     placeholder={text.enterEmail || "Enter your email"}
-                    className={`form-control ${errorsMsgUp.emailError ? "is-invalid" : ""} ${textColor} ${placeholderClass}`}
+                    className={`form-control ${errorsMsgUp.emailError ? "is-invalid" : ""} ${theme === "dark" ? "input-dark" : "input-light"} ${placeholderClass}`}
                   />
                   {errorsMsgUp.emailError && (
                     <div className="invalid-feedback">{errorsMsgUp.emailError}</div>
@@ -188,7 +188,7 @@ function Signin() {
 
               {/* Password */}
               <div className="mb-3">
-                <label className={`form-label ${textColor}`}>
+                <label className={`mb-2 ${textColor}`}>
                   {text.password || "Password"}
                 </label>
                 <div className="input-group">
@@ -201,7 +201,7 @@ function Signin() {
                     value={userUpData.password}
                     onChange={handleData}
                     placeholder={text.enterPassword || "Enter your password"}
-                    className={`form-control ${errorsMsgUp.passwordError ? "is-invalid" : ""} ${textColor} ${placeholderClass}`}
+                    className={`form-control ${errorsMsgUp.passwordError ? "is-invalid" : ""} ${theme === "dark" ? "input-dark" : "input-light"} ${placeholderClass}`}
                   />
                   {errorsMsgUp.passwordError && (
                     <div className="invalid-feedback">{errorsMsgUp.passwordError}</div>
