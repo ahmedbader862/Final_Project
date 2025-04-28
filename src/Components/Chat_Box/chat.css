@@ -36,6 +36,7 @@
     width: 100%;
     box-sizing: border-box;
     box-shadow: rgb(0, 0, 0) 0px 0px 20px;
+    
   }
   
   /* Scrollbar styling */
@@ -60,7 +61,8 @@
   .message {
     display: flex;
     margin-bottom: 15px;
-    width: 100%;
+    width: 100% !important;
+    max-width: 100% !important;
   }
   
   .message.sent {
@@ -72,7 +74,7 @@
   }
   
   .message-content {
-    /* max-width: 70%; */
+    max-width: 100% !important;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     word-wrap: break-word; /* Ensure long words wrap */
   }

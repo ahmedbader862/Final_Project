@@ -151,17 +151,13 @@ const Orders = () => {
   const bgClass = theme === "dark" ? "bg-dark-custom" : "bg-light-custom";
   const cardClass = theme === "dark" ? "bg-dark-card text-white" : "bg-light-card text-dark";
   const textClass = theme === "dark" ? "text-white" : "text-dark";
-  const buttonClass = theme === "dark" ? "btn-dark-custom" : "btn-light-custom";
 
   const extractIdPortion = (id) => {
-    if (!id || typeof id !== 'string') return id || 'N/A';
+    if (!id || typeof id !== 'string') return 'N/A';
     const hashIndex = id.indexOf('#');
-    if (hashIndex === -1) return id;
-    let firstUnderscore = id.indexOf('_', hashIndex);
-    if (firstUnderscore === -1) return id.slice(hashIndex);
-    let secondUnderscore = id.indexOf('_', firstUnderscore + 1);
-    if (secondUnderscore === -1) return id.slice(hashIndex);
-    return id.slice(hashIndex, secondUnderscore + 1);
+    if (hashIndex === -1) return id.slice(0, 8);
+    const portion = id.slice(hashIndex, hashIndex + 9); // Take # + 8 chars
+    return portion.length > 8 ? portion.slice(0, 8) + '...' : portion;
   };
 
   const getStatusStyles = (status) => {
@@ -185,7 +181,7 @@ const Orders = () => {
         <div className="d-flex flex-wrap gap-3 mb-4 justify-content-center">
           <div className="dropdown">
             <button
-              className={`btn ${buttonClass} dropdown-toggle`}
+              className={`btn btn-accent dropdown-toggle`}
               type="button"
               data-bs-toggle="dropdown"
             >
@@ -199,7 +195,7 @@ const Orders = () => {
 
           <div className="dropdown">
             <button
-              className={`btn ${buttonClass} dropdown-toggle`}
+              className={`btn btn-accent dropdown-toggle`}
               type="button"
               data-bs-toggle="dropdown"
             >
@@ -214,7 +210,7 @@ const Orders = () => {
 
           <div className="dropdown">
             <button
-              className={`btn ${buttonClass} dropdown-toggle`}
+              className={`btn btn-accent dropdown-toggle`}
               type="button"
               data-bs-toggle="dropdown"
             >
@@ -350,7 +346,8 @@ const Orders = () => {
                   <ul className="pagination">
                     <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
                       <button
-                        className={`page-link ${buttonClass}`}
+                        className={`page-link btn-accent`}
+                        style={{ border: "3px solid #FF6B6B", color: "#FF6B6B" }}
                         onClick={handlePrevious}
                         disabled={currentPage === 1}
                       >
@@ -360,7 +357,8 @@ const Orders = () => {
                     {getPageNumbers().map(number => (
                       <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
                         <button
-                          className={`page-link ${buttonClass}`}
+                          className={`page-link btn-accent ${currentPage === number ? 'page-active' : ''}`}
+                          style={{ border: "3px solid #FF6B6B", color: "#FF6B6B" }}
                           onClick={() => handlePageChange(number)}
                         >
                           {number}
@@ -369,7 +367,8 @@ const Orders = () => {
                     ))}
                     <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
                       <button
-                        className={`page-link ${buttonClass}`}
+                        className={`page-link btn-accent`}
+                        style={{ border: "3px solid #FF6B6B", color: "#FF6B6B" }}
                         onClick={handleNext}
                         disabled={currentPage === totalPages}
                       >

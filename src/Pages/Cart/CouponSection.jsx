@@ -7,7 +7,7 @@ const CouponSection = ({ couponCode, setCouponCode, handleApplyCoupon, cartItems
   const btnClass = theme === 'dark' ? 'btn-light' : 'btn-dark';
 
   return (
-    <div className={`card border-0 mb-4 ${cardBg}`}>
+    <div className={` border-0 mb-4 ${cardBg}`}>
       <div className="card-body p-4 d-flex flex-row">
         <div className="form-outline flex-fill">
           <input

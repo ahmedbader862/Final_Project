@@ -252,39 +252,46 @@ function Carde({ title, poster_path, description, price, title_ar, desc_ar }) {
       </div>
 
       <Modal
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        centered
-        dialogClassName="custom-modal"
-      >
-        <Modal.Body className={`${bgColor} ${textColor}`}>
-          <h2>{displayTitle}</h2>
-          <div className="text-center mb-3">
-            <img
-              src={safePosterPath}
-              alt={displayTitle}
-              className="img-fluid rounded"
-              style={{ maxHeight: "250px", objectFit: "cover" }}
-            />
-          </div>
-          <p>{displayDescription}</p>
-          <p>
-            <strong>Price:</strong> {safePrice} {currentLange === "Ar" ? "جنيه" : "LE"}
-          </p>
-          <button
-            className={`btn ${theme === "dark" ? "btn-outline-light" : "btn-outline-dark"} me-2`}
-            onClick={toggleCartFirestore}
-          >
-            {isInCart ? "إزالة من العربة" : "إضافة إلى العربة"}
-          </button>
-          <button
-            className={`btn ${theme === "dark" ? "btn-outline-light" : "btn-outline-dark"}`}
-            onClick={() => toggleFirestore()}
-          >
-            {isInWishlist ? "إزالة من قائمة الرغبات" : "إضافة إلى قائمة الرغبات"}
-          </button>
-        </Modal.Body>
-      </Modal>
+  show={showModal}
+  onHide={() => setShowModal(false)}
+  centered
+  dialogClassName="custom-modal"
+>
+  <Modal.Body className={`${bgColor} ${textColor}`}>
+    <h2>{displayTitle}</h2>
+    <div className="text-center mb-3">
+      <img
+        src={safePosterPath}
+        alt={displayTitle}
+        className="img-fluid rounded"
+        style={{ maxHeight: "250px", objectFit: "cover" }}
+      />
+    </div>
+    <p>{displayDescription}</p>
+    <p>
+      <strong>{currentLange === "Ar" ? "السعر:" : "Price:"}</strong> {safePrice} {currentLange === "Ar" ? "جنيه" : "LE"}
+    </p>
+    <button
+      className={`btn ${theme === "dark" ? "btn-light" : "btn-dark"} me-2`}
+      onClick={toggleCartFirestore}
+    >
+      {isInCart 
+        ? (currentLange === "Ar" ? "إزالة من العربة" : "Remove from Cart") 
+        : (currentLange === "Ar" ? "إضافة إلى العربة" : "Add to Cart")
+      }
+    </button>
+    <button
+      className={`btn ${theme === "dark" ? "btn-light" : "btn-dark"}`}
+      onClick={() => toggleFirestore()}
+    >
+      {(user?.uid ? isInWishlistFirestore : isInWishlist)
+        ? (currentLange === "Ar" ? "إزالة من قائمة الرغبات" : "Remove from Wishlist")
+        : (currentLange === "Ar" ? "إضافة إلى قائمة الرغبات" : "Add to Wishlist")
+      }
+    </button>
+  </Modal.Body>
+</Modal>
+
     </>
   );
 }

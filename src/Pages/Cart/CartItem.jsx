@@ -7,7 +7,7 @@ const CartItem = ({ item, handleStepDown, handleStepUp, handleRemoveItem, calcul
   const inputBg = theme === 'dark' ? 'bg-secondary text-white border-0' : '';
 
   return (
-    <div className={`card rounded-3 border-0 mb-4 ${cardClass}`} key={item.title}>
+    <div className={` rounded-3 border-0 mb-4 ${cardClass}`} key={item.title}>
       <div className="card-body p-3">
         <div className="row d-flex align-items-center">
           <div className="col-4 col-md-2">

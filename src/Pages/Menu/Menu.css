@@ -1,4 +1,4 @@
-body{
+/* body{
     background-color:#151518;
 }
 
@@ -29,7 +29,6 @@ body{
     padding: 20px;
   }
   
-  /* ✅ تحسين عرض العناوين */
   .category-header {
     display: flex;
     justify-content: space-between;
@@ -40,7 +39,6 @@ body{
     font-size: 1.5rem;
   }
   
-  /* ✅ ضبط أزرار "See All" */
   .see-all-btn {
     font-size: 1rem;
     color: #ff4d4d;
@@ -52,12 +50,10 @@ body{
     color: #ff1a1a;
   }
   
-  /* ✅ تحسين عرض السلايدر */
   .category-slider {
     padding: 10px 0;
   }
   
-  /* ✅ تحسين التباعد والهوامش في الشاشات الصغيرة */
   @media (max-width: 768px) {
     .menu-title {
       font-size: 1.8rem;
@@ -75,4 +71,4 @@ body{
  
  
   
- 
+  */

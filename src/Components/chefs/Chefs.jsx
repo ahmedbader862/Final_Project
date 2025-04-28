@@ -45,7 +45,7 @@ function Chefs() {
 
   return (
     <section
-      className={`chefs py-5 ${
+      className={`chefs w-100 py-5 ${
         theme === "dark" ? "bg-custom-dark" : "bg-custom-light"
       }`}
       id="chefs"
@@ -74,13 +74,14 @@ function Chefs() {
                 } ${textColor}`}
               >
                 <div
-                  className="img-holder overflow-hidden rounded-circle mx-auto mt-3"
+                  className="img-holder text-center  rounded-circle mx-auto w-100 "
                   style={{ width: "250px", height: "250px" }}
                 >
                   <img
-                    className="chef-img w-100 h-100 object-fit-cover"
+                    className="chef-img  p-4   object-fit-cover"
                     src={chef.image}
                     alt={chef.name}
+                    style={{ width: "100%", height: "100%" }}
                   />
                 </div>
                 <div className={`card-body text-center ${textColor}`}>

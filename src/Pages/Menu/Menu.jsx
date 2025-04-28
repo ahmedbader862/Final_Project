@@ -21,7 +21,6 @@ function Menu() {
   const [menuItems, setMenuItems] = useState({});
 
   useEffect(() => {
-    // Fetch categories dynamically with real-time updates
     const unsubscribeCategories = onSnapshot(
       collection(db, 'menu'),
       (snapshot) => {
@@ -29,11 +28,9 @@ function Menu() {
           id: doc.id,
           ...doc.data(),
         }));
-        console.log('Fetched categories:', loadedCategories);
         setCategories(loadedCategories);
       },
       (error) => {
-        console.error('Error fetching categories:', error);
         toast.error(
           text?.failedLoadCategories ||
             (currentLange === 'Ar' ? 'فشل في تحميل الفئات' : 'Failed to load categories'),
@@ -53,7 +50,6 @@ function Menu() {
   }, [text, currentLange]);
 
   useEffect(() => {
-    // Set up real-time listeners for each category
     const unsubscribes = categories.map((category) => {
       const itemsCollectionRef = collection(db, `menu/${category.id}/items`);
       return onSnapshot(
@@ -67,18 +63,16 @@ function Menu() {
               title_ar: itemData.title_ar || itemData.name_ar || 'عنوان غير متوفر',
               description: itemData.description || 'Description not available',
               desc_ar: itemData.desc_ar || 'الوصف غير متوفر',
-              image: itemData.image || 'default-image.jpg',
+              image: itemData.image || '/Images/default-image.jpg',
               price: itemData.price || 'Price not available',
             };
           });
-          console.log(`Updated items for category ${category.id}:`, categoryData);
           setMenuItems((prev) => ({
             ...prev,
             [category.id]: categoryData,
           }));
         },
         (error) => {
-          console.error(`Error fetching items for ${category.id}:`, error);
           toast.error(
             text?.failedLoadMenuItems ||
               (currentLange === 'Ar'
@@ -134,10 +128,10 @@ function Menu() {
   const renderCategorySection = (title, items, categoryKey) => (
     <div className="category-section mt-5">
       <div className="category-header align-items-center d-flex justify-content-between">
-        <h2>{title}</h2>
+        <h2 className="text-danger">{title}</h2>
         <a
           onClick={() => handleNavigate(categoryKey)}
-          className="see-all-btn text-decoration-none"
+          className="see-all-btn text-danger text-decoration-none"
         >
           {text?.seeAll || (currentLange === 'Ar' ? 'عرض الكل' : 'See All')}{' '}
           <span>
@@ -152,41 +146,50 @@ function Menu() {
           freeMode={true}
           loop={true}
           speed={600}
-          spaceBetween={20}
-          slidesPerView={4}
+          spaceBetween={15}
+          slidesPerView={3}
           breakpoints={{
-            480: { slidesPerView: 1 },
-            768: { slidesPerView: 2 },
-            1024: { slidesPerView: 3 },
-            1280: { slidesPerView: 4 },
+            320: { slidesPerView: 1, spaceBetween: 10 },
+            576: { slidesPerView: 2, spaceBetween: 12 },
+            768: { slidesPerView: 2, spaceBetween: 12 },
+            1024: { slidesPerView: 3, spaceBetween: 15 },
+            1280: { slidesPerView: 3, spaceBetween: 15 },
           }}
           className="category-slider"
         >
           {items.map((item) => (
             <SwiperSlide key={item.id}>
-              <Card
-                poster_path={item.image}
-                title={item.title}
-                title_ar={item.title_ar}
-                price={item.price}
-                description={item.description}
-                desc_ar={item.desc_ar}
-                onAddToCart={() => handleAddToCart(item)}
-                onAddToWishlist={() => handleAddToWishlist(item)}
-              />
+              <div className="card-wrapper">
+                <Card
+                  poster_path={item.image}
+                  title={item.title}
+                  title_ar={item.title_ar}
+                  price={item.price}
+                  description={item.description}
+                  desc_ar={item.desc_ar}
+                  onAddToCart={() => handleAddToCart(item)}
+                  onAddToWishlist={() => handleAddToWishlist(item)}
+                  theme={theme}
+                />
+              </div>
             </SwiperSlide>
           ))}
         </Swiper>
       ) : (
-        <p>{text?.noItems || (currentLange === 'Ar' ? 'لا توجد عناصر' : 'No items available')}</p>
+        <p className={textColor}>
+          {text?.noItems || (currentLange === 'Ar' ? 'لا توجد عناصر' : 'No items available')}
+        </p>
       )}
     </div>
   );
 
   return (
-    <div className={`menu-container ${backgroundColor} ${textColor} mt-5`}>
+    <div className={`menu-container ${backgroundColor} ${textColor} py-5`}>
       <div className="container">
-        <h1 className="text-center menu-title">{text?.menuTitle || (currentLange === 'Ar' ? 'القائمة' : 'Our Menu')}</h1>
+        <h1 className={`text-center menu-title ${textColor}`}>
+          <span>{currentLange === 'Ar' ? 'قائمتنا' : 'Our'}</span>
+          <span className="text-danger"> {currentLange === 'Ar' ? 'القائمة' : 'Menu'}</span>
+        </h1>
         {categories.map((category) =>
           renderCategorySection(
             currentLange === 'Ar' ? category.category_ar || category.name : category.name || category.id,

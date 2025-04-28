@@ -12,7 +12,9 @@
     padding: 1.5rem;
   }
   
- 
+  .cart-item {
+    min-height: 300px; /* او padding جامد */
+  }
   .food-image {
     width: 100%;
     max-width: 100px; 

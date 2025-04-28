@@ -21,10 +21,7 @@ const UserReservationsPage = () => {
 
   const bgColor = theme === "dark" ? "bg-dark-custom" : "bg-light-custom";
   const textColor = theme === "dark" ? "text-white" : "text-dark";
-  const cardClass = theme === "dark" ? "card-dark" : "card-light";
-  const btnClass = theme === "dark" ? "btn-custom-dark" : "btn-custom-light";
-  const pageBtnClass = theme === "dark" ? "page-btn-dark" : "page-btn-light";
-  const pageNavBtnClass = theme === "dark" ? "page-nav-btn-dark" : "page-nav-btn-light";
+  const cardClass = theme === "dark" ? "bg-card-dark text-white" : "bg-card-light text-dark";
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -43,7 +40,7 @@ const UserReservationsPage = () => {
           ...doc.data(),
         }));
         setReservations(userReservations);
-        setCurrentPage(1); // Reset to first page when reservations change
+        setCurrentPage(1);
       },
       (error) => {
         setError((text?.failedLoadReservations || "Failed to load reservations: ") + error.message);
@@ -62,7 +59,7 @@ const UserReservationsPage = () => {
       case "rejected":
         return "var(--danger)"; // #B73E3E
       default:
-        return "var(--text-light)";
+        return "var(--text-light)"; // #ffffff
     }
   };
 
@@ -79,7 +76,6 @@ const UserReservationsPage = () => {
     }
   };
 
-  // Pagination logic
   const indexOfLastReservation = currentPage * reservationsPerPage;
   const indexOfFirstReservation = indexOfLastReservation - reservationsPerPage;
   const currentReservations = reservations.slice(indexOfFirstReservation, indexOfLastReservation);
@@ -123,7 +119,12 @@ const UserReservationsPage = () => {
         <h1 className="text-center mb-4">{text?.myReservationsTitle || "My Reservations"}</h1>
 
         {error && (
-          <Alert variant="danger" onClose={() => setError("")} dismissible>
+          <Alert
+            variant="danger"
+            onClose={() => setError("")}
+            dismissible
+            className={clsx("custom-alert", { "rtl-text": currentLange === "Ar" })}
+          >
             {error}
           </Alert>
         )}
@@ -150,26 +151,46 @@ const UserReservationsPage = () => {
                           {text[`status${reservation.status.charAt(0).toUpperCase() + reservation.status.slice(1)}`] || reservation.status || "pending"}
                         </span>
                       </Card.Title>
-                      <Card.Text className="muted-text">
-                        <strong>{text?.tableIdLabel || "Table ID"}:</strong> {reservation.tableId || "N/A"} <br />
+                      <Card.Text className={clsx("muted-text", { "rtl-text": currentLange === "Ar" })}>
+                        <div className={clsx("d-flex", { "flex-row-reverse": currentLange === "Ar" })}>
+                          <strong>{text?.tableIdLabel || "Table ID"}:</strong>
+                          <span className="ms-2">{reservation.tableId || "N/A"}</span>
+                        </div>
                         <hr className={theme === "dark" ? "hr-dark" : "hr-light"} />
-                        <strong>{text?.nameLabel || "Name"}:</strong> {reservation.name || "N/A"} <br />
-                        <strong>{text?.dateLabel || "Date"}:</strong>{" "}
-                        {reservation.date
-                          ? new Date(reservation.date).toLocaleString(currentLange === "Ar" ? 'ar-EG' : 'en-US', {
-                              month: '2-digit',
-                              day: '2-digit',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })
-                          : "N/A"}{" "}
-                        <br />
-                        <strong>{text?.numPersonsLabel || "Number of Persons"}:</strong>{" "}
-                        {reservation.numPersons || "N/A"} <br />
-                        <strong>{text?.timeArrivingLabel || "Time Arriving"}:</strong> {reservation.timeArriving || "N/A"} <br />
-                        <strong>{text?.timeLeavingLabel || "Time Leaving"}:</strong> {reservation.timeLeaving || "N/A"} <br />
-                        <strong>{text?.phoneLabel || "Phone"}:</strong> {reservation.phone || "N/A"} <br />
+                        <div className={clsx("d-flex", { "flex-row-reverse": currentLange === "Ar" })}>
+                          <strong>{text?.nameLabel || "Name"}:</strong>
+                          <span className="ms-2">{reservation.name || "N/A"}</span>
+                        </div>
+                        <div className={clsx("d-flex", { "flex-row-reverse": currentLange === "Ar" })}>
+                          <strong>{text?.dateLabel || "Date"}:</strong>
+                          <span className="ms-2">
+                            {reservation.date
+                              ? new Date(reservation.date).toLocaleString(currentLange === "Ar" ? 'ar-EG' : 'en-US', {
+                                  month: '2-digit',
+                                  day: '2-digit',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })
+                              : "N/A"}
+                          </span>
+                        </div>
+                        <div className={clsx("d-flex", { "flex-row-reverse": currentLange === "Ar" })}>
+                          <strong>{text?.numPersonsLabel || "Number of Persons"}:</strong>
+                          <span className="ms-2">{reservation.numPersons || "N/A"}</span>
+                        </div>
+                        <div className={clsx("d-flex", { "flex-row-reverse": currentLange === "Ar" })}>
+                          <strong>{text?.timeArrivingLabel || "Time Arriving"}:</strong>
+                          <span className="ms-2">{reservation.timeArriving || "N/A"}</span>
+                        </div>
+                        <div className={clsx("d-flex", { "flex-row-reverse": currentLange === "Ar" })}>
+                          <strong>{text?.timeLeavingLabel || "Time Leaving"}:</strong>
+                          <span className="ms-2">{reservation.timeLeaving || "N/A"}</span>
+                        </div>
+                        <div className={clsx("d-flex", { "flex-row-reverse": currentLange === "Ar" })}>
+                          <strong>{text?.phoneLabel || "Phone"}:</strong>
+                          <span className="ms-2">{reservation.phone || "N/A"}</span>
+                        </div>
                         <div className="text-center mt-3">
                           <em>{getStatusMessage(reservation.status || "pending")}</em>
                         </div>
@@ -179,13 +200,12 @@ const UserReservationsPage = () => {
                 </Col>
               ))}
             </Row>
-            {/* Pagination */}
             <div className={clsx("d-flex justify-content-center mt-5", { "flex-row-reverse": currentLange === "Ar" })}>
               <nav>
-                <ul className="pagination">
+                <ul className="pagination ">
                   <li className={clsx("page-item", { disabled: currentPage === 1 })}>
-                    <button 
-                      className={clsx("page-link", pageNavBtnClass)} 
+                    <button
+                      className={clsx("page-link btn-outline-accent", { "disabled": currentPage === 1 })}
                       onClick={handlePrevious}
                       disabled={currentPage === 1}
                     >
@@ -194,8 +214,8 @@ const UserReservationsPage = () => {
                   </li>
                   {getPageNumbers().map(number => (
                     <li key={number} className={clsx("page-item", { active: currentPage === number })}>
-                      <button 
-                        className={clsx("page-link", pageBtnClass, { "page-active": currentPage === number })} 
+                      <button
+                        className={clsx("page-link btn-outline-accent", { "page-active": currentPage === number })}
                         onClick={() => handlePageChange(number)}
                       >
                         {number}
@@ -203,8 +223,8 @@ const UserReservationsPage = () => {
                     </li>
                   ))}
                   <li className={clsx("page-item", { disabled: currentPage === totalPages })}>
-                    <button 
-                      className={clsx("page-link", pageNavBtnClass)} 
+                    <button
+                      className={clsx("page-link btn-outline-accent", { "disabled": currentPage === totalPages })}
                       onClick={handleNext}
                       disabled={currentPage === totalPages}
                     >
@@ -214,17 +234,9 @@ const UserReservationsPage = () => {
                 </ul>
               </nav>
             </div>
-            {/* Admin Approval Message at Page End */}
-            <div className="text-center mt-4">
-              {currentReservations.map((reservation) => (
-                <p key={reservation.id} className="status-message">
-                  {getStatusMessage(reservation.status || "pending")}
-                </p>
-              ))}
-            </div>
             <div className="text-center mt-4">
               <Button
-                className={clsx(btnClass)}
+                className="btn-outline-accent"
                 onClick={() => navigate("/reservation")}
               >
                 {text?.makeNewReservation || "Make a New Reservation"}
@@ -235,7 +247,7 @@ const UserReservationsPage = () => {
           <div className="text-center">
             <p>{text?.noReservations || "No reservations found."}</p>
             <Button
-              className={clsx(btnClass)}
+              className="btn-outline-accent"
               onClick={() => navigate("/reservation")}
             >
               {text?.makeReservation || "Make a Reservation"}

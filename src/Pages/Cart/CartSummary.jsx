@@ -5,7 +5,7 @@ const CartSummary = ({ calculateSubtotal, calculateTotal, discountApplied, theme
   const discountColor = theme === 'dark' ? 'text-success' : 'text-success';
 
   return (
-    <div className={`card border-0 mb-4 ${cardBg}`}>
+    <div className={` border-0 mb-4 ${cardBg}`}>
       <div className="card-body">
         <div className="d-flex justify-content-between mb-2">
           <p className="mb-0">Subtotal:</p>
