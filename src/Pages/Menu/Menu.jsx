@@ -187,8 +187,8 @@ function Menu() {
     <div className={`menu-container ${backgroundColor} ${textColor} py-5 mt-5`}>
       <div className="container">
         <h1 className={`text-center menu-title ${textColor}`}>
-          <span>{currentLange === 'Ar' ? 'قائمتنا' : 'Our'}</span>
-          <span className="text-danger"> {currentLange === 'Ar' ? 'القائمة' : 'Menu'}</span>
+          <span>{currentLange === 'Ar' ? 'قائمة' : 'Our'}</span>
+          <span className="text-danger"> {currentLange === 'Ar' ? 'الطعام' : 'Menu'}</span>
         </h1>
         {categories.map((category) =>
           renderCategorySection(

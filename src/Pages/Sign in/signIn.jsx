@@ -226,7 +226,7 @@ function Signin() {
                 {/* Google Login */}
                 <button
                   onClick={logInGoogle}
-                  className={clsx("btn btn-outline-danger w-100 d-flex align-items-center gap-2", {
+                  className={clsx("btn btn-outline-danger w-100 text-center d-flex justify-content-center align-items-center gap-2", {
                     "flex-row-reverse": currentLange === "Ar",
                     "justify-content-center": currentLange !== "Ar",
                     "justify-content-center-reverse": currentLange === "Ar"
