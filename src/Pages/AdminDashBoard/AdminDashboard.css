@@ -616,3 +616,54 @@ body {
 }
 
 
+
+/* Sidebar */
+.sidebar {
+  background-color: #151518; /* New background color */
+  height: 100vh; /* Full viewport height */
+  position: fixed; /* Fixed position to stay in place */
+  width: 16.67%; /* Approximately 1/6th of the screen */
+  color: #e0e0e0; /* Soft white for text */
+  top: 0; /* Align to top of viewport */
+  left: 0; /* Align to left of viewport */
+  z-index: 1000; /* Ensure sidebar is above other content */
+  overflow-y: auto; /* Allow scrolling if content overflows */
+}
+
+.sidebar-content {
+  padding: 20px;
+}
+
+.sidebar-content h3 {
+  color: #e0e0e0;
+  margin-bottom: 20px;
+  font-size: 1.35rem;
+  font-weight: 500;
+}
+
+.nav-link {
+  color: #a0a0a0; /* Muted gray */
+  padding: 8px;
+  display: block;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 400;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-link:hover {
+  background-color: #212529; /* Card background for hover */
+  color: #e0e0e0;
+}
+
+/* Responsive Adjustments for Sidebar */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative; /* Change to relative for mobile */
+    top: auto;
+    left: auto;
+    z-index: auto;
+  }
+}
