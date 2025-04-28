@@ -35,7 +35,7 @@ const MenuItemCard = ({ item, openEditModal, setSelectedItem, setShowModal }) =>
           </Button>
           <Button
             variant="danger"
-            className="ms-2"
+            className="mt-2"
             onClick={() => {
               console.log('Opening delete modal for item:', item.docId);
               setSelectedItem(item);

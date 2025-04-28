@@ -4,6 +4,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useSelector } from 'react-redux';
 
+
 const ItemModal = ({
   showModal,
   setShowModal,
@@ -117,14 +118,14 @@ const ItemModal = ({
       centered
       dialogClassName="modal-dark"
     >
-      <Modal.Header closeButton className="bg-dark text-white border-0">
+      {/* <Modal.Header closeButton className="bg-dark text-white border-0">
         <Modal.Title>
           {isAdd && (text.addNewItem || 'Add New Item')}
           {isEdit && (text.editItem || 'Edit Item')}
           {isDelete && (text.confirmDelete || 'Confirm Delete')}
           {isAddCategory && (text.addCategory || 'Add Category')}
         </Modal.Title>
-      </Modal.Header>
+      </Modal.Header> */}
       <Modal.Body className="bg-dark text-white">
         <Form onSubmit={(e) => e.preventDefault()}>
           {isDelete ? (
@@ -135,8 +136,8 @@ const ItemModal = ({
             <>
               {isAddCategory ? (
                 <>
-                  <Form.Group className="mb-3">
-                    <Form.Label>{text.categoryNameEn || 'Category Name (English)'}</Form.Label>
+                  <Form.Group className="mb-3 ">
+                    <Form.Label className='text-white '>{text.categoryNameEn || 'Category Name (English)'}</Form.Label>
                     <Form.Control
                       type="text"
                       name="title"
@@ -144,7 +145,7 @@ const ItemModal = ({
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       placeholder={text.categoryNameEn || 'Enter category name'}
                       required
-                      className="bg-dark text-white border-secondary"
+                      className="  text-white border-secondary"
                     />
                   </Form.Group>
                   <Form.Group className="mb-3">
@@ -337,21 +338,31 @@ const ItemModal = ({
               )}
             </>
           )}
-          <div className="d-flex gap-2 mt-4">
-            {(isAdd || isEdit || isAddCategory) && (
-              <Button variant="primary" type="submit" onClick={formik.handleSubmit}>
-                {isAddCategory ? (text.addCategory || 'Add Category') : isAdd ? (text.add || 'Add') : (text.save || 'Save')}
-              </Button>
-            )}
-            {isDelete && (
-              <Button variant="danger" onClick={handleDelete}>
-                {text.delete || 'Delete'}
-              </Button>
-            )}
-            <Button variant="secondary" onClick={() => setShowModal(null)}>
-              {text.cancel || 'Cancel'}
-            </Button>
-          </div>
+        <div className="d-flex gap-2 mt-4">
+  {(isAdd || isEdit || isAddCategory) && (
+    <Button
+      className="btn btn-primary"
+      type="submit"
+      onClick={formik.handleSubmit}
+    >
+      {isAddCategory ? (text.addCategory || 'Add Category') : isAdd ? (text.add || 'Add') : (text.save || 'Save')}
+    </Button>
+  )}
+  {isDelete && (
+    <Button
+      className="btn btn-danger"
+      onClick={handleDelete}
+    >
+      {text.delete || 'Delete'}
+    </Button>
+  )}
+  <Button
+    className="btn btn-secondary"
+    onClick={() => setShowModal(null)}
+  >
+    {text.cancel || 'Cancel'}
+  </Button>
+</div>
         </Form>
       </Modal.Body>
     </Modal>

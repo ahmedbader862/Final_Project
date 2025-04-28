@@ -508,17 +508,7 @@ body {
 /* AdminDashboard.css */
 
 /* Ensure input fields are visible */
-.form-control-dark {
-  background-color: #fff !important; /* White background for inputs */
-  color: #000 !important; /* Black text for inputs */
-  border: 1px solid #ced4da !important; /* Bootstrap default border */
-}
 
-/* Ensure textarea is visible */
-.form-control-dark textarea {
-  background-color: #fff !important;
-  color: #000 !important;
-}
 
 /* Ensure invalid feedback is styled */
 .invalid-feedback {
@@ -533,9 +523,6 @@ body {
 }
 
 /* Ensure labels are visible */
-.form-label {
-  color: #000 !important; /* Black label text */
-}
 
 /* Optional: Style for modal header */
 .modal-header {

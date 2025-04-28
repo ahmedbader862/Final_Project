@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState, useContext } from 'react';
 import './Counter.css';
 import { ThemeContext } from "../../Context/ThemeContext";
+import { useSelector } from "react-redux";
 
 function Counter() {
   const { theme } = useContext(ThemeContext);
+  const currentLange = useSelector((state) => state.lange?.langue || "En");
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
   const sectionRef = useRef(null);
   const [counters, setCounters] = useState({
     clients: 0,
@@ -80,35 +83,46 @@ function Counter() {
     >
       <div className="container">
         <h2 className={`text-center mb-5 about-title ${textColor}`}>
-          About <span className="text-danger">Us</span>
+          {text?.aboutUs || (currentLange === "Ar" ? "نبذة" : "About")}{" "}
+          {/* <span className="text-danger">
+            {currentLange === "Ar" ? "نحن" : "Us"}
+          </span> */}
         </h2>
         <div className="row g-4 justify-content-center text-center">
           <div className={`col-6 col-md-3 mb-4 ${isVisible ? 'animate-icon' : ''}`}>
             <div className="counter-item">
               <i className={`fa-solid fa-users fs-1 mb-3 ${textColor}`}></i>
               <h2 className={textColor}>{counters.clients}+</h2>
-              <h4 className="text-danger">Happy Clients</h4>
+              <h4 className="text-danger">
+                {text?.happyClients || (currentLange === "Ar" ? "عملاء سعداء" : "Happy Clients")}
+              </h4>
             </div>
           </div>
           <div className={`col-6 col-md-3 mb-4 ${isVisible ? 'animate-icon' : ''}`}>
             <div className="counter-item">
               <i className={`fa-solid fa-truck-fast fs-1 mb-3 ${textColor}`}></i>
               <h2 className={textColor}>{counters.meals}</h2>
-              <h4 className="text-danger">Meal Delivered</h4>
+              <h4 className="text-danger">
+                {text?.mealDelivered || (currentLange === "Ar" ? "وجبات تم توصيلها" : "Meal Delivered")}
+              </h4>
             </div>
           </div>
           <div className={`col-6 col-md-3 mb-4 ${isVisible ? 'animate-icon' : ''}`}>
             <div className="counter-item">
               <i className={`fa-solid fa-utensils fs-1 mb-3 ${textColor}`}></i>
               <h2 className={textColor}>{counters.dishes}+</h2>
-              <h4 className="text-danger">Different Dishes</h4>
+              <h4 className="text-danger">
+                {text?.differentDishes || (currentLange === "Ar" ? "أطباق متنوعة" : "Different Dishes")}
+              </h4>
             </div>
           </div>
           <div className={`col-6 col-md-3 mb-4 ${isVisible ? 'animate-icon' : ''}`}>
             <div className="counter-item">
               <i className={`fa-solid fa-star fs-1 mb-3 ${textColor}`}></i>
               <h2 className={textColor}>{counters.rate}</h2>
-              <h4 className="text-danger">Rate</h4>
+              <h4 className="text-danger">
+                {text?.rate || (currentLange === "Ar" ? "التقييم" : "Rate")}
+              </h4>
             </div>
           </div>
         </div>

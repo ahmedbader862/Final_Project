@@ -211,9 +211,9 @@ function Signin() {
                 {/* Sign In Button */}
                 <button
                   onClick={handleSignin}
-                  className={clsx(`btn btn-white w-100 fw-semibold mt-1 mb-2`, textColor)}
+                  className={clsx(`btn btn-outline-danger w-100 `,)}
                 >
-                  {text.signInButton || "Sign In"}
+                  {text.signInButton || "Sign in"}
                 </button>
 
                 {/* Divider */}

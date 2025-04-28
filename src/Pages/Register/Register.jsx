@@ -321,7 +321,7 @@ function Register() {
                 <div className="text-center">
                   <button
                     type="submit"
-                    className={clsx(`btn btn-outline-white w-100 fw-semibold`, textColor)}
+                    className={clsx(`btn btn-outline-danger w-100`, )}
                     disabled={Object.values(errorsMsgUp).some(error => error !== null)}
                   >
                     {text.signUp || "Sign Up"}

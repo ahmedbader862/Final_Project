@@ -146,7 +146,7 @@ const arabic = {
   nameAr: "الاسم (العربية)",
   descriptionEn: "الوصف (الإنجليزية)",
   descriptionAr: "الوصف (العربية)",
-  price: "السعر ($)",
+  price: "السعر ",
   uploadImage: "رفع الصورة",
   addCategory: "إضافة فئة جديدة",
   categoryNameEn: "اسم الفئة (الإنجليزية)",
@@ -229,26 +229,101 @@ const arabic = {
   makeNewReservation: "إنشاء حجز جديد",
   makeReservation: "إنشاء حجز",
 
-  // Cart Component
-  yourCart: "عربة التسوق الخاصة بك",
-  cartEmpty: "عربة التسوق فارغة.",
-  addedToCart: "تمت الإضافة إلى عربة التسوق",
-  subtotal: "المجموع الفرعي",
-  discount20: "الخصم (20%)",
-  total: "الإجمالي",
-  couponCodeLabel: "كود الخصم",
-  apply: "تطبيق",
-  orderNow: "اطلب الآن",
-  currency: "جنيه",
-  invalidCoupon: "كود خصم غير صالح",
-  invalidCouponMessage: "كود الخصم الذي أدخلته غير صالح.",
-  emptyCart: "عربة فارغة",
-  emptyCartMessage: "عربتك فارغة. أضف عناصر للمتابعة.",
-  removeItem: "إزالة العنصر",
-  removeItemConfirm: 'هل أنت متأكد أنك تريد إزالة "{title}" من عربتك؟',
-  confirmRemove: "نعم، أزلها!",
-  removed: "تمت الإزالة!",
-  removedMessage: 'تمت إزالة "{title}" من عربتك.',
+// Cart Component
+yourCart: "عربة التسوق الخاصة بك",
+cartEmpty: "عربة التسوق فارغة.",
+addedToCart: "تمت الإضافة إلى عربة التسوق",
+addedToCartToast: "أضيف إلى العربة!",
+addedToWishlistToast: "أضيف إلى قائمة الرغبات!",
+removedFromCartToast: "تمت إزالته من العربة!", // Added for removing from cart
+removedFromWishlistToast: "تمت إزالته من قائمة الرغبات", // Added for removing from wishlist
+errorUpdatingWishlist: "خطأ في تحديث قائمة الرغبات", // Added for wishlist error
+errorUpdatingCart: "خطأ في تحديث العربة", // Added for cart error
+pleaseSignInToAddToCart: "يرجى تسجيل الدخول لإضافة عناصر إلى العربة", // Added for login prompt
+subtotal: "المجموع الفرعي",
+discount20: "الخصم (20%)",
+total: "الإجمالي",
+couponCodeLabel: "كود الخصم",
+apply: "تطبيق",
+orderNow: "اطلب الآن",
+currency: "جنيه",
+invalidCoupon: "كود خصم غير صالح",
+invalidCouponMessage: "كود الخصم الذي أدخلته غير صالح.",
+emptyCart: "عربة فارغة",
+emptyCartMessage: "عربتك فارغة. أضف عناصر للمتابعة.",
+removeItem: "إزالة العنصر",
+removeItemConfirm: 'هل أنت متأكد أنك تريد إزالة "{title}" من عربتك؟',
+confirmRemove: "نعم، أزلها!",
+removed: "تمت الإزالة!",
+removedMessage: 'تمت إزالة "{title}" من عربتك.',
+// New keys for Chefs component
+chefsTitle: "الطهاة",
+professionalChefs: "طهاتنا المحترفون",
+chefsData: [
+  {
+    name: "والتر وايت",
+    name_ar: "والتر وايت",
+    rank: "شيف رئيسي",
+    rank_ar: "شيف رئيسي",
+    description: "يهرب من أجل ذلك وذلك. متعة مؤلمة في الوقت الذي تستمر فيه بنفسها. ممارسة الحد الأدنى من الجسم والمتعة.",
+    desc_ar: "يهرب من أجل ذلك وذلك. متعة مؤلمة في الوقت الذي تستمر فيه بنفسها. ممارسة الحد الأدنى من الجسم والمتعة.",
+  },
+  {
+    name: "سارة جونسون",
+    name_ar: "سارة جونسون",
+    rank: "حلواني",
+    rank_ar: "حلواني",
+    description: "لأنه يصد. هو واتهاماته يهربون من الحد الأدنى من الجسم. متعة يتم رفضها ولا يعقل الحكيم.",
+    desc_ar: "لأنه يصد. هو واتهاماته يهربون من الحد الأدنى من الجسم. متعة يتم رفضها ولا يعقل الحكيم.",
+  },
+  {
+    name: "ويليام أندرسون",
+    name_ar: "ويليام أندرسون",
+    rank: "طباخ",
+    rank_ar: "طباخ",
+    description: "كل شيء حقيقي بالتأكيد. متعة يتم وصفها بالمضايقة. متعة بالفعل للمهندس الذي يعاني من التعديلات.",
+    desc_ar: "كل شيء حقيقي بالتأكيد. متعة يتم وصفها بالمضايقة. متعة بالفعل للمهندس الذي يعاني من التعديلات.",
+  },
+],
+// New keys for Counter component
+aboutUs: "نبذة عنا",
+happyClients: "عملاء سعداء",
+mealDelivered: "وجبات تم توصيلها",
+differentDishes: "أطباق متنوعة",
+rate: "التقييم",
+
+// New keys for Contact component
+contactTitle: "الاتصال العام",
+contactUs: "تواصل معنا",
+ourAddress: "عنواننا",
+address: "المنيا الجديدة",
+emailUs: "راسلنا عبر البريد الإلكتروني",
+
+callUs: "اتصل بنا",
+
+openingHours: "ساعات العمل",
+hours: "الإثنين-السبت: 11 صباحًا - 11 مساءً؛ الأحد: مغلق",
+// New keys for Footer component
+restaurantTitle: "المطعم",
+tastyBitesDesc: "تيستي بايتس هي صفحة هبوط لمطعم تقدم تجربة طعام لذيذة لعملائها.",
+socialMedia: "وسائل التواصل الاجتماعي",
+subscribeNewsletter: "اشترك في نشرتنا الإخبارية",
+newsletterDesc: "لا تفوت آخر تحديثات قائمتنا وعروضنا الحصرية - اشترك في نشرتنا الإخبارية اليوم وابقَ على اطلاع بكل ما يتعلق بميليفاي!",
+emailPlaceholder: "أدخل عنوان بريدك الإلكتروني",
+subscribeButton: "اشترك",
+quickLinks: "روابط سريعة",
+aboutUs: "نبذة عنا",
+contact: "اتصل بنا",
+testimonial: "شهادات",
+ourPartners: "شركاؤنا",
+faq: "الأسئلة الشائعة",
+privacyPolicy: "سياسة الخصوصية",
+getInTouch: "تواصل معنا",
+address: "شارع آدم 108، نيويورك، NY 535022",
+
+
+qrCodeDesc: "امسح أو انقر للحصول على القائمة",
 };
 
 export default arabic;
+

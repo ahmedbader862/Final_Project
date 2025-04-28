@@ -19,6 +19,7 @@ function Carde({ title, poster_path, description, price, title_ar, desc_ar }) {
   const user = useSelector((state) => state.UserData?.UserState || null);
   const userState55 = useSelector((state) => state.UserData?.UserState || null);
   const currentLange = useSelector((state) => state.lange?.langue || "en");
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]); // Add text selector for translations
 
   const isInWishlist = wishlist.some((dish) => dish.title === title);
 
@@ -66,18 +67,24 @@ function Carde({ title, poster_path, description, price, title_ar, desc_ar }) {
         price: safePrice,
       })
     );
-    toast.success(`${displayTitle} أضيف إلى قائمة الرغبات!`, {
-      position: "top-right",
-      autoClose: 2000,
-    });
+    toast.success(
+      `${displayTitle} ${text?.addedToWishlistToast || (currentLange === "Ar" ? "أضيف إلى قائمة الرغبات!" : "Added to wishlist!")}`, // Use translated message
+      {
+        position: "top-right",
+        autoClose: 2000,
+      }
+    );
   };
 
   const handleRemoveWishlist = () => {
     dispatch(removWishlist(title));
-    toast.info(`${displayTitle} تمت إزالته من قائمة الرغبات`, {
-      position: "top-right",
-      autoClose: 2000,
-    });
+    toast.info(
+      `${displayTitle} ${text?.removedFromWishlistToast || (currentLange === "Ar" ? "تمت إزالته من قائمة الرغبات" : "Removed from wishlist!")}`, // Use translated message
+      {
+        position: "top-right",
+        autoClose: 2000,
+      }
+    );
   };
 
   const toggleFirestore = async () => {
@@ -116,24 +123,30 @@ function Carde({ title, poster_path, description, price, title_ar, desc_ar }) {
       setIsInWishlistFirestore(!dishExists);
 
       toast[dishExists ? "info" : "success"](
-        `${displayTitle} ${dishExists ? "تمت إزالته من" : "أضيف إلى"} قائمة الرغبات!`,
+        `${displayTitle} ${dishExists ? text?.removedFromWishlistToast || "تمت إزالته من قائمة الرغبات" : text?.addedToWishlistToast || "أضيف إلى قائمة الرغبات!"}`, // Use translated message
         { position: "top-right", autoClose: 2000 }
       );
     } catch (error) {
       console.error("Firestore error:", error);
-      toast.error("خطأ في تحديث قائمة الرغبات", {
-        position: "top-right",
-        autoClose: 2000,
-      });
+      toast.error(
+        text?.errorUpdatingWishlist || (currentLange === "Ar" ? "خطأ في تحديث قائمة الرغبات" : "Error updating wishlist"), // Use translated message
+        {
+          position: "top-right",
+          autoClose: 2000,
+        }
+      );
     }
   };
 
   const toggleCartFirestore = async () => {
     if (!user?.uid) {
-      return toast.error("يرجى تسجيل الدخول لإضافة عناصر إلى العربة", {
-        position: "top-right",
-        autoClose: 2000,
-      });
+      return toast.error(
+        text?.pleaseSignInToAddToCart || (currentLange === "Ar" ? "يرجى تسجيل الدخول لإضافة عناصر إلى العربة" : "Please sign in to add items to cart"), // Use translated message
+        {
+          position: "top-right",
+          autoClose: 2000,
+        }
+      );
     }
 
     try {
@@ -147,10 +160,13 @@ function Carde({ title, poster_path, description, price, title_ar, desc_ar }) {
         const updatedCart = cart.filter((item) => item.title !== title);
         await setDoc(docRef, { cartItems: updatedCart }, { merge: true });
         setIsInCart(false);
-        toast.info(`${displayTitle} تمت إزالته من العربة!`, {
-          position: "top-right",
-          autoClose: 2000,
-        });
+        toast.info(
+          `${displayTitle} ${text?.removedFromCartToast || (currentLange === "Ar" ? "تمت إزالته من العربة!" : "Removed from cart!")}`, // Use translated message
+          {
+            position: "top-right",
+            autoClose: 2000,
+          }
+        );
       } else {
         // Item not in cart, add it
         const itemPrice = safePrice === "Price not available" ? 0 : parseFloat(safePrice);
@@ -168,17 +184,23 @@ function Carde({ title, poster_path, description, price, title_ar, desc_ar }) {
         ];
         await setDoc(docRef, { cartItems: updatedCart }, { merge: true });
         setIsInCart(true);
-        toast.success(`${displayTitle} أضيف إلى العربة!`, {
-          position: "top-right",
-          autoClose: 2000,
-        });
+        toast.success(
+          `${displayTitle} ${text?.addedToCartToast || (currentLange === "Ar" ? "أضيف إلى العربة!" : "Added to cart!")}`, // Use translated message
+          {
+            position: "top-right",
+            autoClose: 2000,
+          }
+        );
       }
     } catch (error) {
       console.error("Error toggling cart:", error);
-      toast.error("خطأ في تحديث العربة", {
-        position: "top-right",
-        autoClose: 2000,
-      });
+      toast.error(
+        text?.errorUpdatingCart || (currentLange === "Ar" ? "خطأ في تحديث العربة" : "Error updating cart"), // Use translated message
+        {
+          position: "top-right",
+          autoClose: 2000,
+        }
+      );
     }
   };
 
@@ -252,46 +274,45 @@ function Carde({ title, poster_path, description, price, title_ar, desc_ar }) {
       </div>
 
       <Modal
-  show={showModal}
-  onHide={() => setShowModal(false)}
-  centered
-  dialogClassName="custom-modal"
->
-  <Modal.Body className={`${bgColor} ${textColor}`}>
-    <h2>{displayTitle}</h2>
-    <div className="text-center mb-3">
-      <img
-        src={safePosterPath}
-        alt={displayTitle}
-        className="img-fluid rounded"
-        style={{ maxHeight: "250px", objectFit: "cover" }}
-      />
-    </div>
-    <p>{displayDescription}</p>
-    <p>
-      <strong>{currentLange === "Ar" ? "السعر:" : "Price:"}</strong> {safePrice} {currentLange === "Ar" ? "جنيه" : "LE"}
-    </p>
-    <button
-      className={`btn ${theme === "dark" ? "btn-light" : "btn-dark"} me-2`}
-      onClick={toggleCartFirestore}
-    >
-      {isInCart 
-        ? (currentLange === "Ar" ? "إزالة من العربة" : "Remove from Cart") 
-        : (currentLange === "Ar" ? "إضافة إلى العربة" : "Add to Cart")
-      }
-    </button>
-    <button
-      className={`btn ${theme === "dark" ? "btn-light" : "btn-dark"}`}
-      onClick={() => toggleFirestore()}
-    >
-      {(user?.uid ? isInWishlistFirestore : isInWishlist)
-        ? (currentLange === "Ar" ? "إزالة من قائمة الرغبات" : "Remove from Wishlist")
-        : (currentLange === "Ar" ? "إضافة إلى قائمة الرغبات" : "Add to Wishlist")
-      }
-    </button>
-  </Modal.Body>
-</Modal>
-
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        centered
+        dialogClassName="custom-modal"
+      >
+        <Modal.Body className={`${bgColor} ${textColor}`}>
+          <h2>{displayTitle}</h2>
+          <div className="text-center mb-3">
+            <img
+              src={safePosterPath}
+              alt={displayTitle}
+              className="img-fluid rounded"
+              style={{ maxHeight: "250px", objectFit: "cover" }}
+            />
+          </div>
+          <p>{displayDescription}</p>
+          <p>
+            <strong>{currentLange === "Ar" ? "السعر:" : "Price:"}</strong> {safePrice} {currentLange === "Ar" ? "جنيه" : "LE"}
+          </p>
+          <button
+            className={`btn ${theme === "dark" ? "btn-light" : "btn-dark"} me-2`}
+            onClick={toggleCartFirestore}
+          >
+            {isInCart 
+              ? (currentLange === "Ar" ? "إزالة من العربة" : "Remove from Cart") 
+              : (currentLange === "Ar" ? "إضافة إلى العربة" : "Add to Cart")
+            }
+          </button>
+          <button
+            className={`btn ${theme === "dark" ? "btn-light" : "btn-dark"}`}
+            onClick={() => toggleFirestore()}
+          >
+            {(user?.uid ? isInWishlistFirestore : isInWishlist)
+              ? (currentLange === "Ar" ? "إزالة من قائمة الرغبات" : "Remove from Wishlist")
+              : (currentLange === "Ar" ? "إضافة إلى قائمة الرغبات" : "Add to Wishlist")
+            }
+          </button>
+        </Modal.Body>
+      </Modal>
     </>
   );
 }

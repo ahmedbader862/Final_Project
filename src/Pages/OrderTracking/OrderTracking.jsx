@@ -305,13 +305,13 @@ const OrderTracking = () => {
                   </p>
                 </div>
                 <hr className="border-secondary border-opacity-20" />
-                <button
+                {/* <button
                   className="btn btn-danger-custom w-100 mt-auto d-flex align-items-center justify-content-center gap-2"
                   onClick={handleDeleteOrder}
                 >
                   <i className="bi bi-trash icon-sm"></i>
                   Delete Order
-                </button>
+                </button> */}
               </div>
             </div>
           </div>

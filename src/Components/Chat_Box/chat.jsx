@@ -4,6 +4,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { useSelector } from "react-redux";
 import './Chat.css';
 import { ThemeContext } from '../../Context/ThemeContext';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Chat(props) {
   const { theme } = useContext(ThemeContext);
@@ -26,15 +28,25 @@ function Chat(props) {
     setInputChat(e.target.value);
   };
 
-  const writeUserMSG = () => {
-    const messagesRef = ref(dbR, `chat admin/${props.uidChats}`);
-    const newMessage = {
-      message: inputChat,
-      timestamp: new Date().getTime(),
-      sender: userState55.uid,
-    };
-    push(messagesRef, newMessage);
-    setInputChat('');
+  const writeUserMSG = async () => {
+    if (!userState55.uid) {
+      toast.error(text.notLoggedIn || "You must be logged in to send messages!");
+      return;
+    }
+
+    try {
+      const messagesRef = ref(dbR, `chat admin/${props.uidChats}`);
+      const newMessage = {
+        message: inputChat,
+        timestamp: new Date().getTime(),
+        sender: userState55.uid,
+      };
+      await push(messagesRef, newMessage);
+      setInputChat('');
+    } catch (error) {
+      toast.error(text.sendFailed || "Failed to send message. Please try again.");
+      console.error("Error sending message:", error);
+    }
   };
 
   useEffect(() => {
@@ -57,8 +69,8 @@ function Chat(props) {
   };
 
   return (
-    <div className={`chat-wrapper cht py-4 ${bgColor}`}>
-      <div className="container">
+    <div className={`chat-wrapper cht py-4 ${bgColor} `}>
+      <div className="container mt-5">
         <div className="row justify-content-center">
           <div className="col-md-9 chat-container">
             {props.showChat && (

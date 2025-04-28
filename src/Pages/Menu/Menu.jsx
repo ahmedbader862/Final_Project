@@ -184,7 +184,7 @@ function Menu() {
   );
 
   return (
-    <div className={`menu-container ${backgroundColor} ${textColor} py-5`}>
+    <div className={`menu-container ${backgroundColor} ${textColor} py-5 mt-5`}>
       <div className="container">
         <h1 className={`text-center menu-title ${textColor}`}>
           <span>{currentLange === 'Ar' ? 'قائمتنا' : 'Our'}</span>

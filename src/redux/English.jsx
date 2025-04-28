@@ -146,7 +146,7 @@ const english = {
   nameAr: "Name (Arabic)",
   descriptionEn: "Description (English)",
   descriptionAr: "Description (Arabic)",
-  price: "Price ($)",
+  price: "Price",
   uploadImage: "Upload Image",
   addCategory: "Add New Category",
   categoryNameEn: "Category Name (English)",
@@ -229,26 +229,102 @@ const english = {
   makeNewReservation: "Make a New Reservation",
   makeReservation: "Make a Reservation",
   
-  // Cart Component
-  yourCart: "Your Cart",
-  cartEmpty: "Your cart is empty.",
-  addedToCart: "Added to cart",
-  subtotal: "Subtotal",
-  discount20: "Discount (20%)",
-  total: "Total",
-  couponCodeLabel: "Coupon Code",
-  apply: "Apply",
-  orderNow: "Order Now",
-  currency: "LE",
-  invalidCoupon: "Invalid Coupon",
-  invalidCouponMessage: "The coupon code you entered is invalid.",
-  emptyCart: "Empty Cart",
-  emptyCartMessage: "Your cart is empty. Add items to proceed.",
-  removeItem: "Remove Item",
-  removeItemConfirm: 'Are you sure you want to remove "{title}" from your cart?',
-  confirmRemove: "Yes, remove it!",
-  removed: "Removed!",
-  removedMessage: '"{title}" has been removed from your cart.',
+// Cart Component
+yourCart: "Your Cart",
+cartEmpty: "Your cart is empty.",
+addedToCart: "Added to cart",
+addedToCartToast: "Added to cart!",
+addedToWishlistToast: "Added to wishlist!",
+removedFromCartToast: "Removed from cart!", // Added for removing from cart
+removedFromWishlistToast: "Removed from wishlist!", // Added for removing from wishlist
+errorUpdatingWishlist: "Error updating wishlist", // Added for wishlist error
+errorUpdatingCart: "Error updating cart", // Added for cart error
+pleaseSignInToAddToCart: "Please sign in to add items to cart", // Added for login prompt
+subtotal: "Subtotal",
+discount20: "Discount (20%)",
+total: "Total",
+couponCodeLabel: "Coupon Code",
+apply: "Apply",
+orderNow: "Order Now",
+currency: "LE",
+invalidCoupon: "Invalid Coupon",
+invalidCouponMessage: "The coupon code you entered is invalid.",
+emptyCart: "Empty Cart",
+emptyCartMessage: "Your cart is empty. Add items to proceed.",
+removeItem: "Remove Item",
+removeItemConfirm: 'Are you sure you want to remove "{title}" from your cart?',
+confirmRemove: "Yes, remove it!",
+removed: "Removed!",
+removedMessage: '"{title}" has been removed from your cart.',
+// New keys for Chefs component
+chefsTitle: "CHEFS",
+professionalChefs: "Our Professional Chefs",
+chefsData: [
+  {
+    name: "Walter White",
+    name_ar: "والتر وايت",
+    rank: "Master Chef",
+    rank_ar: "شيف رئيسي",
+    description: "Velit aut quia fugit et et. Dolorum ea voluptate vel tempore tenetur ipsa quae aut. Ipsum exercitationem iure minima enim corporis et voluptate.",
+    desc_ar: "يهرب من أجل ذلك وذلك. متعة مؤلمة في الوقت الذي تستمر فيه بنفسها. ممارسة الحد الأدنى من الجسم والمتعة.",
+  },
+  {
+    name: "Sarah Jhonson",
+    name_ar: "سارة جونسون",
+    rank: "Patissier",
+    rank_ar: "حلواني",
+    description: "Quo esse repellendus quia id. Est eum et accusantium pariatur fugit nihil minima suscipit corporis. Voluptate sed quas reiciendis animi neque sapiente.",
+    desc_ar: "لأنه يصد. هو واتهاماته يهربون من الحد الأدنى من الجسم. متعة يتم رفضها ولا يعقل الحكيم.",
+  },
+  {
+    name: "William Anderson",
+    name_ar: "ويليام أندرسون",
+    rank: "Cook",
+    rank_ar: "طباخ",
+    description: "Vero omnis enim consequatur. Voluptas consectetur unde qui molestiae deserunt. Voluptates enim aut architecto porro aspernatur molestiae modi.",
+    desc_ar: "كل شيء حقيقي بالتأكيد. متعة يتم وصفها بالمضايقة. متعة بالفعل للمهندس الذي يعاني من التعديلات.",
+  },
+],
+
+// New keys for Counter component
+aboutUs: "About Us",
+happyClients: "Happy Clients",
+mealDelivered: "Meal Delivered",
+differentDishes: "Different Dishes",
+rate: "Rate",
+
+// New keys for Contact component
+contactTitle: "General CONTACT",
+
+ourAddress: "Our Address",
+address: "Al menya elgededa",
+emailUs: "Email Us",
+
+callUs: "Call Us",
+
+openingHours: "Opening Hours",
+hours: "Mon-Sat: 11AM - 23PM; Sunday: Closed",
+
+// New keys for Footer component
+restaurantTitle: "Restaurant",
+tastyBitesDesc: "TastyBites is a restaurant landing page that offers a delicious dining experience to its customers.",
+socialMedia: "Social Media",
+subscribeNewsletter: "Subscribe Our Newsletter",
+newsletterDesc: "Don't miss out on our latest menu updates and exclusive offers - join our newsletter today and stay up-to-date with all things Mealify!",
+emailPlaceholder: "Enter your email address",
+subscribeButton: "Subscribe",
+quickLinks: "Quick Links",
+aboutUs: "About Us",
+contact: "Contact",
+testimonial: "Testimonial",
+ourPartners: "Our Partners",
+faq: "FAQ",
+privacyPolicy: "Privacy Policy",
+getInTouch: "Get in Touch",
+address: "A108 Adam Street, New York, NY 535022",
+
+
+qrCodeDesc: "Scan or click for menu",
 };
 
 export default english;

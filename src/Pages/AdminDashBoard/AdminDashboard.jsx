@@ -52,7 +52,7 @@ const CategorySelector = ({ categories, selectedCategory, setSelectedCategory, s
           {text?.menuManagement || (currentLange === "Ar" ? "إدارة القائمة" : "Menu Management")}
         </h2>
         <Dropdown>
-          <Dropdown.Toggle variant="outline-light" id="categoryDropdown">
+          <Dropdown.Toggle variant="danger"  id="categoryDropdown">
             {categories.find(cat => cat.id === selectedCategory)?.name || 
              text?.selectCategory || (currentLange === "Ar" ? "اختر فئة" : "Select Category")}
           </Dropdown.Toggle>
@@ -428,7 +428,7 @@ const AdminOrdersPage = () => {
         {/* Clear All Orders button commented out as per original code */}
       </div>
       <div className="d-flex flex-wrap gap-3 mb-4 justify-content-center">
-        <div className="dropdown">
+        <div className="dropdown border border-1 border-light rounded">
           <button
             className="btn btn-outline-light dropdown-toggle"
             type="button"
@@ -455,7 +455,7 @@ const AdminOrdersPage = () => {
           </ul>
         </div>
 
-        <div className="dropdown">
+        <div className="dropdown border border-1 border-light rounded">
           <button
             className="btn btn-outline-light dropdown-toggle"
             type="button"
@@ -495,7 +495,7 @@ const AdminOrdersPage = () => {
           </ul>
         </div>
 
-        <div className="dropdown">
+        <div className="dropdown border border-1 border-light rounded">
           <button
             className="btn btn-outline-light dropdown-toggle"
             type="button"
