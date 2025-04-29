@@ -19,6 +19,7 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [validated, setValidated] = useState(false);
 
   const { theme } = useContext(ThemeContext);
   const navigate = useNavigate();
@@ -71,6 +72,15 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const form = e.currentTarget;
+    setValidated(true);
+
+    if (form.checkValidity() === false) {
+      e.stopPropagation();
+      setIsLoading(false);
+      return;
+    }
+
     setError("");
     setIsLoading(true);
 
@@ -164,6 +174,7 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
         setTimeLeaving("");
         setPhone("");
         setSelectedTable(null);
+        setValidated(false);
       }, 3000);
     } catch (error) {
       console.error("Reservation error:", error);
@@ -184,24 +195,19 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
             {text.selectedTable || (currentLange === "Ar" ? "الطاولة المختارة" : "Selected Table")}: {selectedTable}
           </p>
         )}
-        {successMessage && (
-          <Alert variant="success" onClose={() => setSuccessMessage("")} dismissible>
-            {successMessage}
-          </Alert>
-        )}
-        {error && (
-          <Alert variant="danger" onClose={() => setError("")} dismissible>
-            {text[error] || error}
-          </Alert>
-        )}
-        <form className="d-flex flex-column gap-3" onSubmit={handleSubmit}>
+        <form
+          className="d-flex flex-column gap-3 needs-validation"
+          noValidate
+          onSubmit={handleSubmit}
+          validated={validated.toString()}
+        >
           <div className="form-group">
             <label htmlFor="name" className={textColor}>
               {text?.name || (currentLange === "Ar" ? "الاسم" : "Name")}
             </label>
             <input
               id="name"
-              className={clsx("form-control", inputClass)}
+              className={clsx("form-control", inputClass, { 'is-invalid': validated && !name })}
               type="text"
               placeholder={text?.name || (currentLange === "Ar" ? "الاسم" : "Name")}
               value={name}
@@ -209,6 +215,9 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
               required
               aria-label="Name"
             />
+            <div className="invalid-feedback">
+              {text?.nameRequired || (currentLange === "Ar" ? "الاسم مطلوب" : "Name is required")}
+            </div>
           </div>
           <div className="form-group">
             <label htmlFor="date" className={textColor}>
@@ -216,13 +225,16 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
             </label>
             <input
               id="date"
-              className={clsx("form-control", inputClass)}
+              className={clsx("form-control", inputClass, { 'is-invalid': validated && !date })}
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
               required
               aria-label="Date"
             />
+            <div className="invalid-feedback">
+              {text?.dateRequired || (currentLange === "Ar" ? "التاريخ مطلوب" : "Date is required")}
+            </div>
           </div>
           <div className="form-group">
             <label htmlFor="numPersons" className={textColor}>
@@ -230,9 +242,10 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
             </label>
             <select
               id="numPersons"
-              className={clsx("form-control", inputClass)}
+              className={clsx("form-control", inputClass, { 'is-invalid': validated && !numPersons })}
               value={numPersons}
               onChange={(e) => setNumPersons(Number(e.target.value))}
+              required
               aria-label="Number of Persons"
             >
               {[2, 4, 6, 8].map((num) => (
@@ -241,6 +254,9 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
                 </option>
               ))}
             </select>
+            <div className="invalid-feedback">
+              {text?.numPersonsRequired || (currentLange === "Ar" ? "عدد الأشخاص مطلوب" : "Number of persons is required")}
+            </div>
           </div>
           <div className="form-group">
             <label htmlFor="timeArriving" className={textColor}>
@@ -248,13 +264,16 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
             </label>
             <input
               id="timeArriving"
-              className={clsx("form-control", inputClass)}
+              className={clsx("form-control", inputClass, { 'is-invalid': validated && !timeArriving })}
               type="time"
               value={timeArriving}
               onChange={(e) => setTimeArriving(e.target.value)}
               required
               aria-label="Arriving Time"
             />
+            <div className="invalid-feedback">
+              {text?.timeArrivingRequired || (currentLange === "Ar" ? "وقت الوصول مطلوب" : "Arriving time is required")}
+            </div>
           </div>
           <div className="form-group">
             <label htmlFor="timeLeaving" className={textColor}>
@@ -262,13 +281,16 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
             </label>
             <input
               id="timeLeaving"
-              className={clsx("form-control", inputClass)}
+              className={clsx("form-control", inputClass, { 'is-invalid': validated && !timeLeaving })}
               type="time"
               value={timeLeaving}
               onChange={(e) => setTimeLeaving(e.target.value)}
               required
               aria-label="Leaving Time"
             />
+            <div className="invalid-feedback">
+              {text?.timeLeavingRequired || (currentLange === "Ar" ? "وقت المغادرة مطلوب" : "Leaving time is required")}
+            </div>
           </div>
           <div className="form-group">
             <label htmlFor="phone" className={textColor}>
@@ -276,15 +298,29 @@ const ReservationForm = ({ selectedTable, setSelectedTable }) => {
             </label>
             <input
               id="phone"
-              className={clsx("form-control", inputClass)}
+              className={clsx("form-control", inputClass, { 'is-invalid': validated && !phone })}
               type="tel"
               placeholder={text?.phone || (currentLange === "Ar" ? "رقم الهاتف" : "Phone Number")}
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               required
+              pattern="\+?\d{10,15}"
               aria-label="Phone Number"
             />
+            <div className="invalid-feedback">
+              {text?.phoneInvalid || (currentLange === "Ar" ? "رقم الهاتف غير صالح" : "Please enter a valid phone number (10-15 digits)")}
+            </div>
           </div>
+          {successMessage && (
+            <Alert variant="success" onClose={() => setSuccessMessage("")} dismissible>
+              {successMessage}
+            </Alert>
+          )}
+          {error && (
+            <Alert variant="danger" onClose={() => setError("")} dismissible>
+              {text[error] || error}
+            </Alert>
+          )}
           <button
             className={clsx("btn mt-4", btnClass)}
             type="submit"

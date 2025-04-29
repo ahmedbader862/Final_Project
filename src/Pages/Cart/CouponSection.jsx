@@ -1,5 +1,5 @@
 import React from 'react';
-
+import "./CouponSection.css"; // Assuming you have a CSS file for styles
 const CouponSection = ({ couponCode, setCouponCode, handleApplyCoupon, cartItems, theme }) => {
   const cardBg = theme === 'dark' ? 'bg-dark text-white border-secondary' : 'bg-white text-dark border-light';
   const inputClass = theme === 'dark' ? 'bg-secondary text-white' : 'bg-light text-dark';
@@ -7,8 +7,11 @@ const CouponSection = ({ couponCode, setCouponCode, handleApplyCoupon, cartItems
   const btnClass = theme === 'dark' ? 'btn-light' : 'btn-dark';
 
   return (
-    <div className={` border-0 mb-4 ${cardBg}`}>
+    <div className={`coupon border-0 mb-4 ${cardBg}`}>
       <div className="card-body p-4 d-flex flex-row">
+      <label className={`form-label copon-lable badge bdg px-2 mt-1 ${labelClass}`} htmlFor="discountCode">
+            Coupon Code
+          </label>
         <div className="form-outline flex-fill">
           <input
             type="text"
@@ -18,9 +21,7 @@ const CouponSection = ({ couponCode, setCouponCode, handleApplyCoupon, cartItems
             onChange={(e) => setCouponCode(e.target.value)}
             disabled={cartItems.length === 0}
           />
-          <label className={`form-label badge bdg px-2 mt-1 ${labelClass}`} htmlFor="discountCode">
-            Coupon Code
-          </label>
+          
         </div>
         <button
           type="button"

@@ -1,10 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useSelector } from "react-redux";
-import "./Chat_AI.css";
+import { ThemeContext } from "../../Context/ThemeContext";
+import { MessageCircle, X } from "lucide-react";
 import axios from "axios";
+import "./Chat_AI.css";
 
 function Chat_AI() {
   const fireData = useSelector((state) => state.fireData?.FireData[3]);
+  const { theme } = useContext(ThemeContext);
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
   const [query, setQuery] = useState("");
   const [conversation, setConversation] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -36,13 +41,8 @@ function Chat_AI() {
           return dishes.map((dish) => {
             const name = dish.name_en || dish.title || dish.name_ar || dish.title_ar || "Unknown Item";
             const price = dish.price || "Unknown Price";
-            const description = (
-              dish.description_en || 
-              dish.description || 
-              dish.desc_en || 
-              dish.desc_ar || 
-              "No description available."
-            );
+            const description =
+              dish.description_en || dish.description || dish.desc_en || dish.desc_ar || "No description available.";
             const content = `Category: ${category}, Name: ${name}, Price: ${price}, Description: ${description}`;
             return {
               pageContent: content.substring(0, 1000),
@@ -73,13 +73,10 @@ function Chat_AI() {
   const handleSearch = async () => {
     if (!query.trim()) return;
 
-    // إضافة السؤال للشات فورًا
     setConversation((prev) => [...prev, `User: ${query}`]);
-    
-    // تنظيف الإنبوت فورًا
     setQuery("");
-    
     setIsLoading(true);
+
     try {
       const response = await axios.post("http://localhost:3000/search", {
         query: query.substring(0, 200),
@@ -87,13 +84,13 @@ function Chat_AI() {
       });
       console.log("📥 الرد من الـ backend:", response.data);
 
-      const assistantReply = response.data.answer || "❗ حصلت مشكلة، حاول تاني.";
+      const assistantReply = response.data.answer || (text?.error || "Something went wrong, please try again.");
       setConversation((prev) => [...prev, `Assistant: ${assistantReply}`]);
     } catch (error) {
       console.error("❌ خطأ البحث:", error.response?.data || error.message);
       setConversation((prev) => [
         ...prev,
-        "Assistant: عذرًا، حدث خطأ أثناء معالجة طلبك",
+        `Assistant: ${text?.errorProcessing || (currentLange === "Ar" ? "عذرًا، حدث خطأ أثناء معالجة طلبك" : "Sorry, an error occurred while processing your request")}`,
       ]);
     }
     setIsLoading(false);
@@ -116,41 +113,62 @@ function Chat_AI() {
     }
   };
 
+  // Theme-based classes
+  const bgClass = theme === "dark" ? "bg-dark-custom" : "bg-light-custom";
+  const cardClass = theme === "dark" ? "bg-dark-card text-white" : "bg-light-card text-dark";
+  const textClass = theme === "dark" ? "text-white" : "text-dark";
+  const btnClass = theme === "dark" ? "btn-accent-dark" : "btn-accent-light";
+  const inputClass = theme === "dark" ? "bg-dark-card text-white border-secondary" : "bg-light-card text-dark border-light";
+
   return (
-    <div className="chat-container">
-      <button onClick={toggleChat} className="chat-button">
-        {isChatOpen ? "×" : "💬"}
-      </button>
+    <div className={`chat-container`}>
+      {!isChatOpen && (
+        <button onClick={toggleChat} className={`chat-button ${btnClass}`} aria-label="Open chat">
+          <MessageCircle size={35} />
+        </button>
+      )}
 
       {isChatOpen && (
-        <div className="chat-panel">
-          <div className="chat-header">Chat with AI</div>
+        <div className={`chat-panel ${cardClass}`}>
+          <div className={`chat-header ${bgClass} ${textClass}`}>
+            {text?.chatWithAI || "Chat with AI"}
+            <button onClick={toggleChat} className={`close-button rounded ${btnClass}`} aria-label="Close chat">
+              <X size={20} />
+            </button>
+          </div>
 
           <div className="chat-conversation">
-            {conversation.map((message, index) => {
-              const isUser = message.startsWith("User:");
-              const messageText = message.replace("User: ", "").replace("Assistant: ", "");
-              return (
-                <div
-                  key={index}
-                  className={`message ${isUser ? "user-message" : "assistant-message"}`}
-                >
-                  {messageText}
-                </div>
-              );
-            })}
+            {conversation.length === 0 ? (
+              <p className={`text-center ${textClass}`}>
+                {text?.startTyping || (currentLange === "Ar" ? "ابدأ بالكتابة للدردشة!" : "Start typing to chat!")}
+              </p>
+            ) : (
+              conversation.map((message, index) => {
+                const isUser = message.startsWith("User:");
+                const messageText = message.replace("User: ", "").replace("Assistant: ", "");
+                return (
+                  <div
+                    key={`message-${index}`}
+                    className={`message ${isUser ? "user-message" : "assistant-message"} ${textClass}`}
+                  >
+                    {messageText}
+                  </div>
+                );
+              })
+            )}
           </div>
 
           <div className="chat-input">
             <input
               type="text"
-              placeholder="اسألني أي سؤال!"
+              placeholder={text?.askQuestion || (currentLange === "Ar" ? "اسألني أي سؤال!" : "Ask me any question!")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              onKeyPress={handleKeyPress} // Added Enter key support
-              className="input-field"
+              onKeyPress={handleKeyPress}
+              className={`input-field ${inputClass}`}
+              disabled={isLoading}
             />
-            <button onClick={handleSearch} className="send-button" disabled={isLoading}>
+            <button onClick={handleSearch} className={`send-button ${btnClass}`} disabled={isLoading} aria-label="Send message">
               {isLoading ? "..." : "➤"}
             </button>
           </div>

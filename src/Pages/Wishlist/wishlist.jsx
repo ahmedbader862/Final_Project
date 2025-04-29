@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import { db, doc } from '../../firebase/firebase';
+import { db, doc, getDoc } from '../../firebase/firebase';
 import { onSnapshot } from 'firebase/firestore';
 import { useEffect, useState, useContext } from "react";
 import { ThemeContext } from "../../Context/ThemeContext";
@@ -30,7 +30,7 @@ function Wishlist() {
     } else {
       setRealData(wishlistRedux || []);
     }
-  }, [CurrentUser, wishlistRedux , currentLange]);
+  }, [CurrentUser, wishlistRedux]);
 
   // Theme classes
   const bgColor = theme === "dark" ? "bg-custom-dark" : "bg-custom-light";
@@ -39,34 +39,35 @@ function Wishlist() {
   return (
     <div className={`wishlist-page py-5 ${bgColor} ${textColor}`} style={{ minHeight: '100vh' }}>
       <div className="container pt-5">
-        <h1 className={`text-center mb-4 ${textColor}`}>
+        <h1 className={`text-center mb-5 ${textColor}`}>
           {currentLange === "Ar" ? "قائمة رغباتك" : "Your Wishlist"}
         </h1>
-
         {realData.length > 0 ? (
-          <div className="row g-2 justify-content-center">
+          <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center">
             {realData.map((dish, index) => {
+              const title = currentLange === "Ar"
+                ? dish.title_ar || dish.title || "عنوان غير متوفر"
+                : dish.title || "Title not available";
+              const description = currentLange === "Ar"
+                ? dish.description_ar || dish.description || "الوصف غير متوفر"
+                : dish.description || "Description not available";
+              const price = dish.price
+                ? `${dish.price} ${currentLange === "Ar" ? "جنيه" : "LE"}`
+                : currentLange === "Ar" ? "السعر غير متوفر" : "Price not available";
+
               return (
-                <div className="col-12 col-md-6 col-lg-3" key={index}>
+                <div className="col" key={index}>
                   <Card
-                    title={dish.title} // العنوان بالإنجليزية
-                    title_ar={dish.title_ar} // العنوان بالعربية
+                    title={title}
                     poster_path={dish.poster_path || "default-image.jpg"}
-                    price={dish.price} // السعر
-                    description={dish.description} // الوصف بالإنجليزية
-                    desc_ar={dish.desc_ar} // الوصف بالعربية
+                    price={price}
+                    description={description}
                   />
                 </div>
               );
             })}
           </div>
-        ) 
-        
-        
-        : 
-        
-        
-        (
+        ) : (
           <p className={`text-center fs-4 mt-5 ${textColor}`}>
             {currentLange === "Ar" ? "قائمة رغباتك فارغة" : "Your wishlist is empty."}
           </p>
