@@ -15,10 +15,18 @@ import { useSelector } from 'react-redux';
 function Menu() {
   const navigate = useNavigate();
   const { theme } = useContext(ThemeContext);
-  const currentLange = useSelector((state) => state.lange?.langue || "en");
+  const currentLange = useSelector((state) => state.lange?.langue || 'en');
   const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
   const [categories, setCategories] = useState([]);
   const [menuItems, setMenuItems] = useState({});
+
+  // Helper function to format document IDs into proper titles
+  const formatCategoryTitle = (id) => {
+    return id
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
 
   useEffect(() => {
     const unsubscribeCategories = onSnapshot(
@@ -81,10 +89,9 @@ function Menu() {
               image: itemData.image || '/Images/default-image.jpg',
               price: itemData.price || 'Price not available',
               createdAt: parsedCreatedAt,
-              rawCreatedAt: itemData.createdAt, // Keep raw value for debugging
+              rawCreatedAt: itemData.createdAt,
             };
           });
-          // Log the timestamps before sorting
           console.log(`Timestamps for category ${category.id} before sorting:`, 
             categoryData.map(item => ({
               id: item.id,
@@ -93,13 +100,11 @@ function Menu() {
               rawCreatedAt: item.rawCreatedAt,
             }))
           );
-          // Sort items by createdAt (newest first)
           const sortedCategoryData = categoryData.sort((a, b) => {
             const timeA = a.createdAt ? a.createdAt.getTime() : 0;
             const timeB = b.createdAt ? b.createdAt.getTime() : 0;
-            return timeB - timeA; // Newest first
+            return timeB - timeA;
           });
-          // Log the sorted items
           console.log(`Sorted items for category ${category.id}:`, 
             sortedCategoryData.map(item => ({
               id: item.id,
@@ -158,8 +163,8 @@ function Menu() {
     });
   };
 
-  const textColor = theme === 'dark' ? 'text-white' : 'text-dark';
-  const backgroundColor = theme === 'dark' ? 'bg-custom-dark' : 'bg-custom-light';
+  const textColor = theme === 'dark' || theme === 'darkTheme' ? 'text-white' : 'text-dark';
+  const backgroundColor = theme === 'dark' || theme === 'darkTheme' ? 'bg-custom-dark' : 'bg-custom-light';
 
   const handleNavigate = (category) => {
     navigate(`/Dishes/${category}`);
@@ -167,10 +172,13 @@ function Menu() {
 
   const renderCategorySection = (title, items, categoryKey) => (
     <div className="category-section mt-5">
+      <h2 className={`category-title ${textColor} mb-3`}>
+        {title}
+      </h2>
       <div className="category-header align-items-center d-flex justify-content-end cursor-pointer">
         <a
           onClick={() => handleNavigate(categoryKey)}
-          className="see-all-btn text-danger text-decoration-none mb-3 "
+          className="see-all-btn text-danger text-decoration-none mb-3"
         >
           {text?.seeAll || (currentLange === 'Ar' ? 'عرض الكل' : 'See All')}{' '}
           <span>
@@ -231,7 +239,7 @@ function Menu() {
         </h1>
         {categories.map((category) =>
           renderCategorySection(
-            currentLange === 'Ar' ? category.category_ar || category.name : category.name || category.id,
+            category.name || formatCategoryTitle(category.id) || 'Unknown Category', // Always use English title
             menuItems[category.id],
             category.id
           )
