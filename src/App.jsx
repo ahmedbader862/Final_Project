@@ -7,7 +7,7 @@ import WelcomePage from './Pages/Welcome/Welcome';
 import Error from './Pages/Error/Error';
 import Menu from './Pages/Menu/Menu';
 import Reservation from './Pages/Reservation/Reservation';
-import UserReservationsPage from './Pages/Reservation/UserReservationsPage'; // Added import
+import UserReservationsPage from './Pages/Reservation/UserReservationsPage';
 import ContactUs from './Pages/ContactUs/ContactUs';
 import Register from './Pages/Register/Register';
 import Signin from './Pages/Sign in/signIn';
@@ -65,16 +65,21 @@ function App() {
                 <Route path="/signin" element={<Signin />} />
                 <Route path="/menu" element={<Menu />} />
                 <Route path="/Dishes/:id" element={<Dishes />} />
-                <Route path="/reservation" element={<Reservation />} />
-                <Route path="/my-reservations" element={<UserReservationsPage />} /> {/* Added route */}
+                <Route
+                  path="/reservation"
+                  element={<ProtectedRoute element={Reservation} />}
+                />
+                <Route
+                  path="/my-reservations"
+                  element={<ProtectedRoute element={UserReservationsPage} />}
+                />
                 <Route path="/contactus" element={<ContactUs />} />
                 <Route path="/welcome" element={<WelcomePage />} />
                 <Route path="/wishlist" element={<Wishlist />} />
                 <Route path="/cart" element={<ProtectedRoute element={Cart} />} />
                 <Route path="/shippingadress" element={<Shipping />} />
                 <Route path="/order-confirmation" element={<OrderConfirmation />} />
-              <Route path="/search/:term" element={<SearchResults />} />
-
+                <Route path="/search/:term" element={<SearchResults />} />
                 <Route
                   path="/track-order"
                   element={<OrderTracking userId={userState !== "who know" ? userState.uid : null} />}
@@ -87,8 +92,8 @@ function App() {
                 <Route path="*" element={<Error />} />
               </Routes>
             </main>
-           <Chat_AI/>
-           <FirestoreData/>
+            <Chat_AI />
+            <FirestoreData />
             <Footer />
             <ToastContainer
               position="top-right"
@@ -106,7 +111,6 @@ function App() {
         </DebugLocation>
       </BrowserRouter>
     </ThemeProvider>
-
   );
 }
 

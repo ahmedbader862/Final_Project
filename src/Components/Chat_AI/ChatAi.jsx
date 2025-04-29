@@ -97,7 +97,7 @@ function Chat_AI() {
   };
 
   useEffect(() => {
-    const chatConversation = document.querySelector(".chat-conversation");
+    const chatConversation = document.querySelector(".chat-ai .chat-ai-conversation");
     if (chatConversation) {
       chatConversation.scrollTop = chatConversation.scrollHeight;
     }
@@ -114,30 +114,30 @@ function Chat_AI() {
   };
 
   // Theme-based classes
-  const bgClass = theme === "dark" ? "bg-dark-custom" : "bg-light-custom";
-  const cardClass = theme === "dark" ? "bg-dark-card text-white" : "bg-light-card text-dark";
-  const textClass = theme === "dark" ? "text-white" : "text-dark";
-  const btnClass = theme === "dark" ? "btn-accent-dark" : "btn-accent-light";
-  const inputClass = theme === "dark" ? "bg-dark-card text-white border-secondary" : "bg-light-card text-dark border-light";
+  const bgClass = theme === "dark" ? "chat-ai-bg-dark-custom" : "chat-ai-bg-light-custom";
+  const cardClass = theme === "dark" ? "chat-ai-bg-dark-card chat-ai-text-white" : "chat-ai-bg-light-card chat-ai-text-dark";
+  const textClass = theme === "dark" ? "chat-ai-text-white" : "chat-ai-text-dark";
+  const btnClass = theme === "dark" ? "chat-ai-btn-accent-dark" : "chat-ai-btn-accent-light";
+  const inputClass = theme === "dark" ? "chat-ai-bg-dark-card chat-ai-text-white chat-ai-border-secondary" : "chat-ai-bg-light-card chat-ai-text-dark chat-ai-border-light";
 
   return (
-    <div className={`chat-container`}>
+    <div className="chat-ai">
       {!isChatOpen && (
-        <button onClick={toggleChat} className={`chat-button ${btnClass}`} aria-label="Open chat">
+        <button onClick={toggleChat} className={`chat-ai-button ${btnClass}`} aria-label="Open chat">
           <MessageCircle size={35} />
         </button>
       )}
 
       {isChatOpen && (
-        <div className={`chat-panel ${cardClass}`}>
-          <div className={`chat-header ${bgClass} ${textClass}`}>
+        <div className={`chat-ai-panel ${cardClass}`}>
+          <div className={`chat-ai-header bg-danger text-white ${bgClass} ${textClass}`}>
             {text?.chatWithAI || "Chat with AI"}
-            <button onClick={toggleChat} className={`close-button rounded ${btnClass}`} aria-label="Close chat">
+            <button onClick={toggleChat} className={`chat-ai-close-button rounded ${btnClass}`} aria-label="Close chat">
               <X size={20} />
             </button>
           </div>
 
-          <div className="chat-conversation">
+          <div className="chat-ai-conversation">
             {conversation.length === 0 ? (
               <p className={`text-center ${textClass}`}>
                 {text?.startTyping || (currentLange === "Ar" ? "ابدأ بالكتابة للدردشة!" : "Start typing to chat!")}
@@ -149,7 +149,7 @@ function Chat_AI() {
                 return (
                   <div
                     key={`message-${index}`}
-                    className={`message ${isUser ? "user-message" : "assistant-message"} ${textClass}`}
+                    className={`chat-ai-message ${isUser ? "chat-ai-user-message" : "chat-ai-assistant-message"} ${textClass}`}
                   >
                     {messageText}
                   </div>
@@ -158,17 +158,17 @@ function Chat_AI() {
             )}
           </div>
 
-          <div className="chat-input">
+          <div className="chat-ai-input">
             <input
               type="text"
               placeholder={text?.askQuestion || (currentLange === "Ar" ? "اسألني أي سؤال!" : "Ask me any question!")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyPress={handleKeyPress}
-              className={`input-field ${inputClass}`}
+              className={`chat-ai-input-field ${inputClass}`}
               disabled={isLoading}
             />
-            <button onClick={handleSearch} className={`send-button ${btnClass}`} disabled={isLoading} aria-label="Send message">
+            <button onClick={handleSearch} className={`chat-ai-send-button ${btnClass}`} disabled={isLoading} aria-label="Send message">
               {isLoading ? "..." : "➤"}
             </button>
           </div>

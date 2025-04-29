@@ -57,6 +57,21 @@ function Menu() {
         (snapshot) => {
           const categoryData = snapshot.docs.map((doc) => {
             const itemData = doc.data();
+            let parsedCreatedAt = null;
+            if (itemData.createdAt) {
+              try {
+                parsedCreatedAt = itemData.createdAt.toDate ? itemData.createdAt.toDate() : new Date(itemData.createdAt);
+                if (isNaN(parsedCreatedAt.getTime())) {
+                  console.warn(`Invalid createdAt for item ${doc.id}:`, itemData.createdAt);
+                  parsedCreatedAt = null;
+                }
+              } catch (error) {
+                console.error(`Error parsing createdAt for item ${doc.id}:`, error);
+                parsedCreatedAt = null;
+              }
+            } else {
+              console.warn(`No createdAt field for item ${doc.id}`);
+            }
             return {
               id: doc.id,
               title: itemData.title || 'Title not available',
@@ -65,11 +80,36 @@ function Menu() {
               desc_ar: itemData.desc_ar || 'الوصف غير متوفر',
               image: itemData.image || '/Images/default-image.jpg',
               price: itemData.price || 'Price not available',
+              createdAt: parsedCreatedAt,
+              rawCreatedAt: itemData.createdAt, // Keep raw value for debugging
             };
           });
+          // Log the timestamps before sorting
+          console.log(`Timestamps for category ${category.id} before sorting:`, 
+            categoryData.map(item => ({
+              id: item.id,
+              title: item.title,
+              createdAt: item.createdAt ? item.createdAt.toISOString() : 'null',
+              rawCreatedAt: item.rawCreatedAt,
+            }))
+          );
+          // Sort items by createdAt (newest first)
+          const sortedCategoryData = categoryData.sort((a, b) => {
+            const timeA = a.createdAt ? a.createdAt.getTime() : 0;
+            const timeB = b.createdAt ? b.createdAt.getTime() : 0;
+            return timeB - timeA; // Newest first
+          });
+          // Log the sorted items
+          console.log(`Sorted items for category ${category.id}:`, 
+            sortedCategoryData.map(item => ({
+              id: item.id,
+              title: item.title,
+              createdAt: item.createdAt ? item.createdAt.toISOString() : 'null',
+            }))
+          );
           setMenuItems((prev) => ({
             ...prev,
-            [category.id]: categoryData,
+            [category.id]: sortedCategoryData,
           }));
         },
         (error) => {
@@ -127,15 +167,14 @@ function Menu() {
 
   const renderCategorySection = (title, items, categoryKey) => (
     <div className="category-section mt-5">
-      <div className="category-header align-items-center d-flex justify-content-between">
-        <h2 className="text-danger">{title}</h2>
+      <div className="category-header align-items-center d-flex justify-content-end cursor-pointer">
         <a
           onClick={() => handleNavigate(categoryKey)}
-          className="see-all-btn text-danger text-decoration-none"
+          className="see-all-btn text-danger text-decoration-none mb-3 "
         >
           {text?.seeAll || (currentLange === 'Ar' ? 'عرض الكل' : 'See All')}{' '}
           <span>
-            <i className="fa-solid fa-greater-than"></i>
+            <i className="fa-solid fa-greater-than cursor-pointer"></i>
           </span>
         </a>
       </div>

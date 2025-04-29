@@ -723,179 +723,490 @@ const AdminReservationsPage = () => {
     return pageNumbers;
   };
 
+  // Function to format the date without time
+  const formatDate = (date) => {
+    if (!date) return "N/A";
+    return date.toLocaleDateString('en-US', {
+      month: 'numeric',
+      day: 'numeric',
+      year: 'numeric',
+    }); // e.g., "4/30/2025"
+  };
+
   return (
-    <div className="container mt-5">
-      <div className="d-flex justify-content-between mb-4 align-items-center flex-wrap">
-        <h2 className={textColor}>
-          {text?.reservationsManagement || (currentLange === "Ar" ? "إدارة الحجوزات" : "Reservations Management")}
-        </h2>
-        <div className="d-flex gap-2 align-items-center flex-wrap">
-          <div>
-            <label className={`me-2 ${textColor}`}>
-              {text?.sortBy || (currentLange === "Ar" ? "ترتيب حسب:" : "Sort by:")}
-            </label>
-            <select
-              value={sortOrder}
-              onChange={(e) => {
-                setSortOrder(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="form-select d-inline-block"
-              style={{ width: "auto", backgroundColor: theme === "dark" ? "#333" : "#fff", color: theme === "dark" ? "#fff" : "#000" }}
-            >
-              <option value="newest">
-                {text?.newest || (currentLange === "Ar" ? "الأحدث" : "Newest")}
-              </option>
-              <option value="oldest">
-                {text?.oldest || (currentLange === "Ar" ? "الأقدم" : "Oldest")}
-              </option>
-            </select>
-          </div>
-          <div>
-            <label className={`me-2 ${textColor}`}>
-              {text?.filterByStatus || (currentLange === "Ar" ? "تصفية حسب الحالة:" : "Filter by Status:")}
-            </label>
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="form-select d-inline-block"
-              style={{ width: "auto", backgroundColor: theme === "dark" ? "#333" : "#fff", color: theme === "dark" ? "#fff" : "#000" }}
-            >
-              <option value="all">
-                {text?.all || (currentLange === "Ar" ? "الكل" : "All")}
-              </option>
-              <option value="pending">
-                {text?.pending || (currentLange === "Ar" ? "معلق" : "Pending")}
-              </option>
-              <option value="accepted">
-                {text?.accepted || (currentLange === "Ar" ? "مقبول" : "Accepted")}
-              </option>
-              <option value="rejected">
-                {text?.rejected || (currentLange === "Ar" ? "مرفوض" : "Rejected")}
-              </option>
-            </select>
+    <>
+      <style>
+        {`
+          /* Container */
+          .reservations-container {
+            padding: 30px;
+            background-color: ${theme === 'dark' ? '#1a1d21' : '#f8f9fa'};
+            min-height: 100vh;
+          }
+
+          /* Header Section */
+          .reservations-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+          }
+
+          .reservations-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: ${theme === 'dark' ? '#e0e0e0' : '#212529'};
+            margin: 0;
+          }
+
+          .filters-section {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+          }
+
+          .filter-label {
+            color: ${theme === 'dark' ? '#a0a0a0' : '#6c757d'};
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+          }
+
+          .filter-select {
+            background-color: ${theme === 'dark' ? '#2a2e34' : '#fff'};
+            color: ${theme === 'dark' ? '#e0e0e0' : '#212529'};
+            border: 1px solid ${theme === 'dark' ? '#3a3f47' : '#ced4da'};
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+          }
+
+          .filter-select:focus {
+            outline: none;
+            border-color: #4A919E;
+            box-shadow: 0 0 0 0.2rem rgba(74, 145, 158, 0.25);
+          }
+
+          /* Reservation Card */
+          .reservation-card {
+            background: linear-gradient(145deg, #2a2e34, #1f2327);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            color: #e0e0e0;
+            border: none;
+          }
+
+          .reservation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+          }
+
+          .reservation-card-body {
+            padding: 1.5rem;
+          }
+
+          .reservation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #3a3f47;
+          }
+
+          .reservation-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #4A919E;
+            margin: 0;
+          }
+
+          .status-badge {
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+          }
+
+          .reservation-details {
+            margin-bottom: 1rem;
+          }
+
+          .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+          }
+
+          .detail-label {
+            font-weight: 500;
+            color: #e0e0e0;
+            width: 40%;
+          }
+
+          .detail-value {
+            color: #a0a0a0;
+            width: 60%;
+            text-align: right;
+          }
+
+          .reservation-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+            padding-top: 0.75rem;
+            border-top: 1px solid #3a3f47;
+          }
+
+          .action-btn {
+            font-size: 0.85rem;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            border: none;
+          }
+
+          .action-btn:hover {
+            transform: scale(1.05);
+          }
+
+          .btn-accept {
+            background-color: #4A919E;
+          }
+
+          .btn-accept:hover {
+            background-color: #3A7D8C;
+          }
+
+          .btn-reject {
+            background-color: #B73E3E;
+          }
+
+          .btn-reject:hover {
+            background-color: #9A3434;
+          }
+
+          .btn-delete {
+            background-color: #d4a017;
+          }
+
+          .btn-delete:hover {
+            background-color: #b38b14;
+          }
+
+          .action-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+          }
+
+          /* No Reservations Message */
+          .no-reservations {
+            font-size: 1rem;
+            font-weight: 400;
+            color: ${theme === 'dark' ? '#a0a0a0' : '#6c757d'};
+            text-align: center;
+            margin-top: 2rem;
+          }
+
+          /* Pagination */
+          .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 3rem;
+          }
+
+          .pagination {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+          }
+
+          .page-item {
+            list-style: none;
+          }
+
+          .page-link {
+            background-color: ${theme === 'dark' ? '#2a2e34' : '#fff'};
+            color: ${theme === 'dark' ? '#e0e0e0' : '#212529'};
+            border: 1px solid ${theme === 'dark' ? '#3a3f47' : '#ced4da'};
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            cursor: pointer;
+          }
+
+          .page-link:hover:not(.disabled .page-link) {
+            background-color: #4A919E;
+            color: #fff;
+            border-color: #4A919E;
+          }
+
+          .page-item.active .page-link {
+            background-color: #4A919E;
+            color: #fff;
+            border-color: #4A919E;
+          }
+
+          .page-item.disabled .page-link {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+
+          /* Responsive Adjustments */
+          @media (max-width: 768px) {
+            .reservations-container {
+              padding: 20px;
+            }
+
+            .reservations-title {
+              font-size: 1.5rem;
+            }
+
+            .filters-section {
+              flex-direction: column;
+              align-items: flex-start;
+              gap: 1rem;
+            }
+
+            .filter-select {
+              width: 100%;
+              padding: 0.5rem;
+              font-size: 0.85rem;
+            }
+
+            .reservation-card-body {
+              padding: 1rem;
+            }
+
+            .reservation-title {
+              font-size: 1rem;
+            }
+
+            .status-badge {
+              font-size: 0.65rem;
+            }
+
+            .detail-row {
+              flex-direction: column;
+              font-size: 0.85rem;
+            }
+
+            .detail-label,
+            .detail-value {
+              width: 100%;
+              text-align: left;
+            }
+
+            .detail-value {
+              margin-top: 0.2rem;
+            }
+
+            .reservation-actions {
+              flex-direction: column;
+              gap: 0.5rem;
+            }
+
+            .action-btn {
+              width: 100%;
+              padding: 0.5rem;
+              font-size: 0.8rem;
+            }
+
+            .page-link {
+              padding: 0.4rem 0.8rem;
+              font-size: 0.85rem;
+            }
+          }
+        `}
+      </style>
+      <div className="reservations-container">
+        <div className="reservations-header">
+          <h2 className="reservations-title">
+            {text?.reservationsManagement || (currentLange === "Ar" ? "إدارة الحجوزات" : "Reservations Management")}
+          </h2>
+          <div className="filters-section">
+            <div>
+              <label className="filter-label">
+                {text?.sortBy || (currentLange === "Ar" ? "ترتيب حسب:" : "Sort by:")}
+              </label>
+              <select
+                value={sortOrder}
+                onChange={(e) => {
+                  setSortOrder(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="filter-select"
+              >
+                <option value="newest">
+                  {text?.newest || (currentLange === "Ar" ? "الأحدث" : "Newest")}
+                </option>
+                <option value="oldest">
+                  {text?.oldest || (currentLange === "Ar" ? "الأقدم" : "Oldest")}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label className="filter-label">
+                {text?.filterByStatus || (currentLange === "Ar" ? "تصفية حسب الحالة:" : "Filter by Status:")}
+              </label>
+              <select
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="filter-select"
+              >
+                <option value="all">
+                  {text?.all || (currentLange === "Ar" ? "الكل" : "All")}
+                </option>
+                <option value="pending">
+                  {text?.pending || (currentLange === "Ar" ? "معلق" : "Pending")}
+                </option>
+                <option value="accepted">
+                  {text?.accepted || (currentLange === "Ar" ? "مقبول" : "Accepted")}
+                </option>
+                <option value="rejected">
+                  {text?.rejected || (currentLange === "Ar" ? "مرفوض" : "Rejected")}
+                </option>
+              </select>
+            </div>
           </div>
         </div>
-      </div>
 
-      {filteredReservations.length > 0 ? (
-        <>
-          <Row>
-            {currentReservations.map((reservation) => (
-              <Col md={6} lg={4} className="mb-4" key={reservation.id}>
-                <Card className="bg-dark text-white border-0 shadow">
-                  <Card.Body>
-                    <Card.Title className="d-flex justify-content-between align-items-center">
-                      <span>
-                        {text?.reservationTitle?.replace("{reservationId}", reservation.reservationId || reservation.id || "Unknown") ||
-                          (currentLange === "Ar" ? `الحجز #${reservation.reservationId || reservation.id || "غير معروف"}` : `Reservation #${reservation.reservationId || reservation.id || "Unknown"}`)}
-                      </span>
-                      <span
-                        style={{
-                          color: getStatusColor(reservation.status),
-                          fontWeight: "bold",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        {reservation.status || "pending"}
-                      </span>
-                    </Card.Title>
-                    <Card.Text>
-                      <strong>{text?.tableId || (currentLange === "Ar" ? "معرف الطاولة:" : "Table ID:")}</strong> {reservation.tableId || "N/A"} <br />
-                      <strong>{text?.name || (currentLange === "Ar" ? "الاسم:" : "Name:")}</strong> {reservation.name || "N/A"} <br />
-                      <strong>{text?.date || (currentLange === "Ar" ? "التاريخ:" : "Date:")}</strong>{" "}
-                      {reservation.date
-                        ? reservation.date.toLocaleString()
-                        : "N/A"}{" "}
-                      <br />
-                      <strong>{text?.numPersons || (currentLange === "Ar" ? "عدد الأشخاص:" : "Number of Persons:")}</strong>{" "}
-                      {reservation.numPersons || "N/A"} <br />
-                      <strong>{text?.timeArriving || (currentLange === "Ar" ? "وقت الوصول:" : "Time Arriving:")}</strong> {reservation.timeArriving || "N/A"} <br />
-                      <strong>{text?.timeLeaving || (currentLange === "Ar" ? "وقت المغادرة:" : "Time Leaving:")}</strong> {reservation.timeLeaving || "N/A"} <br />
-                      <strong>{text?.phone || (currentLange === "Ar" ? "الهاتف:" : "Phone:")}</strong> {reservation.phone || "N/A"} <br />
-                    </Card.Text>
-                    <div className="d-flex gap-2">
-                      <Button
-                        variant="success"
-                        size="sm"
-                        onClick={() => updateStatus(reservation.id, "accepted")}
-                        disabled={reservation.status?.toLowerCase() === "accepted"}
-                      >
-                        {text?.accept || (currentLange === "Ar" ? "قبول" : "Accept")}
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => updateStatus(reservation.id, "rejected")}
-                        disabled={reservation.status?.toLowerCase() === "rejected"}
-                      >
-                        {text?.reject || (currentLange === "Ar" ? "رفض" : "Reject")}
-                      </Button>
-                      <Button
-                        variant="warning"
-                        size="sm"
-                        onClick={() => deleteReservation(reservation.id)}
-                      >
-                        {text?.delete || (currentLange === "Ar" ? "حذف" : "Delete")}
-                      </Button>
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-          <div className="d-flex justify-content-center mt-5">
-            <nav>
-              <ul className="pagination">
-                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                  <button 
-                    className="page-link bg-dark text-white" 
-                    onClick={handlePrevious}
-                    disabled={currentPage === 1}
-                    style={{ borderRadius: '50px', margin: '0 5px' }}
-                  >
-                    {text?.previous || (currentLange === "Ar" ? "السابق" : "Previous")}
-                  </button>
-                </li>
-                {getPageNumbers().map(number => (
-                  <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
+        {filteredReservations.length > 0 ? (
+          <>
+            <Row>
+              {currentReservations.map((reservation) => (
+                <Col md={6} lg={4} className="mb-4" key={reservation.id}>
+                  <Card className="reservation-card">
+                    <Card.Body className="reservation-card-body">
+                      <div className="reservation-header">
+                        <Card.Title className="reservation-title">
+                          {text?.reservationTitle?.replace("{reservationId}", reservation.reservationId || reservation.id || "Unknown") ||
+                            (currentLange === "Ar" ? `الحجز #${reservation.reservationId || reservation.id || "غير معروف"}` : `Reservation #${reservation.reservationId || reservation.id || "Unknown"}`)}
+                        </Card.Title>
+                        <span
+                          className="status-badge"
+                          style={{
+                            backgroundColor: getStatusColor(reservation.status),
+                            color: reservation.status?.toLowerCase() === "pending" ? '#1a1d21' : '#e0e0e0',
+                          }}
+                        >
+                          {reservation.status || "pending"}
+                        </span>
+                      </div>
+                      <div className="reservation-details">
+                        <div className="detail-row">
+                          <span className="detail-label">{text?.tableId || (currentLange === "Ar" ? "معرف الطاولة:" : "Table ID:")}</span>
+                          <span className="detail-value">{reservation.tableId || "N/A"}</span>
+                        </div>
+                        <div className="detail-row">
+                          <span className="detail-label">{text?.name || (currentLange === "Ar" ? "الاسم:" : "Name:")}</span>
+                          <span className="detail-value">{reservation.name || "N/A"}</span>
+                        </div>
+                        <div className="detail-row">
+                          <span className="detail-label">{text?.date || (currentLange === "Ar" ? "التاريخ:" : "Date:")}</span>
+                          <span className="detail-value">
+                            {reservation.date ? formatDate(reservation.date) : "N/A"}
+                          </span>
+                        </div>
+                        <div className="detail-row">
+                          <span className="detail-label">{text?.numPersons || (currentLange === "Ar" ? "عدد الأشخاص:" : "Number of Persons:")}</span>
+                          <span className="detail-value">{reservation.numPersons || "N/A"}</span>
+                        </div>
+                        <div className="detail-row">
+                          <span className="detail-label">{text?.timeArriving || (currentLange === "Ar" ? "وقت الوصول:" : "Time Arriving:")}</span>
+                          <span className="detail-value">{reservation.timeArriving || "N/A"}</span>
+                        </div>
+                        <div className="detail-row">
+                          <span className="detail-label">{text?.timeLeaving || (currentLange === "Ar" ? "وقت المغادرة:" : "Time Leaving:")}</span>
+                          <span className="detail-value">{reservation.timeLeaving || "N/A"}</span>
+                        </div>
+                        <div className="detail-row">
+                          <span className="detail-label">{text?.phone || (currentLange === "Ar" ? "الهاتف:" : "Phone:")}</span>
+                          <span className="detail-value">{reservation.phone || "N/A"}</span>
+                        </div>
+                      </div>
+                      <div className="reservation-actions">
+                        <Button
+                          className="action-btn btn-accept"
+                          onClick={() => updateStatus(reservation.id, "accepted")}
+                          disabled={reservation.status?.toLowerCase() === "accepted"}
+                        >
+                          {text?.accept || (currentLange === "Ar" ? "قبول" : "Accept")}
+                        </Button>
+                        <Button
+                          className="action-btn btn-reject"
+                          onClick={() => updateStatus(reservation.id, "rejected")}
+                          disabled={reservation.status?.toLowerCase() === "rejected"}
+                        >
+                          {text?.reject || (currentLange === "Ar" ? "رفض" : "Reject")}
+                        </Button>
+                        <Button
+                          className="action-btn btn-delete"
+                          onClick={() => deleteReservation(reservation.id)}
+                        >
+                          {text?.delete || (currentLange === "Ar" ? "حذف" : "Delete")}
+                        </Button>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+            <div className="pagination-container">
+              <nav>
+                <ul className="pagination">
+                  <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
                     <button 
-                      className="page-link bg-dark text-white" 
-                      onClick={() => handlePageChange(number)}
-                      style={{ 
-                        borderRadius: '50px', 
-                        margin: '0 5px',
-                        backgroundColor: currentPage === number ? '#555' : '',
-                        border: 'none'
-                      }}
+                      className="page-link"
+                      onClick={handlePrevious}
+                      disabled={currentPage === 1}
                     >
-                      {number}
+                      {text?.previous || (currentLange === "Ar" ? "السابق" : "Previous")}
                     </button>
                   </li>
-                ))}
-                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                  <button 
-                    className="page-link bg-dark text-white" 
-                    onClick={handleNext}
-                    disabled={currentPage === totalPages}
-                    style={{ borderRadius: '50px', margin: '0 5px' }}
-                  >
-                    {text?.next || (currentLange === "Ar" ? "التالي" : "Next")}
-                  </button>
-                </li>
-              </ul>
-            </nav>
-          </div>
-        </>
-      ) : (
-        <p className={textColor}>
-          {text?.noReservations || (currentLange === "Ar" ? "لا توجد حجوزات." : "No reservations found.")}
-        </p>
-      )}
-    </div>
+                  {getPageNumbers().map(number => (
+                    <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
+                      <button 
+                        className="page-link"
+                        onClick={() => handlePageChange(number)}
+                      >
+                        {number}
+                      </button>
+                    </li>
+                  ))}
+                  <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                    <button 
+                      className="page-link"
+                      onClick={handleNext}
+                      disabled={currentPage === totalPages}
+                    >
+                      {text?.next || (currentLange === "Ar" ? "التالي" : "Next")}
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </>
+        ) : (
+          <p className="no-reservations">
+            {text?.noReservations || (currentLange === "Ar" ? "لا توجد حجوزات." : "No reservations found.")}
+          </p>
+        )}
+      </div>
+    </>
   );
 };
 
@@ -958,9 +1269,33 @@ const AdminPanel = () => {
     const unsubscribe = onSnapshot(
       collection(db, `menu/${selectedCategory}/items`),
       (snapshot) => {
-        const items = snapshot.docs.map((doc) => ({ docId: doc.id, ...doc.data() }));
-        console.log(`Menu items updated for category ${selectedCategory}:`, items);
-        setMenuItems(items);
+        const items = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          let parsedCreatedAt = null;
+          if (data.createdAt) {
+            if (data.createdAt.toDate) {
+              parsedCreatedAt = data.createdAt.toDate();
+            } else {
+              parsedCreatedAt = new Date(data.createdAt);
+              if (isNaN(parsedCreatedAt.getTime())) {
+                parsedCreatedAt = null;
+              }
+            }
+          }
+          return {
+            docId: doc.id,
+            ...data,
+            createdAt: parsedCreatedAt,
+          };
+        });
+        // Sort items by createdAt (newest first)
+        const sortedItems = items.sort((a, b) => {
+          const timeA = a.createdAt ? a.createdAt.getTime() : 0;
+          const timeB = b.createdAt ? b.createdAt.getTime() : 0;
+          return timeB - timeA; // Newest first
+        });
+        console.log(`Sorted menu items for category ${selectedCategory}:`, sortedItems);
+        setMenuItems(sortedItems);
       },
       (error) => {
         console.error('Error fetching menu items:', error);
@@ -1012,8 +1347,9 @@ const AdminPanel = () => {
         category_ar: categories.find(cat => cat.id === selectedCategory)?.category_ar || values.category_ar || '',
         price: parseFloat(values.price) || 0,
         image: imageUrl || '',
+        createdAt: values.createdAt || Timestamp.fromDate(new Date()), // Ensure createdAt is a Timestamp
       };
-      console.log('Saving item to:', `menu/${selectedCategory}/items`, 'Data:', itemData);
+      console.log('Saving item with createdAt:', itemData.createdAt, 'to:', `menu/${selectedCategory}/items`, 'Data:', itemData);
       if (showModal === 'add') {
         const docRef = await addDoc(collection(db, `menu/${selectedCategory}/items`), itemData);
         console.log('Item added with ID:', docRef.id);
@@ -1159,7 +1495,7 @@ const AdminPanel = () => {
               variant="primary"
               onClick={() => {
                 if (!selectedCategory) {
-                  toast.error('Please select a category first');
+                  toastja.error('Please select a category first');
                   return;
                 }
                 const selectedCat = categories.find(cat => cat.id === selectedCategory);
