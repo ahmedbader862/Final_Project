@@ -18,26 +18,26 @@ function Chat_AI() {
   useEffect(() => {
     const processData = async () => {
       console.log("🔍 فحص fireData:", fireData);
-  
+
       if (!fireData) {
         console.log("❌ fireData فاضي بالكامل");
         return;
       }
-  
+
       if (!fireData.dishesByCategory) {
         console.log("❌ fireData.dishesByCategory غير موجود");
         return;
       }
-  
+
       console.log("📋 محتوى fireData.dishesByCategory:", fireData.dishesByCategory);
-  
+
       try {
         const documents = Object.entries(fireData.dishesByCategory).flatMap(([category, dishes]) => {
           if (!Array.isArray(dishes)) {
             console.log(`❌ الفئة ${category} مش مصفوفة:`, dishes);
             return [];
           }
-  
+
           return dishes.map((dish) => {
             const name = dish.name_en || dish.title || dish.name_ar || dish.title_ar || "Unknown Item";
             const price = dish.price || "Unknown Price";
@@ -50,26 +50,23 @@ function Chat_AI() {
             };
           });
         });
-  
+
         if (documents.length === 0) {
           console.log("❌ لا توجد بيانات لتحميلها");
           return;
         }
-  
+
         console.log("📤 الوثائق المرسلة إلى الباك إند:", documents);
-  
+
         const response = await axios.post("http://localhost:3000/generate-embeddings", {
           documents: documents.slice(0, 50),
         });
         console.log("✅ تم تحميل البيانات بنجاح:", response.data);
-  
-        // انتظر 20 ثانية للتأكد إن الـ embeddings اتخزنت
-        await new Promise(resolve => setTimeout(resolve, 20000));
       } catch (error) {
         console.error("❌ فشل تحميل البيانات:", error.response?.data || error.message);
       }
     };
-  
+
     processData();
   }, [fireData]);
 
@@ -109,6 +106,19 @@ function Chat_AI() {
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
   };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !isLoading) {
+      handleSearch();
+    }
+  };
+
+  // Theme-based classes
+  const bgClass = theme === "dark" ? "chat-ai-bg-dark-custom" : "chat-ai-bg-light-custom";
+  const cardClass = theme === "dark" ? "chat-ai-bg-dark-card chat-ai-text-white" : "chat-ai-bg-light-card chat-ai-text-dark";
+  const textClass = theme === "dark" ? "chat-ai-text-white" : "chat-ai-text-dark";
+  const btnClass = theme === "dark" ? "chat-ai-btn-accent-dark" : "chat-ai-btn-accent-light";
+  const inputClass = theme === "dark" ? "chat-ai-bg-dark-card chat-ai-text-white chat-ai-border-secondary" : "chat-ai-bg-light-card chat-ai-text-dark chat-ai-border-light";
 
   return (
     <div className="chat-ai">
@@ -154,7 +164,9 @@ function Chat_AI() {
               placeholder={text?.askQuestion || (currentLange === "Ar" ? "اسألني أي سؤال!" : "Ask me any question!")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="input-field"
+              onKeyPress={handleKeyPress}
+              className={`chat-ai-input-field ${inputClass}`}
+              disabled={isLoading}
             />
             <button onClick={handleSearch} className={`chat-ai-send-button ${btnClass}`} disabled={isLoading} aria-label="Send message">
               {isLoading ? "..." : "➤"}
