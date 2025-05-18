@@ -13,26 +13,26 @@ function Chat_AI() {
   useEffect(() => {
     const processData = async () => {
       console.log("🔍 فحص fireData:", fireData);
-
+  
       if (!fireData) {
         console.log("❌ fireData فاضي بالكامل");
         return;
       }
-
+  
       if (!fireData.dishesByCategory) {
         console.log("❌ fireData.dishesByCategory غير موجود");
         return;
       }
-
+  
       console.log("📋 محتوى fireData.dishesByCategory:", fireData.dishesByCategory);
-
+  
       try {
         const documents = Object.entries(fireData.dishesByCategory).flatMap(([category, dishes]) => {
           if (!Array.isArray(dishes)) {
             console.log(`❌ الفئة ${category} مش مصفوفة:`, dishes);
             return [];
           }
-
+  
           return dishes.map((dish) => {
             const name = dish.name_en || dish.title || dish.name_ar || dish.title_ar || "Unknown Item";
             const price = dish.price || "Unknown Price";
@@ -50,23 +50,26 @@ function Chat_AI() {
             };
           });
         });
-
+  
         if (documents.length === 0) {
           console.log("❌ لا توجد بيانات لتحميلها");
           return;
         }
-
+  
         console.log("📤 الوثائق المرسلة إلى الباك إند:", documents);
-
+  
         const response = await axios.post("http://localhost:3000/generate-embeddings", {
           documents: documents.slice(0, 50),
         });
         console.log("✅ تم تحميل البيانات بنجاح:", response.data);
+  
+        // انتظر 20 ثانية للتأكد إن الـ embeddings اتخزنت
+        await new Promise(resolve => setTimeout(resolve, 20000));
       } catch (error) {
         console.error("❌ فشل تحميل البيانات:", error.response?.data || error.message);
       }
     };
-
+  
     processData();
   }, [fireData]);
 
@@ -110,12 +113,6 @@ function Chat_AI() {
     setIsChatOpen(!isChatOpen);
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter" && !isLoading) {
-      handleSearch();
-    }
-  };
-
   return (
     <div className="chat-container">
       <button onClick={toggleChat} className="chat-button">
@@ -147,7 +144,6 @@ function Chat_AI() {
               placeholder="اسألني أي سؤال!"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              onKeyPress={handleKeyPress} // Added Enter key support
               className="input-field"
             />
             <button onClick={handleSearch} className="send-button" disabled={isLoading}>
