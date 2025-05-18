@@ -4,7 +4,7 @@ import { onSnapshot } from 'firebase/firestore';
 import { useEffect, useState, useContext } from "react";
 import { ThemeContext } from "../../Context/ThemeContext";
 import Card from '../../Components/Card/card';
-import "./Wishlist.css";
+import "./wishlist.css";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
