@@ -125,7 +125,7 @@ export default function OrderConfirmation() {
 
                 <div className="d-flex justify-content-center gap-3 flex-wrap">
                   <button
-                    className="btn btn-primary btn-lg"
+                    className="btn btn-outline-secondary btn-lg"
                     onClick={handleReturnHome}
                   >
                     Return to Home

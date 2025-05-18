@@ -15,10 +15,18 @@ import { useSelector } from 'react-redux';
 function Menu() {
   const navigate = useNavigate();
   const { theme } = useContext(ThemeContext);
-  const currentLange = useSelector((state) => state.lange?.langue || "en");
+  const currentLange = useSelector((state) => state.lange?.langue || 'en');
   const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
   const [categories, setCategories] = useState([]);
   const [menuItems, setMenuItems] = useState({});
+
+  // Helper function to format document IDs into proper titles
+  const formatCategoryTitle = (id) => {
+    return id
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
 
   useEffect(() => {
     const unsubscribeCategories = onSnapshot(
@@ -57,6 +65,21 @@ function Menu() {
         (snapshot) => {
           const categoryData = snapshot.docs.map((doc) => {
             const itemData = doc.data();
+            let parsedCreatedAt = null;
+            if (itemData.createdAt) {
+              try {
+                parsedCreatedAt = itemData.createdAt.toDate ? itemData.createdAt.toDate() : new Date(itemData.createdAt);
+                if (isNaN(parsedCreatedAt.getTime())) {
+                  console.warn(`Invalid createdAt for item ${doc.id}:`, itemData.createdAt);
+                  parsedCreatedAt = null;
+                }
+              } catch (error) {
+                console.error(`Error parsing createdAt for item ${doc.id}:`, error);
+                parsedCreatedAt = null;
+              }
+            } else {
+              console.warn(`No createdAt field for item ${doc.id}`);
+            }
             return {
               id: doc.id,
               title: itemData.title || 'Title not available',
@@ -65,11 +88,33 @@ function Menu() {
               desc_ar: itemData.desc_ar || 'الوصف غير متوفر',
               image: itemData.image || '/Images/default-image.jpg',
               price: itemData.price || 'Price not available',
+              createdAt: parsedCreatedAt,
+              rawCreatedAt: itemData.createdAt,
             };
           });
+          console.log(`Timestamps for category ${category.id} before sorting:`, 
+            categoryData.map(item => ({
+              id: item.id,
+              title: item.title,
+              createdAt: item.createdAt ? item.createdAt.toISOString() : 'null',
+              rawCreatedAt: item.rawCreatedAt,
+            }))
+          );
+          const sortedCategoryData = categoryData.sort((a, b) => {
+            const timeA = a.createdAt ? a.createdAt.getTime() : 0;
+            const timeB = b.createdAt ? b.createdAt.getTime() : 0;
+            return timeB - timeA;
+          });
+          console.log(`Sorted items for category ${category.id}:`, 
+            sortedCategoryData.map(item => ({
+              id: item.id,
+              title: item.title,
+              createdAt: item.createdAt ? item.createdAt.toISOString() : 'null',
+            }))
+          );
           setMenuItems((prev) => ({
             ...prev,
-            [category.id]: categoryData,
+            [category.id]: sortedCategoryData,
           }));
         },
         (error) => {
@@ -118,8 +163,8 @@ function Menu() {
     });
   };
 
-  const textColor = theme === 'dark' ? 'text-white' : 'text-dark';
-  const backgroundColor = theme === 'dark' ? 'bg-custom-dark' : 'bg-custom-light';
+  const textColor = theme === 'dark' || theme === 'darkTheme' ? 'text-white' : 'text-dark';
+  const backgroundColor = theme === 'dark' || theme === 'darkTheme' ? 'bg-custom-dark' : 'bg-custom-light';
 
   const handleNavigate = (category) => {
     navigate(`/Dishes/${category}`);
@@ -127,15 +172,17 @@ function Menu() {
 
   const renderCategorySection = (title, items, categoryKey) => (
     <div className="category-section mt-5">
-      <div className="category-header align-items-center d-flex justify-content-between">
-        <h2 className="text-danger">{title}</h2>
+      <h2 className={`category-title ${textColor} mb-3`}>
+        {title}
+      </h2>
+      <div className="category-header align-items-center d-flex justify-content-end cursor-pointer">
         <a
           onClick={() => handleNavigate(categoryKey)}
-          className="see-all-btn text-danger text-decoration-none"
+          className="see-all-btn text-danger text-decoration-none mb-3"
         >
           {text?.seeAll || (currentLange === 'Ar' ? 'عرض الكل' : 'See All')}{' '}
           <span>
-            <i className="fa-solid fa-greater-than"></i>
+            <i className="fa-solid fa-greater-than cursor-pointer"></i>
           </span>
         </a>
       </div>
@@ -187,12 +234,12 @@ function Menu() {
     <div className={`menu-container ${backgroundColor} ${textColor} py-5 mt-5`}>
       <div className="container">
         <h1 className={`text-center menu-title ${textColor}`}>
-          <span>{currentLange === 'Ar' ? 'قائمتنا' : 'Our'}</span>
-          <span className="text-danger"> {currentLange === 'Ar' ? 'القائمة' : 'Menu'}</span>
+          <span>{currentLange === 'Ar' ? 'قائمة' : 'Our'}</span>
+          <span className="text-danger"> {currentLange === 'Ar' ? 'الطعام' : 'Menu'}</span>
         </h1>
         {categories.map((category) =>
           renderCategorySection(
-            currentLange === 'Ar' ? category.category_ar || category.name : category.name || category.id,
+            category.name || formatCategoryTitle(category.id) || 'Unknown Category', // Always use English title
             menuItems[category.id],
             category.id
           )

@@ -62,13 +62,13 @@ const arabic = {
   reservationsManagement: "إدارة الحجوزات",
   refreshReservations: "تحديث الحجوزات",
   reservationTitle: "الحجز #{reservationId}",
-  tableId: "معرف الطاولة", // Removed colon
-  name: "الاسم", // Removed colon
-  date: "التاريخ", // Removed colon
-  numPersons: "عدد الأشخاص", // Removed colon
-  timeArriving: "وقت الوصول", // Removed colon
-  timeLeaving: "وقت المغادرة", // Removed colon
-  phone: "الهاتف", // Removed colon
+  tableId: "معرف الطاولة",
+  name: "الاسم",
+  date: "التاريخ",
+  numPersons: "عدد الأشخاص",
+  timeArriving: "وقت الوصول",
+  timeLeaving: "وقت المغادرة",
+  phone: "الهاتف",
   accept: "قبول",
   reject: "رفض",
   delete: "حذف",
@@ -214,14 +214,14 @@ const arabic = {
   myReservationsTitle: "حجوزاتي",
   mustBeLoggedIn: "يجب أن تكون مسجلاً لعرض حجوزاتك.",
   failedLoadReservations: "فشل في تحميل الحجوزات: ",
-  tableIdLabel: "معرف الطاولة", // Already updated above as `tableId`
+  tableIdLabel: "معرف الطاولة",
   unknown: "غير معروف",
-  nameLabel: "الاسم", // Already updated above as `name`
-  dateLabel: "التاريخ", // Already updated above as `date`
-  numPersonsLabel: "عدد الأشخاص", // Already updated above as `numPersons`
-  timeArrivingLabel: "وقت الوصول", // Already updated above as `timeArriving`
-  timeLeavingLabel: "وقت المغادرة", // Already updated above as `timeLeaving`
-  phoneLabel: "الهاتف", // Already updated above as `phone`
+  nameLabel: "الاسم",
+  dateLabel: "التاريخ",
+  numPersonsLabel: "عدد الأشخاص",
+  timeArrivingLabel: "وقت الوصول",
+  timeLeavingLabel: "وقت المغادرة",
+  phoneLabel: "الهاتف",
   pendingMessage: "في انتظار موافقة الإدارة. سيتم إشعارك بمجرد التأكيد.",
   acceptedMessage: "تم تأكيد حجزك! نتطلع إلى رؤيتك.",
   rejectedMessage: "عذراً، لم يتم الموافقة على حجزك. يرجى تجربة وقت أو طاولة مختلفة.",

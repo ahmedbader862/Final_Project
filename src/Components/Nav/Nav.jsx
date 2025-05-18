@@ -23,7 +23,7 @@ function Nav() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [wishlistCountFirestore, setWishlistCountFirestore] = useState(0);
-  const [cartCount, setCartCount] = useState(0); // حالة لتخزين عدد العناصر في الكارت
+  const [cartCount, setCartCount] = useState(0);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -123,7 +123,7 @@ function Nav() {
       (docSnap) => {
         if (docSnap.exists()) {
           const cartItems = docSnap.data().cartItems || [];
-          const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0); // حساب العدد الإجمالي
+          const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
           setCartCount(totalItems);
         } else {
           setCartCount(0);
@@ -196,15 +196,17 @@ function Nav() {
                 {text?.menu || (currentLange === "Ar" ? "القائمة" : "Menu")}
               </Link>
             </li>
-            <li className="nav-item">
-              <Link
-                to="/reservation"
-                className={`nav-link ${activeTab === "Reservation" ? "active" : ""} ${textColorClass}`}
-                onClick={() => setActiveTab("Reservation")}
-              >
-                {text?.reservation || (currentLange === "Ar" ? "الحجز" : "Reservation")}
-              </Link>
-            </li>
+            {userState !== "who know" && (
+              <li className="nav-item">
+                <Link
+                  to="/reservation"
+                  className={`nav-link ${activeTab === "Reservation" ? "active" : ""} ${textColorClass}`}
+                  onClick={() => setActiveTab("Reservation")}
+                >
+                  {text?.reservation || (currentLange === "Ar" ? "الحجز" : "Reservation")}
+                </Link>
+              </li>
+            )}
             {userState !== "who know" && (
               <li className="nav-item">
                 <Link

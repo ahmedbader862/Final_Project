@@ -62,13 +62,13 @@ const english = {
   reservationsManagement: "Reservations Management",
   refreshReservations: "Refresh Reservations",
   reservationTitle: "Reservation #{reservationId}",
-  tableId: "Table ID", // Removed colon
-  name: "Name", // Removed colon
-  date: "Date", // Removed colon
-  numPersons: "Number of Persons", // Removed colon
-  timeArriving: "Time Arriving", // Removed colon
-  timeLeaving: "Time Leaving", // Removed colon
-  phone: "Phone", // Removed colon
+  tableId: "Table ID",
+  name: "Name",
+  date: "Date",
+  numPersons: "Number of Persons",
+  timeArriving: "Time Arriving",
+  timeLeaving: "Time Leaving",
+  phone: "Phone",
   accept: "Accept",
   reject: "Reject",
   delete: "Delete",
@@ -214,14 +214,14 @@ const english = {
   myReservationsTitle: "My Reservations",
   mustBeLoggedIn: "You must be logged in to view your reservations.",
   failedLoadReservations: "Failed to load reservations: ",
-  tableIdLabel: "Table ID", // Already updated above as `tableId`
+  tableIdLabel: "Table ID",
   unknown: "Unknown",
-  nameLabel: "Name", // Already updated above as `name`
-  dateLabel: "Date", // Already updated above as `date`
-  numPersonsLabel: "Number of Persons", // Already updated above as `numPersons`
-  timeArrivingLabel: "Time Arriving", // Already updated above as `timeArriving`
-  timeLeavingLabel: "Time Leaving", // Already updated above as `timeLeaving`
-  phoneLabel: "Phone", // Already updated above as `phone`
+  nameLabel: "Name",
+  dateLabel: "Date",
+  numPersonsLabel: "Number of Persons",
+  timeArrivingLabel: "Time Arriving",
+  timeLeavingLabel: "Time Leaving",
+  phoneLabel: "Phone",
   pendingMessage: "Awaiting admin approval. You’ll be notified once confirmed.",
   acceptedMessage: "Your reservation is confirmed! We look forward to seeing you.",
   rejectedMessage: "Sorry, your reservation was not approved. Please try a different time or table.",
@@ -286,24 +286,21 @@ chefsData: [
   },
 ],
 
-// New keys for Counter component
-aboutUs: "About Us",
-happyClients: "Happy Clients",
-mealDelivered: "Meal Delivered",
-differentDishes: "Different Dishes",
-rate: "Rate",
+  // New keys for Counter component
+  aboutUs: "About Us",
+  happyClients: "Happy Clients",
+  mealDelivered: "Meal Delivered",
+  differentDishes: "Different Dishes",
+  rate: "Rate",
 
-// New keys for Contact component
-contactTitle: "General CONTACT",
-
-ourAddress: "Our Address",
-address: "Al menya elgededa",
-emailUs: "Email Us",
-
-callUs: "Call Us",
-
-openingHours: "Opening Hours",
-hours: "Mon-Sat: 11AM - 23PM; Sunday: Closed",
+  // New keys for Contact component
+  contactTitle: "General CONTACT",
+  ourAddress: "Our Address",
+  address: "Al menya elgededa",
+  emailUs: "Email Us",
+  callUs: "Call Us",
+  openingHours: "Opening Hours",
+  hours: "Mon-Sat: 11AM - 23PM; Sunday: Closed",
 
 // New keys for Footer component
 restaurantTitle: "Restaurant",

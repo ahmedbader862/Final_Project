@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import "./Grid.css";
 import { motion } from "framer-motion";
 import { ThemeContext } from "../../Context/ThemeContext"; // استيراد ال ThemeContext
+import { useSelector } from "react-redux";
 
 function Grid() {
   const { theme } = useContext(ThemeContext); // الحصول على قيمة الثيم الحالي من Context
@@ -69,19 +70,22 @@ function Grid() {
     visible: { opacity: 1, y: 0 },
   };
 
+  const currentLange = useSelector((state) => state.lange.langue);
+  const text = useSelector((state) => state.lange[currentLange.toLowerCase()]);
+  
   return (
     <section className={`gallery ${theme === "dark" ? "bg-custom-dark" : "bg-custom-light"}`} id="gallery">
       <div className="container text-dark">
-        <motion.div
+      <motion.div
           className="g-head"
           initial={{ opacity: 0, y: -50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
           viewport={{ once: true }}
         >
-          <h2 style={{ color: textColor }}>GALLERY</h2>
+          <h2 className="mb-3" style={{ color: textColor }}> {text.checkOurGallery || "Check"} </h2>
           <h3 style={{ color: textColor }}>
-            Check <span className="red">Our Gallery</span>
+          {text.gallery || "GALLERY"}
           </h3>
         </motion.div>
 
